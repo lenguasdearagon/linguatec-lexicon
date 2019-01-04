@@ -29,8 +29,8 @@ class Word(models.Model):
     that compounds the Lexicon.
 
     """
-    lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE)
-    term = models.CharField(max_length=64)
+    lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE, related_name="words")
+    term = models.CharField(unique=True, max_length=64)
     gramcat = models.CharField(max_length=32, choices=settings.GRAMATICAL_CATEGORIES)
 
 
@@ -40,7 +40,7 @@ class Entry(models.Model):
     destination language) for a word (written in the source language).
 
     """
-    word = models.ForeignKey('Word', on_delete=models.CASCADE)
+    word = models.ForeignKey('Word', on_delete=models.CASCADE, related_name="entries")
     translation = models.TextField()
 
 
@@ -49,5 +49,5 @@ class Example(models.Model):
     The Example class stores examples of usage of a Entry.
 
     """
-    entry = models.ForeignKey('Entry', on_delete=models.CASCADE)
+    entry = models.ForeignKey('Entry', on_delete=models.CASCADE, related_name="examples")
     phrase = models.TextField()
