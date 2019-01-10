@@ -1,6 +1,7 @@
 # LINGUATEC lexicon
 
-Diccionario online de aragonés dentro del proyecto LINGUATEC.
+An online bilingual dictionary developed inside the LINGUATEC project
+with the purpose of host a Spanish to Aragonese dictionary.
 
 ## Development installation
 
