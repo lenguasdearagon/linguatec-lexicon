@@ -10,8 +10,7 @@ test:
   - virtualenv env
   - source env/bin/activate
   - pip3 install -r requirements.txt
-  # temp: replace with pip install linguatec_lexicon when setup.py is ready
-  - for mypath in env/lib/python*; do echo `pwd` > $mypath/site-packages/linguatec_lexicon.pth; done
+  - pip3 install . # add linguatec_lexicon to PYTHONPATH
   - django-admin startproject testsite
   - mv testsite/testsite/settings.py testsite/testsite/settings.py.orig
   - cp test/settings_test.py testsite/testsite/settings.py
