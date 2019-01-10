@@ -1,0 +1,20 @@
+# src https://docs.gitlab.com/ce/ci/examples/test-and-deploy-python-application-to-heroku.html
+# src https://gitlab.com/help/ci/quick_start/README
+
+test:
+  script:
+  - apt-get update -qy
+  - apt-get install -y --no-install-recommends python3-pip
+  # temp: quit virtualenv when possible
+  - pip3 install virtualenv
+  - virtualenv env
+  - source env/bin/activate
+  - pip3 install -r requirements.txt
+  # temp: replace with pip install linguatec_lexicon when setup.py is ready
+  - for mypath in env/lib/python*; do echo `pwd` > $mypath/site-packages/linguatec_lexicon.pth; done
+  - django-admin startproject testsite
+  - mv testsite/testsite/settings.py testsite/testsite/settings.py.orig
+  - cp test/settings_test.py testsite/testsite/settings.py
+  - cd testsite
+  - python manage.py migrate
+  - python manage.py test linguatec_lexicon
