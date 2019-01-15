@@ -29,18 +29,6 @@ python -c "import linguatec_lexicon; print(linguatec_lexicon.get_version())"
 django-admin startproject mysite --template=linguatec-lexicon/linguatec_lexicon/conf/project_template
 ```
 
-Add the following to your root `urls.py`:
-```python
-# mysite/mysite/urls.py
-
-urlpatterns = [
-    ...
-    path('api/', include('linguatec_lexicon.urls')),
-]
-
-```
-Note that the URL path can be whatever you want.
-
 Run migrations, start development server and go to http://127.0.0.1:8000/api/
 ```bash
 cd mysite
