@@ -26,17 +26,7 @@ pip3 install -e linguatec-lexicon/
 python -c "import linguatec_lexicon; print(linguatec_lexicon.get_version())"
 
 # create a project (name it as you want!)
-django-admin startproject mysite
-```
-
-Add `linguatec_lexicon` to `INSTALLED_APPS`
-```python
-# mysite/mysite/settings.py
-
-INSTALLED_APPS = [
-     ...
-    'linguatec_lexicon',
-]
+django-admin startproject mysite --template=linguatec-lexicon/linguatec_lexicon/conf/project_template
 ```
 
 TODO: include urls.py on mysite.url (when this file exists)

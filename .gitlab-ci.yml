@@ -11,9 +11,9 @@ test:
   - source env/bin/activate
   - pip3 install -r requirements.txt
   - pip3 install . # add linguatec_lexicon to PYTHONPATH
-  - django-admin startproject testsite
-  - mv testsite/testsite/settings.py testsite/testsite/settings.py.orig
-  - cp test/settings_test.py testsite/testsite/settings.py
+  - django-admin startproject testsite --template=linguatec_lexicon/conf/project_template
+#  - mv testsite/testsite/settings.py testsite/testsite/settings.py.orig
+#  - cp test/settings_test.py testsite/testsite/settings.py
   - cd testsite
   - python manage.py migrate
   - python manage.py test linguatec_lexicon
