@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'linguatec_lexicon',
     
     # Third-party apps
+    'django_extensions',
     'rest_framework',
 ]
 
