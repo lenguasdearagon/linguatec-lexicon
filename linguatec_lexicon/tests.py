@@ -10,3 +10,16 @@ class FooTestCase(TestCase):
 
     def test_sum(self):
         self.assertEqual(2 + 2, 4)
+
+
+class ApiTestCase(TestCase):
+    fixtures = ['lexicon-sample.json']
+        
+    
+    def test_word_list(self):
+        resp = self.client.get('/api/words/')
+        self.assertEqual(200, resp.status_code)
+    
+    def test_word_show(self):
+        resp = self.client.get('/api/words/1/')
+        self.assertEqual(200, resp.status_code)

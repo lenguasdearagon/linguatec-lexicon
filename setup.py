@@ -29,6 +29,7 @@ setup(
     long_description=read('README.md'),
     license = 'AGPLv3 License',
     packages=find_packages(),
+    include_package_data = True,
     zip_safe=False,
     classifiers = [
         'Development Status :: 2 - Pre-Alpha',

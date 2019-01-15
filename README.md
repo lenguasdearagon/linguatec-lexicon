@@ -29,9 +29,7 @@ python -c "import linguatec_lexicon; print(linguatec_lexicon.get_version())"
 django-admin startproject mysite --template=linguatec-lexicon/linguatec_lexicon/conf/project_template
 ```
 
-TODO: include urls.py on mysite.url (when this file exists)
-
-# Run migrations and start development server!
+Run migrations, start development server and go to http://127.0.0.1:8000/api/
 ```bash
 cd mysite
 python manage.py migrate
@@ -39,3 +37,11 @@ python manage.py runserver
 ```
 
 You got it! Let's start creating magical code!
+
+### (Optional) Load sample data
+Download sample data file and load it:
+```bash
+cd mysite
+wget https://gitlab.com/slamora/linguatec-lexicon/raw/3-data-import/linguatec_lexicon/fixtures/sample-output.json?inline=false -o sample-output.json
+python manage.py loaddata sample-output.json
+```
