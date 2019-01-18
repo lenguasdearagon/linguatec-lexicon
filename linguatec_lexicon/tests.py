@@ -2,10 +2,11 @@ import os
 import unittest
 
 from django.core.management import call_command
+from django.core.exceptions import ValidationError
 from django.test import TestCase
-from linguatec_lexicon.models import Word
 
-from .models import Entry, Example, GramaticalCategory, Lexicon, Word
+from linguatec_lexicon.models import Entry, Example, GramaticalCategory, Lexicon, Word
+from linguatec_lexicon.validators import VerbalConjugationValidator
 
 
 class FooTestCase(TestCase):
@@ -59,6 +60,7 @@ class WordManagerTestCase(TestCase):
     def test_search_null_query(self):
         result = Word.objects.search(None)
         self.assertEqual(0, result.count())
+
 
 class ImporterTestCase(TestCase):
     def test_import_sample(self):
@@ -121,4 +123,77 @@ class ImportGramCatTestCase(TestCase):
         sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path)
 
-        self.assertEqual(NUMBER_OF_GRAMCATS, GramaticalCategory.objects.count())
+        self.assertEqual(NUMBER_OF_GRAMCATS,
+                         GramaticalCategory.objects.count())
+
+
+class VerbalConjugationValidatorTestCase(TestCase):
+    INPUT = """
+            Adubir es modelo para la conjugación regular
+            de los verbos regulares terminados en –IR.
+            conjug. IND. pres. adubo, adubes, adube,
+            adubimos, adubiz, aduben; pret. imp.
+            adubiba, adubibas, adubiba, adubíbanos,
+            adubíbaz, adubiban; pret. indef. adubié,
+            adubiés, adubió, adubiemos, adubiez,
+            adubioron/adubión; fut. adubiré, adubirás,
+            adubirá, adubiremos, adubirez, adubirán;
+            cond. adubirba, adubirbas, adubirba,
+            adubírbanos, adubírbaz, adubirban; SUBJ.
+            pres. aduba, adubas, aduba, adubamos,
+            adubaz, aduban; pret. imp. adubise,
+            adubises, adubise, adubísenos, adubísez,
+            adubisen; IMP. adube, adubiz; INF. adubir;
+            GER. adubindo; PART. adubito/a.
+            """
+    INPUT2 = """
+            Adubir es modelo para la conjugación regular
+            de los verbos regulares terminados en –IR.
+            conjug. IND. pres. adubo, adubes, adube,
+            adubimos, adubiz, aduben; pret. imp.
+            adubiba, adubibas, adubiba, adubíbanos,
+            adubíbaz, adubiban; pret. indef. adubié,
+            adubiés, adubió, adubiemos, adubiez,
+            adubioron/adubión; fut. adubiré, adubirás,
+            adubirá, adubiremos, adubirez, adubirán;
+            cond. adubirba, adubirbas, adubirba,
+            adubírbanos, adubírbaz, adubirban; SUBJ.
+            pres. aduba, adubas, aduba, adubamos,
+            adubaz, aduban; pret. imp. adubise,
+            adubises, adubise, adubísenos, adubísez,
+            adubisen; IMP. adube, adubiz; INF. adubir;
+            GER. adubindo;
+            """
+    INPUT3 = """
+            Adubir es modelo para la conjugación regular
+            de los verbos regulares terminados en –IR.
+            conjug. IND. pres. adubes, adube,
+            adubimos, adubiz, aduben; pret. imp.
+            adubiba, adubibas, adubiba, adubíbanos,
+            adubíbaz, adubiban; pret. indef. adubié,
+            adubiés, adubió, adubiemos, adubiez,
+            adubioron/adubión; fut. adubiré, adubirás,
+            adubirá, adubiremos, adubirez, adubirán;
+            cond. adubirba, adubirbas, adubirba,
+            adubírbanos, adubírbaz, adubirban; SUBJ.
+            pres. aduba, adubas, aduba, adubamos,
+            adubaz, aduban; pret. imp. adubise,
+            adubises, adubise, adubísenos, adubísez,
+            adubisen; IMP. adube, adubiz; INF. adubir;
+            GER. adubindo; PART. adubito/a.
+            """
+
+    def test_valid_input(self):
+        value = self.INPUT
+        verbal_validator = VerbalConjugationValidator()
+        verbal_validator(value)
+
+    def test_invalid_input_missing_participle_mood(self):
+        value = self.INPUT2
+        verbal_validator = VerbalConjugationValidator()
+        self.assertRaises(ValidationError, verbal_validator, value)
+
+    def test_invalid_input_incomplete_infinitive_present_conjugation(self):
+        value = self.INPUT3
+        verbal_validator = VerbalConjugationValidator()
+        self.assertRaises(ValidationError, verbal_validator, value)
