@@ -24,6 +24,20 @@ class ApiTestCase(TestCase):
         resp = self.client.get('/api/words/1/')
         self.assertEqual(200, resp.status_code)
 
+    def test_word_search_several_results(self):
+        resp = self.client.get('/api/words/?search=e')
+        self.assertEqual(200, resp.status_code)
+        
+        resp_json = resp.json()
+        self.assertEqual(4, len(resp_json))
+        
+    def test_word_search_no_results(self):
+        resp = self.client.get('/api/words/?search=foo')
+        self.assertEqual(200, resp.status_code)
+        
+        resp_json = resp.json()
+        self.assertEqual(0, len(resp_json))
+
 
 class WordManagerTestCase(TestCase):
     fixtures = ['lexicon-sample.json']

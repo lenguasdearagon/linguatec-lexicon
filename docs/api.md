@@ -11,3 +11,7 @@ List all the words of the dictionary.
 ### Show word
 Show the details of a word of the dictionary using its identifier.
 `GET /words/{id}`
+
+### Search words
+List the words that maches a query.
+`GET /words/?search=querystring`
