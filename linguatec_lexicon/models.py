@@ -23,6 +23,9 @@ class Lexicon(models.Model):
     dst_language = models.CharField(max_length=16)
 
 
+# FIXME(@slamora) currently unused because search is implemented using
+# django-rest-frameworks filters that provides a more powerfull search
+# than using exact match.
 class WordManager(models.Manager):
     def search(self, query):
         return self.filter(term=query)
