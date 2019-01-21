@@ -23,6 +23,11 @@ class Lexicon(models.Model):
     dst_language = models.CharField(max_length=16)
 
 
+class WordManager(models.Manager):
+    def search(self, query):
+        return self.filter(term=query)
+
+
 class Word(models.Model):
     """
     The Word class stores each word (written in the source language)
@@ -32,6 +37,8 @@ class Word(models.Model):
     lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE, related_name="words")
     term = models.CharField(unique=True, max_length=64)
     gramcat = models.CharField(max_length=32, choices=settings.GRAMATICAL_CATEGORIES)
+
+    objects = WordManager()
 
 
 class Entry(models.Model):
