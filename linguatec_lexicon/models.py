@@ -1,6 +1,5 @@
 from django.db import models
 
-from . import settings
 
 class Lexicon(models.Model):
     """
@@ -39,7 +38,7 @@ class Word(models.Model):
     """
     lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE, related_name="words")
     term = models.CharField(unique=True, max_length=64)
-    gramcat = models.CharField(max_length=32, choices=settings.GRAMATICAL_CATEGORIES)
+    gramcat = models.ForeignKey('GramaticalCategory', on_delete=models.CASCADE, related_name="words")
 
     objects = WordManager()
 
@@ -61,3 +60,8 @@ class Example(models.Model):
     """
     entry = models.ForeignKey('Entry', on_delete=models.CASCADE, related_name="examples")
     phrase = models.TextField()
+
+
+class GramaticalCategory(models.Model):
+    abbreviation = models.CharField(max_length=32)
+    title = models.CharField(max_length=128)
