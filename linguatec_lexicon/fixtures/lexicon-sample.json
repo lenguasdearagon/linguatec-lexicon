@@ -10,12 +10,52 @@
     }
 },
 {
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 1,
+    "fields": {
+        "abbreviation": "adj.",
+        "title": "adjective"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 2,
+    "fields": {
+        "abbreviation": "adv.",
+        "title": "adverb"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 3,
+    "fields": {
+        "abbreviation": "conj.",
+        "title": "conjunction"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 4,
+    "fields": {
+        "abbreviation": "n.",
+        "title": "noun"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 5,
+    "fields": {
+        "abbreviation": "v.",
+        "title": "verb"
+    }
+},
+{
     "model": "linguatec_lexicon.word",
     "pk": 1,
     "fields": {
         "lexicon": 1,
         "term": "ebrio",
-        "gramcat": "adj."
+        "gramcat": 1
     }
 },
 {
@@ -24,7 +64,7 @@
     "fields": {
         "lexicon": 1,
         "term": "echar",
-        "gramcat": "v."
+        "gramcat": 5
     }
 },
 {
@@ -33,7 +73,7 @@
     "fields": {
         "lexicon": 1,
         "term": "eclipsar",
-        "gramcat": "v."
+        "gramcat": 5
     }
 },
 {
@@ -42,7 +82,7 @@
     "fields": {
         "lexicon": 1,
         "term": "edad",
-        "gramcat": "n."
+        "gramcat": 4
     }
 },
 {
