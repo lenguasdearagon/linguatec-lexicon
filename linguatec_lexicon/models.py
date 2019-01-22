@@ -65,3 +65,6 @@ class Example(models.Model):
 class GramaticalCategory(models.Model):
     abbreviation = models.CharField(max_length=32)
     title = models.CharField(max_length=128)
+
+    def __str__(self):
+        return self.abbreviation
