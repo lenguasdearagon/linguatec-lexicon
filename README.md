@@ -7,7 +7,7 @@ with the purpose of host a Spanish to Aragonese dictionary.
 
 Get the app code:
 ```bash
-git clone git@gitlab.com:slamora/linguatec-lexicon.git
+git clone git@gitlab.com:linguatec/linguatec-lexicon.git
 ```
 
 Create devel project site
@@ -42,6 +42,6 @@ You got it! Let's start creating magical code!
 Download sample data file and load it:
 ```bash
 cd mysite
-wget https://gitlab.com/slamora/linguatec-lexicon/raw/3-data-import/linguatec_lexicon/fixtures/sample-output.json?inline=false -o sample-output.json
+wget https://gitlab.com/linguatec/linguatec-lexicon/raw/3-data-import/linguatec_lexicon/fixtures/sample-output.json?inline=false -o sample-output.json
 python manage.py loaddata sample-output.json
 ```
