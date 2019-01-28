@@ -21,6 +21,8 @@ class Lexicon(models.Model):
     src_language = models.CharField(max_length=16)
     dst_language = models.CharField(max_length=16)
 
+    def __str__(self):
+        return self.name
 
 # FIXME(@slamora) currently unused because search is implemented using
 # django-rest-frameworks filters that provides a more powerfull search
@@ -42,6 +44,8 @@ class Word(models.Model):
 
     objects = WordManager()
 
+    def __str__(self):
+        return self.term
 
 class Entry(models.Model):
     """
@@ -52,6 +56,10 @@ class Entry(models.Model):
     word = models.ForeignKey('Word', on_delete=models.CASCADE, related_name="entries")
     translation = models.TextField()
 
+    class Meta:
+        verbose_name_plural = "entries"
+    def __str__(self):
+        return self.translation
 
 class Example(models.Model):
     """
@@ -61,10 +69,14 @@ class Example(models.Model):
     entry = models.ForeignKey('Entry', on_delete=models.CASCADE, related_name="examples")
     phrase = models.TextField()
 
+    def __str__(self):
+        return self.phrase
 
 class GramaticalCategory(models.Model):
     abbreviation = models.CharField(max_length=32)
     title = models.CharField(max_length=128)
 
+    class Meta:
+        verbose_name_plural = "gramatical categories"
     def __str__(self):
         return self.abbreviation
