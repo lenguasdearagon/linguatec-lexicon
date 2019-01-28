@@ -1,6 +1,6 @@
 import pandas as pd
 from django.core.management.base import BaseCommand, CommandError
-from linguatec_lexicon.models import Entry, Lexicon, GramaticalCategory, Word
+from linguatec_lexicon.models import Entry, Example, Lexicon, GramaticalCategory, Word
 
 
 def read_input_file(input_file):
@@ -13,13 +13,14 @@ def read_input_file(input_file):
         # we define na_values and keep_default_na because defaults na_values
         # includes empty string. We don't want that pandas replaces empty
         # cells with 'nan'
-        partial = xlsx.parse(sheet, header=None, usecols='A:F', skiprows=[0, 1])
-                             # names=['colA', 'colB', 'colC', 'colD', 'colE', 'colF'])
+        partial = xlsx.parse(sheet, header=None,
+                             usecols='A:F', skiprows=[0, 1])
+        # names=['colA', 'colB', 'colC', 'colD', 'colE', 'colF'])
         df = df.append(partial, ignore_index=True, sort=False)
 
     df_obj = df.select_dtypes(['object'])
     df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
-    df = df.fillna('') # replace NaN with blank string
+    df = df.fillna('')  # replace NaN with blank string
 
     # TODO change this confusing split
     #df[1] = df[1].str.split(' y ')
@@ -72,7 +73,8 @@ def populate_models(db, gramcats):
     lex = Lexicon.objects.create(
         name="diccionario linguatec", src_language="es", dst_language="ar")
 
-    for row in db.itertuples(name='Word'):
+    cleaned_data = []
+    for row in db.itertuples(name=None):
         # itertuples by default return the index as the first element of the tuple.
 
         # filter empty rows
@@ -92,16 +94,21 @@ def populate_models(db, gramcats):
             # TODO change model to two foreign keys?
             #g_str = g_str[0]
             g = GramaticalCategory.objects.get(abbreviation=g_str)
-            w = Word.objects.create(lexicon=lex, term=w_str, gramcat=g)
+            w = Word(lexicon=lex, term=w_str, gramcat=g)
+            cleaned_data.append(w)
 
         else:
+            # TODO errors
             print("ERROR\t%s missing gramatical category" % w_str)
 
         # column C is entry (required)
         en_str = row[3]
         en_strs = en_str.split(' // ')
+        w.clean_entries = []
         for s in en_strs:  # subelement
-            Entry.objects.create(word=w, translation=s)
+            entry = Entry(word=w, translation=s)
+            entry.clean_examples = []
+            w.clean_entries.append(entry)
 
         # column E is example (optional)
         try:
@@ -112,26 +119,60 @@ def populate_models(db, gramcats):
             if pd.notnull(ex_str) and ex_str != '':
                 ex_strs = [x.strip() for x in ex_str.split('//')]
                 for i, value in enumerate(ex_strs):  # subelement
+                    we = w.clean_entries[i]  # word entry
                     if value:
-                        we = w.entries.get(translation=en_strs[i])  # word entry
-                        we.examples.create(phrase=ex_strs[i])
+                        # TODO could be several examples separated by ';'
+                        we.clean_examples.append(Example(phrase=value))
 
         # TODO column F is verb conjugation (only when gramcat is verb)
+
+    return cleaned_data
 
 
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('input_file', type=str)
+        parser.add_argument(
+            '--dry-run', action='store_true', dest='dry_run',
+            help="Just validate input file; don't actually import to database.",
+        )
 
     def handle(self, *args, **options):
-
+        self.dry_run = options['dry_run']
         input_file = options['input_file']
 
         self.stdout.write("INFO\tinput file: %s\n" % input_file, ending='')
 
         db = read_input_file(input_file)
 
+        # TODO gramcats should be defined before importing data!
+        # if not, there is no way to validate column B.
         gramcats = extract_gramcats(db)
 
-        populate_models(db, gramcats)
+        cleaned_data = populate_models(db, gramcats)
+
+        if not self.dry_run:
+            # Write data into the database
+            self.write_to_database(cleaned_data)
+
+    def write_to_database(self, cleaned_data):
+        count_words = 0
+        count_entries = 0
+        count_examples = 0
+        for word in cleaned_data:
+            word.save()
+            count_words += 1
+
+            for entry in word.clean_entries:
+                entry.word_id = word.pk
+                entry.save()
+                count_entries += 1
+
+                for example in entry.clean_examples:
+                    example.entry_id = entry.pk
+                    example.save()
+                    count_examples += 1
+
+        self.stdout.write("Imported: %s words, %s entries, %s examples" %
+              (count_words, count_entries, count_examples))

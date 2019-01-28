@@ -100,3 +100,12 @@ class ImporterTestCase(TestCase):
         call_command('data-import', sample_path)
 
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
+
+    def test_dry_run(self):
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
+        call_command('data-import', sample_path, dry_run=True)
+
+        self.assertEqual(0, Word.objects.count())
+        self.assertEqual(0, Entry.objects.count())
+        self.assertEqual(0, Example.objects.count())
