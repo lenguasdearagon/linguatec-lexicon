@@ -1,0 +1,320 @@
+[
+{
+    "model": "linguatec_lexicon.lexicon",
+    "pk": 1,
+    "fields": {
+        "name": "diccionario linguatec",
+        "description": "",
+        "src_language": "es",
+        "dst_language": "ar"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 1,
+    "fields": {
+        "lexicon": 1,
+        "term": "ebrio",
+        "gramcat": 1
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 2,
+    "fields": {
+        "lexicon": 1,
+        "term": "echar",
+        "gramcat": 6
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 3,
+    "fields": {
+        "lexicon": 1,
+        "term": "eclipsar",
+        "gramcat": 6
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 4,
+    "fields": {
+        "lexicon": 1,
+        "term": "edad",
+        "gramcat": 3
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 5,
+    "fields": {
+        "lexicon": 1,
+        "term": "ictericia",
+        "gramcat": 4
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 6,
+    "fields": {
+        "lexicon": 1,
+        "term": "idea",
+        "gramcat": 4
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 7,
+    "fields": {
+        "lexicon": 1,
+        "term": "ideal",
+        "gramcat": 2
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 8,
+    "fields": {
+        "lexicon": 1,
+        "term": "idioma",
+        "gramcat": 5
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 9,
+    "fields": {
+        "lexicon": 1,
+        "term": "idiota",
+        "gramcat": 1
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 10,
+    "fields": {
+        "lexicon": 1,
+        "term": "iglesia",
+        "gramcat": 4
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 11,
+    "fields": {
+        "lexicon": 1,
+        "term": "ignominia",
+        "gramcat": 4
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 12,
+    "fields": {
+        "lexicon": 1,
+        "term": "ignorar",
+        "gramcat": 7
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 1,
+    "fields": {
+        "word": 1,
+        "translation": "capino/a, pop. zorro/a, calamocano/a, chorrupato/a, pifolo/a, rusio/a, zafumato/a"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 2,
+    "fields": {
+        "word": 2,
+        "translation": "chitar (var. fon\u00e9tica itar)"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 3,
+    "fields": {
+        "word": 2,
+        "translation": "arrullar, volar, aventar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 4,
+    "fields": {
+        "word": 2,
+        "translation": "esfurriar, uxar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 5,
+    "fields": {
+        "word": 2,
+        "translation": "despedir, chitar, dar palleta, portiar, espachar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 6,
+    "fields": {
+        "word": 3,
+        "translation": "clisar (var, fon\u00e9tica clixar), aclisar, fer un clis"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 7,
+    "fields": {
+        "word": 4,
+        "translation": "ed\u00e1"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 8,
+    "fields": {
+        "word": 4,
+        "translation": "tiempo"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 9,
+    "fields": {
+        "word": 5,
+        "translation": "terizia"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 10,
+    "fields": {
+        "word": 6,
+        "translation": "idea"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 11,
+    "fields": {
+        "word": 7,
+        "translation": "ideyal"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 12,
+    "fields": {
+        "word": 8,
+        "translation": "idioma, luenga, fabla (f.)"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 13,
+    "fields": {
+        "word": 9,
+        "translation": "idiota"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 14,
+    "fields": {
+        "word": 10,
+        "translation": "ilesia"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 15,
+    "fields": {
+        "word": 11,
+        "translation": "ignominia"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 16,
+    "fields": {
+        "word": 12,
+        "translation": "inorar"
+    }
+},
+{
+    "model": "linguatec_lexicon.example",
+    "pk": 1,
+    "fields": {
+        "entry": 6,
+        "phrase": "Diz que ista nuei fer\u00e1 un clis de luna."
+    }
+},
+{
+    "model": "linguatec_lexicon.example",
+    "pk": 2,
+    "fields": {
+        "entry": 8,
+        "phrase": "\u00bfQu\u00e9 tiempo tiene ixa ninona?"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 1,
+    "fields": {
+        "abbreviation": "adj.",
+        "title": "autogenerated"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 2,
+    "fields": {
+        "abbreviation": "adj. inv.",
+        "title": "autogenerated"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 3,
+    "fields": {
+        "abbreviation": "n.",
+        "title": "autogenerated"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 4,
+    "fields": {
+        "abbreviation": "s. f.",
+        "title": "autogenerated"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 5,
+    "fields": {
+        "abbreviation": "s. m.",
+        "title": "autogenerated"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 6,
+    "fields": {
+        "abbreviation": "v.",
+        "title": "autogenerated"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 7,
+    "fields": {
+        "abbreviation": "v. tr.",
+        "title": "autogenerated"
+    }
+}
+]
