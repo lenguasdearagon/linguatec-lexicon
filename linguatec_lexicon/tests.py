@@ -1,5 +1,6 @@
 import os
 import unittest
+from io import StringIO
 
 from django.core.management import call_command
 from django.core.exceptions import ValidationError
@@ -63,6 +64,12 @@ class WordManagerTestCase(TestCase):
 
 
 class ImporterTestCase(TestCase):
+    def setUp(self):
+        # data-import requires that GramaticalCategories are initialized
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
+        call_command('importgramcat', sample_path, verbosity=0)
+
     def test_import_sample(self):
         """
         Input file:
@@ -115,10 +122,30 @@ class ImporterTestCase(TestCase):
         self.assertEqual(0, Entry.objects.count())
         self.assertEqual(0, Example.objects.count())
 
+    def test_invalid_gramcat_unkown(self):
+        out = StringIO()
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/invalid-gramcat-unknown.xlsx')
+        call_command('data-import', sample_path, stdout=out)
+
+        # data shouldn't be imported if there are any errors
+        self.assertEqual(0, Word.objects.count())
+        self.assertIn('invalid', out.getvalue())
+
+    def test_invalid_gramcat_empty(self):
+        out = StringIO()
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/invalid-gramcat-empty.xlsx')
+        call_command('data-import', sample_path, stdout=out)
+
+        # data shouldn't be imported if there are any errors
+        self.assertEqual(0, Word.objects.count())
+        self.assertIn('empty', out.getvalue())
+
 
 class ImportGramCatTestCase(TestCase):
     def test_import(self):
-        NUMBER_OF_GRAMCATS = 21
+        NUMBER_OF_GRAMCATS = 24
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path)
