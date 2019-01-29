@@ -100,7 +100,6 @@ class Command(BaseCommand):
             # Write data into the database
             self.write_to_database(cleaned_data)
 
-
     def populate_models(self, db):
         self.errors = []
         cleaned_data = []
@@ -138,10 +137,10 @@ class Command(BaseCommand):
 
             else:
                 self.errors.append({
-                        "word": w_str,
-                        "column": "B",
-                        "message": "missing gramatical category"
-                    })
+                    "word": w_str,
+                    "column": "B",
+                    "message": "missing gramatical category"
+                })
 
             # column C is entry (required)
             en_str = row[3]
@@ -160,6 +159,14 @@ class Command(BaseCommand):
             else:
                 if pd.notnull(ex_str) and ex_str != '':
                     ex_strs = [x.strip() for x in ex_str.split('//')]
+                    if len(w.clean_entries) < len(ex_strs):
+                        self.errors.append({
+                            "word": w_str,
+                            "column": "E",
+                            "message": "there are more examples '{}' than entries'{}'".format(
+                                len(w.clean_entries), len(ex_strs))
+                        })
+                        continue  # invalid format, don't try to extract it!
                     for i, value in enumerate(ex_strs):  # subelement
                         we = w.clean_entries[i]  # word entry
                         if value:
