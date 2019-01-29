@@ -73,6 +73,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.dry_run = options['dry_run']
+        self.verbosity = options['verbosity']
         input_file = options['input_file']
 
         # check that GramaticalCategories are initialized
@@ -93,8 +94,10 @@ class Command(BaseCommand):
         cleaned_data = self.populate_models(db)
 
         if self.errors:
-            self.stdout.write(self.style.ERROR("Detected errors!"))
-            self.stdout.write(self.style.ERROR(self.errors))
+            self.stdout.write(self.style.ERROR("Detected {} errors!".format(len(self.errors))))
+            if self.verbosity >= 2:
+                for error in self.errors:
+                    self.stdout.write(self.style.ERROR(error))
 
         elif not self.dry_run:
             # Write data into the database
