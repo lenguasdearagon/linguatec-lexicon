@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from linguatec_lexicon.models import Word
 
-from .models import Lexicon, Word, Entry, Example
+from .models import Entry, Example, GramaticalCategory, Lexicon, Word
 
 
 class FooTestCase(TestCase):
@@ -112,3 +112,13 @@ class ImporterTestCase(TestCase):
         self.assertEqual(0, Word.objects.count())
         self.assertEqual(0, Entry.objects.count())
         self.assertEqual(0, Example.objects.count())
+
+
+class ImportGramCatTestCase(TestCase):
+    def test_import(self):
+        NUMBER_OF_GRAMCATS = 21
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
+        call_command('importgramcat', sample_path)
+
+        self.assertEqual(NUMBER_OF_GRAMCATS, GramaticalCategory.objects.count())
