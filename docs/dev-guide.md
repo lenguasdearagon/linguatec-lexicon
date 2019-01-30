@@ -2,10 +2,17 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
+- [clonning the git repository](#clonning-the-git-repository)
 - [generic tool](#generic-tool)
 - [tool for data-import](#tool-for-data-import)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# clone git repository
+
+If you are going to clone the git repository you have to know that this project uses `git lfs`. [Git LFS](https://git-lfs.github.com/) is the tool intended to manage large files in git repositories such as audio samples, videos, datasets, and graphics. If you just `git clone` (without `apt install git-lfs`) you are going to be missing [this kind of files](../gitattributes).
+
+If you have git lfs installed and you don't want to download media files do it like: `GIT_LFS_SKIP_SMUDGE=1 git clone (...)` src https://github.com/git-lfs/git-lfs/issues/2406
 
 # generic tool
 
