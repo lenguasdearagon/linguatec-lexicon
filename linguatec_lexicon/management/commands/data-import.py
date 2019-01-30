@@ -97,7 +97,9 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("Detected {} errors!".format(len(self.errors))))
             if self.verbosity >= 2:
                 for error in self.errors:
-                    self.stdout.write(self.style.ERROR(error))
+                    # FIXME serialize to json instead of force str conversion??
+                    # https://stackoverflow.com/a/51594842/1538221
+                    self.stdout.write(self.style.ERROR(str(error)))
 
         elif not self.dry_run:
             # Write data into the database
