@@ -54,8 +54,7 @@
     "pk": 1,
     "fields": {
         "lexicon": 1,
-        "term": "ebrio",
-        "gramcat": 1
+        "term": "ebrio"
     }
 },
 {
@@ -63,8 +62,7 @@
     "pk": 2,
     "fields": {
         "lexicon": 1,
-        "term": "echar",
-        "gramcat": 5
+        "term": "echar"
     }
 },
 {
@@ -72,8 +70,7 @@
     "pk": 3,
     "fields": {
         "lexicon": 1,
-        "term": "eclipsar",
-        "gramcat": 5
+        "term": "eclipsar"
     }
 },
 {
@@ -81,8 +78,7 @@
     "pk": 4,
     "fields": {
         "lexicon": 1,
-        "term": "edad",
-        "gramcat": 4
+        "term": "edad"
     }
 },
 {
@@ -90,6 +86,7 @@
     "pk": 1,
     "fields": {
         "word": 1,
+        "gramcats": [1],
         "translation": "capino/a, pop. zorro/a, calamocano/a, chorrupato/a, pifolo/a, rusio/a, zafumato/a"
     }
 },
@@ -98,6 +95,7 @@
     "pk": 2,
     "fields": {
         "word": 2,
+        "gramcats": [5],
         "translation": "chitar (var. fon\u00e9tica itar)"
     }
 },
@@ -106,6 +104,7 @@
     "pk": 3,
     "fields": {
         "word": 2,
+        "gramcats": [5],
         "translation": "arrullar, volar, aventar"
     }
 },
@@ -114,6 +113,7 @@
     "pk": 4,
     "fields": {
         "word": 2,
+        "gramcats": [5],
         "translation": "esfurriar, uxar"
     }
 },
@@ -122,6 +122,7 @@
     "pk": 5,
     "fields": {
         "word": 2,
+        "gramcats": [5],
         "translation": "despedir, chitar, dar palleta, portiar, espachar"
     }
 },
@@ -130,6 +131,7 @@
     "pk": 6,
     "fields": {
         "word": 3,
+        "gramcats": [5],
         "translation": "clisar (var, fon\u00e9tica clixar), aclisar, fer un clis"
     }
 },
@@ -138,6 +140,7 @@
     "pk": 7,
     "fields": {
         "word": 4,
+        "gramcats": [4],
         "translation": "ed\u00e1"
     }
 },
@@ -146,6 +149,7 @@
     "pk": 8,
     "fields": {
         "word": 4,
+        "gramcats": [4],
         "translation": "tiempo"
     }
 },
