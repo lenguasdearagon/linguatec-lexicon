@@ -159,7 +159,7 @@ class ImporterTestCase(TestCase):
 
 class ImportGramCatTestCase(TestCase):
     def test_import(self):
-        NUMBER_OF_GRAMCATS = 24
+        NUMBER_OF_GRAMCATS = 46
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path)
