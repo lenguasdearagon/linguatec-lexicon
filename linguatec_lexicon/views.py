@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 from io import StringIO
@@ -34,7 +35,15 @@ class DataValidatorView(TemplateView):
 
             context['input_file'] = form.cleaned_data['input_file']
 
-            context['errors'] = out.getvalue().split('\n')
+            errors = []
+            for line in out.getvalue().split('\n'):
+                try:
+                    data = json.loads(line)
+                except json.JSONDecodeError as e:
+                    continue
+                errors.append(data)
+
+            context['errors'] = errors
             return self.render_to_response(context)
 
         context['form'] = form

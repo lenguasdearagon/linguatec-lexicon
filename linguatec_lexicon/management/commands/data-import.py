@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 from django.core.management.base import BaseCommand, CommandError
 from linguatec_lexicon.models import Entry, Example, Lexicon, GramaticalCategory, Word
@@ -97,9 +98,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("Detected {} errors!".format(len(self.errors))))
             if self.verbosity >= 2:
                 for error in self.errors:
-                    # FIXME serialize to json instead of force str conversion??
-                    # https://stackoverflow.com/a/51594842/1538221
-                    self.stdout.write(self.style.ERROR(str(error)))
+                    self.stdout.write(self.style.ERROR(json.dumps(error)))
 
         elif not self.dry_run:
             # Write data into the database
