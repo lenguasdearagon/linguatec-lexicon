@@ -62,6 +62,16 @@ def extract_gramcats(db):
     return gramcats
 
 
+def get_or_create_word(term, cleaned_data):
+    for word in cleaned_data:
+        if word.term == term:
+            return (False, word)
+
+    new_word = Word(term=term)
+    new_word.clean_entries = []
+    return (True, new_word)
+
+
 def populate_models(db, gramcats):
 
     # TODO delete me!!!!
@@ -83,16 +93,19 @@ def populate_models(db, gramcats):
 
         # column A is word (required)
         w_str = row[1]
+        # avoid duplicated word.term
+        created, w = get_or_create_word(w_str, cleaned_data)
+        if created:
+            cleaned_data.append(w)
 
         # column B is gramcat (required) # TODO several gramcats issue #42
         g_str = row[2]
 
         if pd.notnull(g_str):
-            # TODO change model to two foreign keys?
-            #g_str = g_str[0]
-            g = GramaticalCategory.objects.get(abbreviation=g_str)
-            w = Word(term=w_str, gramcat=g)
-            cleaned_data.append(w)
+            gramcats = []
+            for abbr in g_str.split("//"):
+                abbr = abbr.strip()
+                gramcats.append(GramaticalCategory.objects.get(abbreviation=abbr))
 
         else:
             # TODO errors
@@ -101,9 +114,9 @@ def populate_models(db, gramcats):
         # column C is entry (required)
         en_str = row[3]
         en_strs = en_str.split(' // ')
-        w.clean_entries = []
         for s in en_strs:  # subelement
             entry = Entry(word=w, translation=s)
+            entry.clean_gramcats = gramcats
             entry.clean_examples = []
             w.clean_entries.append(entry)
 
@@ -172,6 +185,7 @@ class Command(BaseCommand):
             for entry in word.clean_entries:
                 entry.word_id = word.pk
                 entry.save()
+                entry.gramcats.set(entry.clean_gramcats)
                 count_entries += 1
 
                 for example in entry.clean_examples:

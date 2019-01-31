@@ -19,7 +19,8 @@ class EntrySerializer(serializers.ModelSerializer):
 
 class WordSerializer(serializers.ModelSerializer):
     entries = EntrySerializer(many=True, read_only=True)
+    gramcats = serializers.ListField(read_only=True)
 
     class Meta:
         model = Word
-        fields = ('url', 'term', 'gramcat', 'entries')
+        fields = ('url', 'term', 'gramcats', 'entries')
