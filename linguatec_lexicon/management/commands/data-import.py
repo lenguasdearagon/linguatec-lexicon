@@ -136,8 +136,14 @@ class Command(BaseCommand):
             # column B is gramcat (required) # TODO several gramcats issue #42
             g_str = row[2]
 
-            if pd.notnull(g_str):
-                gramcats = []
+            gramcats = []
+            if not g_str:
+                self.errors.append({
+                    "word": w_str,
+                    "column": "B",
+                    "message": "missing gramatical category"
+                })
+            else:
                 for abbr in g_str.split("//"):
                     abbr = abbr.strip()
                     try:
@@ -148,13 +154,6 @@ class Command(BaseCommand):
                             "column": "B",
                             "message": "unkown gramatical category '{}'".format(abbr)
                         })
-
-            else:
-                self.errors.append({
-                    "word": w_str,
-                    "column": "B",
-                    "message": "missing gramatical category"
-                })
 
             # column C is entry (required)
             en_str = row[3]
