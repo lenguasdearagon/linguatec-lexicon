@@ -12,11 +12,13 @@ class GramaticalCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(models.Word)
 class WordAdmin(admin.ModelAdmin):
-    list_display = ('term', 'gramcat', 'lexicon',)
+    list_display = ('term', 'lexicon',)
+
 
 @admin.register(models.Entry)
 class EntryAdmin(admin.ModelAdmin):
     list_display = ('translation', 'word',)
+    # TODO show GramCats
 
 @admin.register(models.Example)
 class ExampleAdmin(admin.ModelAdmin):
