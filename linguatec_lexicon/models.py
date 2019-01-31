@@ -46,6 +46,9 @@ class Word(models.Model):
     def __str__(self):
         return self.term
 
+    def gramcats(self):
+        return self.entries.values_list('gramcats__abbreviation', flat=True).distinct()
+
 
 class Entry(models.Model):
     """
