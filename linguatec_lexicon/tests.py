@@ -125,7 +125,8 @@ class ImporterTestCase(TestCase):
     def test_invalid_gramcat_unkown(self):
         out = StringIO()
         base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(base_path, 'fixtures/invalid-gramcat-unknown.xlsx')
+        sample_path = os.path.join(
+            base_path, 'fixtures/invalid-gramcat-unknown.xlsx')
         call_command('data-import', sample_path, stdout=out)
 
         # data shouldn't be imported if there are any errors
@@ -135,12 +136,25 @@ class ImporterTestCase(TestCase):
     def test_invalid_gramcat_empty(self):
         out = StringIO()
         base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(base_path, 'fixtures/invalid-gramcat-empty.xlsx')
+        sample_path = os.path.join(
+            base_path, 'fixtures/invalid-gramcat-empty.xlsx')
         call_command('data-import', sample_path, stdout=out)
 
         # data shouldn't be imported if there are any errors
         self.assertEqual(0, Word.objects.count())
         self.assertIn('empty', out.getvalue())
+
+    def test_word_several_gramcats(self):
+        NUMBER_OF_WORDS = 6
+        NUMBER_OF_ENTRIES = 8
+
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(
+            base_path, 'fixtures/multiple-gramcats.xlsx')
+        call_command('data-import', sample_path)
+
+        self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
+        self.assertEqual(NUMBER_OF_ENTRIES, Entry.objects.count())
 
 
 class ImportGramCatTestCase(TestCase):
@@ -224,3 +238,82 @@ class VerbalConjugationValidatorTestCase(TestCase):
         value = self.INPUT3
         verbal_validator = VerbalConjugationValidator()
         self.assertRaises(ValidationError, verbal_validator, value)
+
+
+class MultipleGramCatsTestCase(TestCase):
+    """
+    Tests of issue #42 - add support to multiple gramatical categories
+
+    """
+
+    def setUp(self):
+        ACCEPTED_GRAMCATS = [
+            "adj.",
+            "adv.",
+            "part.",
+            "s.",
+            "v. prnl.",
+            "v. tr.",
+        ]
+        self.lex = Lexicon.objects.create(
+            name="lexicon", src_language="es", dst_language="ar")
+        for abbr in ACCEPTED_GRAMCATS:
+            GramaticalCategory.objects.create(abbreviation=abbr, title="-")
+
+    def create_word(self, term):
+        return Word.objects.create(lexicon=self.lex, term=term)
+
+    def get_gramcat(self, abbr):
+        return GramaticalCategory.objects.get(abbreviation=abbr)
+
+    def test_word_one_gramcat_one_entry(self):
+        w = self.create_word("lorem")
+        g = self.get_gramcat("v. tr.")
+        e = Entry.objects.create(
+            word=w, translation="Aliquam tristique nulla vitae elit feugiat")
+        e.gramcats.add(g)
+
+    def test_word_one_gramcat_several_entries(self):
+        w = self.create_word("sem")
+        g = self.get_gramcat("v. prnl.")
+        e = Entry.objects.create(
+            word=w, translation="Nullam maximus vel ligula sed cursus.")
+        e2 = Entry.objects.create(
+            word=w, translation="Sed egestas eros non orci sodales.")
+        e.gramcats.add(g)
+        e2.gramcats.add(g)
+
+    def test_word_several_gramcat_diferent_entries(self):
+        w = self.create_word("feugiat")
+        g = self.get_gramcat("adj.")
+        e = Entry.objects.create(
+            word=w, translation="Quisque nunc magna")
+        e.gramcats.add(g)
+
+        g2 = self.get_gramcat("adv.")
+        e2 = Entry.objects.create(
+            word=w, translation="eu tempor tellus accumsan")
+        e2.gramcats.add(g2)
+
+    def test_word_several_gramcat_sharing_entry(self):
+        w = self.create_word("suscipit")
+        g = self.get_gramcat("adj.")
+        g2 = self.get_gramcat("s.")
+        e = Entry.objects.create(word=w, translation="vestibulum")
+
+        e.gramcats.add(g)
+        e.gramcats.add(g2)
+
+    def test_word_several_gramcat_sharing_several_entries(self):
+        w = self.create_word("tristique")
+        g = self.get_gramcat("part.")
+        g2 = self.get_gramcat("adj.")
+        e = Entry.objects.create(word=w, translation="porttitor")
+        e2 = Entry.objects.create(word=w, translation="posuere")
+
+        e.gramcats.add(g)
+        e.gramcats.add(g2)
+        e2.gramcats.add(g)
+        e2.gramcats.add(g2)
+
+    # TODO create tests for invalid combinations

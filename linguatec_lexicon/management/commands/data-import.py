@@ -105,6 +105,15 @@ class Command(BaseCommand):
             # Write data into the database
             self.write_to_database(cleaned_data)
 
+    def get_or_create_word(self, term, cleaned_data):
+        for word in cleaned_data:
+            if word.term == term:
+                return (False, word)
+
+        new_word = Word(term=term)
+        new_word.clean_entries = []
+        return (True, new_word)
+
     def populate_models(self, db):
         self.errors = []
         cleaned_data = []
@@ -120,25 +129,26 @@ class Command(BaseCommand):
 
             # column A is word (required)
             w_str = row[1]
+            # avoid duplicated word.term
+            created, w = self.get_or_create_word(w_str, cleaned_data)
+            if created:
+                cleaned_data.append(w)
 
             # column B is gramcat (required) # TODO several gramcats issue #42
             g_str = row[2]
 
             if pd.notnull(g_str):
-                # TODO change model to two foreign keys?
-                #g_str = g_str[0]
-                try:
-                    g = GramaticalCategory.objects.get(abbreviation=g_str)
-                except GramaticalCategory.DoesNotExist:
-                    self.errors.append({
-                        "word": w_str,
-                        "column": "B",
-                        "message": "unkown gramatical category '{}'".format(g_str)
-                    })
-                    g = None
-
-                w = Word(term=w_str, gramcat=g)
-                cleaned_data.append(w)
+                gramcats = []
+                for abbr in g_str.split("//"):
+                    abbr = abbr.strip()
+                    try:
+                        gramcats.append(GramaticalCategory.objects.get(abbreviation=abbr))
+                    except GramaticalCategory.DoesNotExist:
+                        self.errors.append({
+                            "word": w_str,
+                            "column": "B",
+                            "message": "unkown gramatical category '{}'".format(abbr)
+                        })
 
             else:
                 self.errors.append({
@@ -150,9 +160,9 @@ class Command(BaseCommand):
             # column C is entry (required)
             en_str = row[3]
             en_strs = en_str.split(' // ')
-            w.clean_entries = []
             for s in en_strs:  # subelement
                 entry = Entry(word=w, translation=s)
+                entry.clean_gramcats = gramcats
                 entry.clean_examples = []
                 w.clean_entries.append(entry)
 
@@ -201,6 +211,7 @@ class Command(BaseCommand):
             for entry in word.clean_entries:
                 entry.word_id = word.pk
                 entry.save()
+                entry.gramcats.set(entry.clean_gramcats)
                 count_entries += 1
 
                 for example in entry.clean_examples:

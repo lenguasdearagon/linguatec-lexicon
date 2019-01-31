@@ -4,12 +4,12 @@ from django.db import models
 class Lexicon(models.Model):
     """
     The Lexicon class provides a class to define a bilingual dictionary.
-    
+
     Keep in mind that you define the Lexicon direction choosing the
     source and destination language. This direction is not
     bidirectional, so if you want to have a complete bilingual dictionary
     you have to create two Lexicon, one for each way.
-    
+
     For example, a lexicon with Spanish as source language and
     Aragonese as destination language stores the translation in Aragonese
     for a collection of words in Spanish.
@@ -40,12 +40,15 @@ class Word(models.Model):
     """
     lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE, related_name="words")
     term = models.CharField(unique=True, max_length=64)
-    gramcat = models.ForeignKey('GramaticalCategory', on_delete=models.CASCADE, related_name="words")
 
     objects = WordManager()
 
     def __str__(self):
         return self.term
+
+    def gramcats(self):
+        return self.entries.values_list('gramcats__abbreviation', flat=True).distinct()
+
 
 class Entry(models.Model):
     """
@@ -54,6 +57,7 @@ class Entry(models.Model):
 
     """
     word = models.ForeignKey('Word', on_delete=models.CASCADE, related_name="entries")
+    gramcats = models.ManyToManyField('GramaticalCategory', related_name="entries")
     translation = models.TextField()
 
     class Meta:
