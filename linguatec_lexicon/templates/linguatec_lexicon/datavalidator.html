@@ -26,11 +26,25 @@
 <div class="row">
     <div class="col-12">
         <h3>Errors for <strong>{{ input_file }}</strong></h3>
-        <ol>
-            {% for e in errors %}
-            <li>{{ e }}</li>
-            {% endfor %}
-        </ol>
+        <p>Found {{ errors|length }} errors.</p>
+        <table class="table table-hover table-striped">
+            <thead>
+                <th>#</th>
+                <th>word</th>
+                <th>column</th>
+                <th>error</th>
+            </thead>
+            <tbody>
+                {% for e in errors %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ e.word }}</td>
+                    <td>{{ e.column }}</td>
+                    <td>{{ e.message }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
