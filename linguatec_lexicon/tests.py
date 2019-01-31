@@ -114,6 +114,17 @@ class ImporterTestCase(TestCase):
         self.assertEqual(0, Entry.objects.count())
         self.assertEqual(0, Example.objects.count())
 
+    def test_word_several_gramcats(self):
+        NUMBER_OF_WORDS = 6
+        NUMBER_OF_ENTRIES = 8
+
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/multiple-gramcats.xlsx')
+        call_command('data-import', sample_path)
+
+        self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
+        self.assertEqual(NUMBER_OF_ENTRIES, Entry.objects.count())
+
 
 class ImportGramCatTestCase(TestCase):
     def test_import(self):
