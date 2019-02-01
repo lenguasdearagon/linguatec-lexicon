@@ -10,17 +10,6 @@ from linguatec_lexicon.models import Entry, Example, GramaticalCategory, Lexicon
 from linguatec_lexicon.validators import VerbalConjugationValidator
 
 
-class FooTestCase(TestCase):
-    """
-    Just a fake test to prepare CI environment.
-    TODO remove this class when valid tests are implemented.
-
-    """
-
-    def test_sum(self):
-        self.assertEqual(2 + 2, 4)
-
-
 class ApiTestCase(TestCase):
     fixtures = ['lexicon-sample.json']
 
