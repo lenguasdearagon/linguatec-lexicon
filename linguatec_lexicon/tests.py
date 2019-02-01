@@ -65,7 +65,7 @@ class WordManagerTestCase(TestCase):
 
 class ImporterTestCase(TestCase):
     def setUp(self):
-        # data-import requires that GramaticalCategories are initialized
+        # importdata requires that GramaticalCategories are initialized
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path, verbosity=0)
@@ -91,7 +91,7 @@ class ImporterTestCase(TestCase):
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
-        call_command('data-import', sample_path)
+        call_command('importdata', sample_path)
 
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
         self.assertEqual(NUMBER_OF_ENTRIES, Entry.objects.count())
@@ -106,7 +106,7 @@ class ImporterTestCase(TestCase):
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/abcd.xlsx')
-        call_command('data-import', sample_path)
+        call_command('importdata', sample_path)
 
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
 
@@ -115,7 +115,7 @@ class ImporterTestCase(TestCase):
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
-        call_command('data-import', sample_path, dry_run=True)
+        call_command('importdata', sample_path, dry_run=True)
 
         self.assertEqual(lexicon_initial, Lexicon.objects.count())
         self.assertEqual(0, Word.objects.count())
@@ -127,7 +127,7 @@ class ImporterTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/invalid-gramcat-unknown.xlsx')
-        call_command('data-import', sample_path, stdout=out)
+        call_command('importdata', sample_path, stdout=out)
 
         # data shouldn't be imported if there are any errors
         self.assertEqual(0, Word.objects.count())
@@ -138,7 +138,7 @@ class ImporterTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/invalid-gramcat-empty.xlsx')
-        call_command('data-import', sample_path, stdout=out)
+        call_command('importdata', sample_path, stdout=out)
 
         # data shouldn't be imported if there are any errors
         self.assertEqual(0, Word.objects.count())
@@ -151,7 +151,7 @@ class ImporterTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/multiple-gramcats.xlsx')
-        call_command('data-import', sample_path)
+        call_command('importdata', sample_path)
 
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
         self.assertEqual(NUMBER_OF_ENTRIES, Entry.objects.count())

@@ -4,7 +4,7 @@
 
 - [about git repository clone](#about-git-repository-clone)
 - [generic tool](#generic-tool)
-- [tool for importdata](#tool-for-importdata)
+- [tool for data-import](#tool-for-data-import)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -22,6 +22,22 @@ You have to know that this repository uses `git lfs`. [Git LFS](https://git-lfs.
 
 If you have git lfs installed and you don't want to download media files do it like: `GIT_LFS_SKIP_SMUDGE=1 git clone (...)` src https://github.com/git-lfs/git-lfs/issues/2406
 
+# graphviz
+Tool to generate models diagram
+
+Install requirements
+```bash
+apt-get install graphviz
+sudo apt-get install graphviz libgraphviz-dev pkg-config
+source venv/bin/activate
+pip install pygraphviz
+```
+
+Run it
+```bash
+python manage.py  graph_models linguatec_lexicon -a -g -o my_project_visualized.png
+```
+
 # generic tool
 
 When I reach errors I like to do this kind of breakpoint:
@@ -30,9 +46,9 @@ When I reach errors I like to do this kind of breakpoint:
 
 that helps to try things interactively taking in account the current variables in use
 
-# tool for importdata
+# tool for data-import
 
-to do fast iterations about the process of importdata first of all I place to
+to do fast iterations about the process of data-import first of all I place to
 
 ```
 path/to/mysite/
@@ -45,11 +61,11 @@ activate.sh, that I execute as `. activate.sh`, with:
 source ../env/bin/activate
 ```
 
-Each modification and change you want to try on importdata script, do `./cycle.sh`, that have these lines:
+Each modification and change you want to try on data-import script, do `./cycle.sh`, that have these lines:
 
 ```
 #!/bin/bash
 python3 manage.py flush --noinput
 echo "from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')" | python3 manage.py shell
-python3 manage.py importdata
+python3 manage.py data-import
 ```

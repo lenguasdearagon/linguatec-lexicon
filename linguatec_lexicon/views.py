@@ -31,7 +31,7 @@ class DataValidatorView(TemplateView):
 
             # validate user file
             out = StringIO()
-            call_command('data-import', tmp_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
+            call_command('importdata', tmp_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
 
             context['input_file'] = form.cleaned_data['input_file']
 

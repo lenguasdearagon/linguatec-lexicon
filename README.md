@@ -39,9 +39,8 @@ python manage.py runserver
 You got it! Let's start creating magical code!
 
 ### (Optional) Load sample data
-Download sample data file and load it:
+Download [sample data](linguatec_lexicon/fixtures/lexicon-sample.json) file and load it:
 ```bash
 cd mysite
-wget https://gitlab.com/linguatec/linguatec-lexicon/raw/3-data-import/linguatec_lexicon/fixtures/sample-output.json?inline=false -o sample-output.json
-python manage.py loaddata sample-output.json
+python manage.py loaddata lexicon-sample.json
 ```
