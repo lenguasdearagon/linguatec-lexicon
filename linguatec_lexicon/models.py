@@ -62,6 +62,7 @@ class Entry(models.Model):
 
     class Meta:
         verbose_name_plural = "entries"
+
     def __str__(self):
         return self.translation
 
@@ -77,10 +78,11 @@ class Example(models.Model):
         return self.phrase
 
 class GramaticalCategory(models.Model):
-    abbreviation = models.CharField(max_length=32)
+    abbreviation = models.CharField(unique=True, max_length=32)
     title = models.CharField(max_length=128)
 
     class Meta:
         verbose_name_plural = "gramatical categories"
+
     def __str__(self):
         return self.abbreviation
