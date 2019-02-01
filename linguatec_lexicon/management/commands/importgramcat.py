@@ -14,10 +14,23 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('args', metavar='csv_file',
                             nargs='+', help='CSV files.')
+        parser.add_argument(
+            '--purge', action='store_true', dest='purge',
+            help='Remove old Gramatical Categories before performing '
+                 'the import.'
+        )
 
 
     def handle(self, *csv_files, **options):
         self.verbosity = options['verbosity']
+        self.purge_gramcat = options['purge']
+
+        if self.purge_gramcat:
+            deleted, _ = GramaticalCategory.objects.all().delete()
+            if self.verbosity >= 1:
+                self.stdout.write(
+                    "Purged %d object(s) from database" % deleted
+                )
 
         self.loaddata(csv_files)
 
