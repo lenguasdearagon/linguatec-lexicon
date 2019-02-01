@@ -22,7 +22,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name="linguatec-lexicon",
     version=version,
-    url = 'https://gitlab.com/slamora/linguatec-lexicon/',
+    url = 'https://gitlab.com/linguatec/linguatec-lexicon/',
     author = 'Santiago Lamora',
     author_email='santiago@ribaguifi.com',
     description = ('An online bilingual dictionary based on Django.'),
