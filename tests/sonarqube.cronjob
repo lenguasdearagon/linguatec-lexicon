@@ -1,0 +1,4 @@
+# append error -> src https://stackoverflow.com/questions/876239/how-can-i-redirect-and-append-both-stdout-and-stderr-to-a-file-with-bash
+50 * * * * root /path/to/project/run-bandit.sh   >> /path/to/project/run-bandit.log 2>&1
+55 * * * * root /path/to/project/run-coverage.sh >> /path/to/project/run-coverage.log 2>&1
+ 0 * * * * root /path/to/project/run-sonar.sh    >> /path/to/project/run-sonar.log 2>&1
