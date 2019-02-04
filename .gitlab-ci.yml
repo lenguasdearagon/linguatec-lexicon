@@ -4,7 +4,7 @@
 test:
   script:
   - apt-get update -qy
-  - apt-get install -y --no-install-recommends python3-pip
+  - apt-get install -y --no-install-recommends python3-pip python3-dev
   # temp: quit virtualenv when possible
   - pip3 install virtualenv
   - virtualenv env
@@ -28,7 +28,7 @@ staging:
   - ssh-add <(echo "$STAGING_PRIVATE_KEY")
   script:
   - apt-get update -qy
-  - apt-get install -y --no-install-recommends python3-pip
+  - apt-get install -y --no-install-recommends python3-pip python3-dev
   - ssh -p22 linguatec@api.conectividadcolectiva.org "rm -rf linguatec-lexicon/"
   - ssh -p22 linguatec@api.conectividadcolectiva.org "mkdir -p linguatec-lexicon/sandbox"
   - ssh -p22 linguatec@api.conectividadcolectiva.org "ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts"

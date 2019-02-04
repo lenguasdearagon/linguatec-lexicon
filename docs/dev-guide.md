@@ -2,11 +2,37 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
+- [quality tools for development](#quality-tools-for-development)
 - [about git repository clone](#about-git-repository-clone)
 - [generic tool](#generic-tool)
 - [tool for importdata](#tool-for-importdata)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+# quality tools for development
+
+This project is checked using sonarqube. Sonarqube has a server and client architecture
+
+The server part is deployed using a [docker container](https://docs.docker.com/samples/library/sonarqube/) particularly it is used [the production deployment](https://github.com/SonarSource/docker-sonarqube/blob/master/recipes/docker-compose-postgres-example.yml) to improve performance. The essential plugins for this project are: SonarPython, SonarCSS, SonarJS, SonarHTML
+
+There are two clients used:
+
+- a client inside some of the supported [IDEs](https://en.wikipedia.org/wiki/Integrated_development_environment) through [sonarlint](https://www.sonarlint.org/)
+- a client in the same server running sonarqube with a command line tool called [sonar-scanner](https://docs.sonarqube.org/display/SCAN/Analyzing+with+SonarQube+Scanner). This client runs with the help of a script every hour with a cronjob:
+    - [the run-bandit.sh script](../tests/run-bandit.sh)
+    - [the run-coverage.sh script](../tests/run-coverage.sh)
+    - [the run-sonar.sh script](../tests/run-sonar.sh)
+    - [the /etc/cron.d/sonarqube cronjob](../tests/sonarqube.cronjob)
+
+references:
+
+- [configure quality profiles](https://docs.sonarqube.org/latest/instance-administration/quality-profiles/). [Our critical profiles](https://ast.aragon.es/sites/default/files/ast.sonar_perfiles.zip) taken from [this website](https://ast.aragon.es/servicios/pruebas-de-resistencia-y-calidad-del-software)
+- [SonarPython's Advanced Usage](https://docs.sonarqube.org/display/PLUG/SonarPython) talks about interesting quality tools
+    - [bandit in sonarqube](https://docs.sonarqube.org/display/PLUG/Import+Bandit+Issues+Reports)
+    - [coverage in sonarqube](https://docs.sonarqube.org/display/PLUG/Python+Coverage+Results+Import)
+        - [integration of coverage in django project](https://docs.djangoproject.com/en/2.1/topics/testing/advanced/#integration-with-coverage-py)
+        - [coverage](https://coverage.readthedocs.io/en/latest/)
+    - [pylint in sonarqube](https://docs.sonarqube.org/display/PLUG/Import+Pylint+Issues+Report) it justs requires to be installed and after that use the sonarqube UI to configure it
 
 # about git repository clone
 
