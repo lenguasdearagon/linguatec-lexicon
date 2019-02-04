@@ -6,7 +6,8 @@ from django.core.management import call_command
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from linguatec_lexicon.models import Entry, Example, GramaticalCategory, Lexicon, Word
+from linguatec_lexicon.models import (
+    Entry, Example, GramaticalCategory, Lexicon, VerbalConjugation, Word)
 from linguatec_lexicon.validators import VerbalConjugationValidator
 
 
@@ -145,6 +146,25 @@ class ImporterTestCase(TestCase):
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
         self.assertEqual(NUMBER_OF_ENTRIES, Entry.objects.count())
 
+    def test_word_with_verbal_conjugation(self):
+        NUMBER_OF_WORDS = 4
+        NUMBER_OF_CONJUGATIONS = 4
+
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(
+            base_path, 'fixtures/verbal-conjugation.xlsx')
+        call_command('importdata', sample_path)
+
+        self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
+        self.assertEqual(NUMBER_OF_CONJUGATIONS,
+                         VerbalConjugation.objects.count())
+
+        # check that conjugation is related to proper entry
+        word = Word.objects.get(term="abarcar")
+        entry = word.entries.get(translation__contains="adubir")
+        self.assertIsNotNone(entry.conjugation)
+
+
 
 class ImportGramCatTestCase(TestCase):
     def test_import(self):
@@ -155,7 +175,6 @@ class ImportGramCatTestCase(TestCase):
 
         self.assertEqual(NUMBER_OF_GRAMCATS,
                          GramaticalCategory.objects.count())
-
 
     def test_purge_and_import(self):
         NUMBER_OF_GRAMCATS = 46
@@ -168,7 +187,7 @@ class ImportGramCatTestCase(TestCase):
         call_command('importgramcat', sample_path, purge=True)
 
         self.assertNotEqual(NUMBER_OF_GRAMCATS + existing_gramcats,
-                         GramaticalCategory.objects.count())
+                            GramaticalCategory.objects.count())
 
 
 class VerbalConjugationValidatorTestCase(TestCase):

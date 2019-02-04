@@ -86,3 +86,8 @@ class GramaticalCategory(models.Model):
 
     def __str__(self):
         return self.abbreviation
+
+
+class VerbalConjugation(models.Model):
+    entry = models.OneToOneField('Entry', on_delete=models.CASCADE, related_name="conjugation")
+    raw = models.TextField('Raw imported content.')

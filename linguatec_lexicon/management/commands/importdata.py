@@ -1,7 +1,8 @@
 import json
 import pandas as pd
 from django.core.management.base import BaseCommand, CommandError
-from linguatec_lexicon.models import Entry, Example, Lexicon, GramaticalCategory, Word
+from linguatec_lexicon.models import (
+    Entry, Example, Lexicon, GramaticalCategory, VerbalConjugation, Word)
 
 
 def read_input_file(input_file):
@@ -95,7 +96,8 @@ class Command(BaseCommand):
         cleaned_data = self.populate_models(db)
 
         if self.errors:
-            self.stdout.write(self.style.ERROR("Detected {} errors!".format(len(self.errors))))
+            self.stdout.write(self.style.ERROR(
+                "Detected {} errors!".format(len(self.errors))))
             if self.verbosity >= 2:
                 for error in self.errors:
                     self.stdout.write(self.style.ERROR(json.dumps(error)))
@@ -147,7 +149,8 @@ class Command(BaseCommand):
                 for abbr in g_str.split("//"):
                     abbr = abbr.strip()
                     try:
-                        gramcats.append(GramaticalCategory.objects.get(abbreviation=abbr))
+                        gramcats.append(
+                            GramaticalCategory.objects.get(abbreviation=abbr))
                     except GramaticalCategory.DoesNotExist:
                         self.errors.append({
                             "word": w_str,
@@ -186,7 +189,27 @@ class Command(BaseCommand):
                             # TODO could be several examples separated by ';'
                             we.clean_examples.append(Example(phrase=value))
 
-            # TODO column F is verb conjugation (only when gramcat is verb)
+            # column F is verb conjugation
+            try:
+                conjugation_str = row[6]
+            except IndexError:
+                continue
+            else:
+                raw_conjugations = [x.strip() for x in conjugation_str.split('//')]
+                # check if word is a verb
+                if not 'v.' in g_str:
+                    self.errors.append({
+                        "word": w_str,
+                        "column": "F",
+                        "message": "only verbs can have verbal conjugation data",
+                    })
+                    continue
+                for i, raw_conjugation in enumerate(raw_conjugations):
+                    # TODO check number of conjugations VS number of entries
+                    if raw_conjugation:
+                        # TODO validate format
+                        w.clean_entries[i].clean_conjugation = VerbalConjugation(
+                            raw=raw_conjugation)
 
         return cleaned_data
 
@@ -216,6 +239,12 @@ class Command(BaseCommand):
                     example.entry_id = entry.pk
                     example.save()
                     count_examples += 1
+
+                try:
+                    entry.clean_conjugation.entry_id = entry.pk
+                    entry.clean_conjugation.save()
+                except AttributeError:
+                    pass
 
         self.stdout.write("Imported: %s words, %s entries, %s examples" %
                           (count_words, count_entries, count_examples))
