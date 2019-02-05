@@ -204,8 +204,18 @@ class Command(BaseCommand):
                         "message": "only verbs can have verbal conjugation data",
                     })
                     continue
+
+                # check number of conjugations VS number of entries
+                if len(w.clean_entries) < len(raw_conjugations):
+                    self.errors.append({
+                            "word": w_str,
+                            "column": "F",
+                            "message": "there are more conjugations '{}' than entries'{}'".format(
+                                len(w.clean_entries), len(conjugation_str))
+                        })
+                    continue # invalid format, don't try to extract it!
+
                 for i, raw_conjugation in enumerate(raw_conjugations):
-                    # TODO check number of conjugations VS number of entries
                     if raw_conjugation:
                         # TODO validate format
                         w.clean_entries[i].clean_conjugation = VerbalConjugation(
