@@ -1,3 +1,6 @@
+# install base requirements
+-r ../requirements.txt
+
 # test and quality tools
 coverage
 bandit

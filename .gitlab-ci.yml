@@ -5,18 +5,12 @@ test:
   script:
   - apt-get update -qy
   - apt-get install -y --no-install-recommends python3-pip python3-dev
-  # temp: quit virtualenv when possible
   - pip3 install virtualenv
   - virtualenv env
   - source env/bin/activate
-  - pip3 install -r requirements.txt
+  - pip3 install -r tests/requirements.txt
   - pip3 install . # add linguatec_lexicon to PYTHONPATH
-  - django-admin startproject testsite --template=linguatec_lexicon/conf/project_template
-#  - mv testsite/testsite/settings.py testsite/testsite/settings.py.orig
-#  - cp test/settings_test.py testsite/testsite/settings.py
-  - cd testsite
-  - python manage.py migrate
-  - python manage.py test linguatec_lexicon
+  - ./runtests.py
 
 staging:
   type: deploy
