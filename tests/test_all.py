@@ -209,14 +209,12 @@ class VerbalConjugationModelTestCase(TestCase):
 
         parsed_conjugation = entry.conjugation.parse_raw()
         self.assertIn("conjugation", parsed_conjugation)
-        print(parsed_conjugation)
 
     def test_extract_verbal_model(self):
         word = Word.objects.get(term="zambullir")
         entry = word.entries.get(translation__contains="capuzar")
         parsed_conjugation = entry.conjugation.parse_raw()
         self.assertIn("model", parsed_conjugation)
-        print(parsed_conjugation)
 
     def test_invalid_conjugation(self):
         word = Word.objects.get(term="beber")
