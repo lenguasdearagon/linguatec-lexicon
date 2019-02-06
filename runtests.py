@@ -106,7 +106,7 @@ def setup(verbosity, test_labels, parallel):
 
     # Redirect some settings for the duration of these tests.
     settings.INSTALLED_APPS = ALWAYS_INSTALLED_APPS
-    settings.ROOT_URLCONF = 'urls'
+    settings.ROOT_URLCONF = 'tests.urls'
     settings.STATIC_URL = '/static/'
     settings.STATIC_ROOT = os.path.join(TMPDIR, 'static')
     settings.TEMPLATES = [{
@@ -271,7 +271,7 @@ if __name__ == "__main__":
     if options.settings:
         os.environ['DJANGO_SETTINGS_MODULE'] = options.settings
     else:
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'test_sqlite')
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tests.test_sqlite')
         options.settings = os.environ['DJANGO_SETTINGS_MODULE']
 
     failures = django_tests(
