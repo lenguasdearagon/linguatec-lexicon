@@ -190,6 +190,40 @@ class ImportGramCatTestCase(TestCase):
                             GramaticalCategory.objects.count())
 
 
+class VerbalConjugationModelTestCase(TestCase):
+    def setUp(self):
+        # importdata requires that GramaticalCategories are initialized
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
+        call_command('importgramcat', sample_path, verbosity=0)
+
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(
+            base_path, 'fixtures/verbal-conjugation-2.xlsx')
+        call_command('importdata', sample_path)
+
+    def test_extract_verbal_conjugation(self):
+        word = Word.objects.get(term="abarcar")
+        entry = word.entries.get(translation__contains="adubir")
+        self.assertIsNotNone(entry.conjugation)
+
+        parsed_conjugation = entry.conjugation.parse_raw()
+        self.assertIn("conjugation", parsed_conjugation)
+        print(parsed_conjugation)
+
+    def test_extract_verbal_model(self):
+        word = Word.objects.get(term="zambullir")
+        entry = word.entries.get(translation__contains="capuzar")
+        parsed_conjugation = entry.conjugation.parse_raw()
+        self.assertIn("model", parsed_conjugation)
+        print(parsed_conjugation)
+
+    def test_invalid_conjugation(self):
+        word = Word.objects.get(term="beber")
+        entry = word.entries.get(translation="beber")
+        self.assertRaises(ValidationError, entry.conjugation.parse_raw)
+
+
 class VerbalConjugationValidatorTestCase(TestCase):
     INPUT = """
             Adubir es modelo para la conjugación regular

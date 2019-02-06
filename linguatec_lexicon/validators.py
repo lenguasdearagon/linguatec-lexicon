@@ -71,12 +71,18 @@ class VerbalConjugationValidator:
                 raise ValidationError(_('Verbal mood %s not found.') % mood)
 
         # Validate that conjugations are complete
+        cleaned_data = {}
         for mood in self.MOODS:
+            current_mood = {}
             mood_value = self.extract_mood(value, mood)
             for tense in self.MOOD_TENSES[mood]:
                 count = self.MOOD_NUMBER_OF_CONJUGATIONS[mood]
-                self.validate_number_of_conjugations(
+                conjugation = self.validate_number_of_conjugations(
                     mood_value, mood, tense, count)
+                current_mood[tense] = conjugation
+            cleaned_data[mood] = current_mood
+
+        return cleaned_data
 
     def extract_mood(self, value, mood):
         mood_idx = self.MOODS.index(mood)
@@ -111,7 +117,7 @@ class VerbalConjugationValidator:
                 _('Invalid number of conjugations for %s - %s. Should be %d' % (mood, tense, count)))
         logger.debug("%s %s: %s" % (mood, tense, conjugation))
 
-        return True
+        return conjugation
 
     def __eq__(self, other):
         return isinstance(other, VerbalConjugationValidator)
