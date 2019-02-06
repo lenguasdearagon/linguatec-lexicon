@@ -44,3 +44,20 @@ Download [sample data](linguatec_lexicon/fixtures/lexicon-sample.json) file and 
 cd mysite
 python manage.py loaddata lexicon-sample.json
 ```
+
+### Running tests
+To run the tests, clone the repository, and then:
+
+```bash
+# Setup the virtual environment
+virtualenv env
+source env/bin/activate
+git clone git@gitlab.com:linguatec/linguatec-lexicon.git linguatec-lexicon
+cd linguatec-lexicon/
+pip install -r requirements.txt
+pip install .
+
+# Run the tests
+./runtests.py
+```
+
