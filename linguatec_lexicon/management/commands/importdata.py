@@ -199,15 +199,17 @@ class Command(BaseCommand):
             except IndexError:
                 continue
             else:
-                raw_conjugations = [x.strip() for x in conjugation_str.split('//')]
                 # check if word is a verb
-                if not 'v.' in g_str:
+                if conjugation_str and not 'v.' in g_str:
                     self.errors.append({
                         "word": w_str,
                         "column": "F",
                         "message": "only verbs can have verbal conjugation data",
                     })
                     continue
+
+                raw_conjugations = [x.strip()
+                                for x in conjugation_str.split('//')]
 
                 # check number of conjugations VS number of entries
                 if len(w.clean_entries) < len(raw_conjugations):
