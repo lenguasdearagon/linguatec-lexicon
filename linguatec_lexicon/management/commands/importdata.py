@@ -1,6 +1,9 @@
 import json
 import pandas as pd
+
+from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
+
 from linguatec_lexicon.models import (
     Entry, Example, Lexicon, GramaticalCategory, VerbalConjugation, Word)
 from linguatec_lexicon.validators import validate_column_verb_conjugation
@@ -209,18 +212,26 @@ class Command(BaseCommand):
                 # check number of conjugations VS number of entries
                 if len(w.clean_entries) < len(raw_conjugations):
                     self.errors.append({
-                            "word": w_str,
-                            "column": "F",
-                            "message": "there are more conjugations '{}' than entries'{}'".format(
-                                len(w.clean_entries), len(conjugation_str))
-                        })
-                    continue # invalid format, don't try to extract it!
+                        "word": w_str,
+                        "column": "F",
+                        "message": "there are more conjugations '{}' than entries'{}'".format(
+                            len(w.clean_entries), len(conjugation_str))
+                    })
+                    continue  # invalid format, don't try to extract it!
 
                 for i, raw_conjugation in enumerate(raw_conjugations):
                     if raw_conjugation:
-                        validate_column_verb_conjugation(raw_conjugation)
-                        w.clean_entries[i].clean_conjugation = VerbalConjugation(
-                            raw=raw_conjugation)
+                        try:
+                            validate_column_verb_conjugation(raw_conjugation)
+                        except ValidationError as e:
+                            self.errors.append({
+                                "word": w_str,
+                                "column": "F",
+                                "message": str(e.message),
+                            })
+                        else:
+                            w.clean_entries[i].clean_conjugation = VerbalConjugation(
+                                raw=raw_conjugation)
 
         return cleaned_data
 
