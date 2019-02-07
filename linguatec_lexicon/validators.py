@@ -21,6 +21,23 @@ def validate_morfcat(value):
         raise ValidationError(_('Enter a valid value.'))
 
 
+def validate_column_verb_conjugation(value):
+    from linguatec_lexicon.models import VerbalConjugation
+    # should follow model 1 full conjugation or model 2 refs to other verb
+    value_lowered = value.lower()
+    if VerbalConjugation.KEYWORD_CONJUGATION in value_lowered:
+        cleaned_conjugation = VerbalConjugationValidator()(value)
+    elif VerbalConjugation.KEYWORD_MODEL in value_lowered:
+        cleaned_model = value_lowered.split(VerbalConjugation.KEYWORD_CONJUGATION)[1].strip()
+        if len(cleaned_model.split()) > 1:
+            raise ValidationError(_('Expected only one word (verb) as {}'.format(VerbalConjugation.KEYWORD_MODEL)))
+    else:
+        raise ValidationError(_('Missing keyword. Verb should have '
+                                'conjugation or link to another verb as model.'))
+
+    return value
+
+
 @deconstructible
 class VerbalConjugationValidator:
     # Verbal moods

@@ -3,6 +3,7 @@ import pandas as pd
 from django.core.management.base import BaseCommand, CommandError
 from linguatec_lexicon.models import (
     Entry, Example, Lexicon, GramaticalCategory, VerbalConjugation, Word)
+from linguatec_lexicon.validators import validate_column_verb_conjugation
 
 
 def read_input_file(input_file):
@@ -217,7 +218,7 @@ class Command(BaseCommand):
 
                 for i, raw_conjugation in enumerate(raw_conjugations):
                     if raw_conjugation:
-                        # TODO validate format
+                        validate_column_verb_conjugation(raw_conjugation)
                         w.clean_entries[i].clean_conjugation = VerbalConjugation(
                             raw=raw_conjugation)
 

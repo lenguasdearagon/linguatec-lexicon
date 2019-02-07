@@ -147,8 +147,8 @@ class ImporterTestCase(TestCase):
         self.assertEqual(NUMBER_OF_ENTRIES, Entry.objects.count())
 
     def test_word_with_verbal_conjugation(self):
-        NUMBER_OF_WORDS = 4
-        NUMBER_OF_CONJUGATIONS = 4
+        NUMBER_OF_WORDS = 2
+        NUMBER_OF_CONJUGATIONS = 2
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
