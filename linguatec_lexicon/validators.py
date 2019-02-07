@@ -22,20 +22,30 @@ def validate_morfcat(value):
 
 
 def validate_column_verb_conjugation(value):
+    """
+    This column should contain full conjugation or refer to other
+    verb as model.
+    """
     from linguatec_lexicon.models import VerbalConjugation
-    # should follow model 1 full conjugation or model 2 refs to other verb
+
+    cleaned_data = {}
     value_lowered = value.lower()
-    if VerbalConjugation.KEYWORD_CONJUGATION in value_lowered:
-        cleaned_conjugation = VerbalConjugationValidator()(value)
-    elif VerbalConjugation.KEYWORD_MODEL in value_lowered:
-        cleaned_model = value_lowered.split(VerbalConjugation.KEYWORD_CONJUGATION)[1].strip()
-        if len(cleaned_model.split()) > 1:
-            raise ValidationError(_('Expected only one word (verb) as {}'.format(VerbalConjugation.KEYWORD_MODEL)))
+
+    if VerbalConjugation.KEYWORD_MODEL in value_lowered:
+        model = value_lowered.split(
+            VerbalConjugation.KEYWORD_CONJUGATION)[1].strip()
+        if len(model.split()) > 1:
+            raise ValidationError(
+                _('Expected only one word (verb) as {}'.format(VerbalConjugation.KEYWORD_MODEL)))
+        cleaned_data['model'] = model
+
+    elif VerbalConjugation.KEYWORD_CONJUGATION in value_lowered:
+        cleaned_data['conjugation'] = VerbalConjugationValidator()(value)
     else:
         raise ValidationError(_('Missing keyword. Verb should have '
                                 'conjugation or link to another verb as model.'))
 
-    return value
+    return cleaned_data
 
 
 @deconstructible
@@ -131,7 +141,7 @@ class VerbalConjugationValidator:
         conjugation = self.extract_conjugation(value)
         if len(conjugation) != count:
             raise ValidationError(
-                _('Invalid number of conjugations for %s - %s. Should be %d' % (mood, tense, count)))
+                _('Invalid number of conjugations for %s - %s. Should be %d. %s found' % (mood, tense, count, len(conjugation))))
         logger.debug("%s %s: %s" % (mood, tense, conjugation))
 
         return conjugation
