@@ -6,34 +6,8 @@ from django.core.management import call_command
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from linguatec_lexicon.models import Entry, Example, GramaticalCategory, Lexicon, Word
-from linguatec_lexicon.validators import VerbalConjugationValidator
-
-
-class ApiTestCase(TestCase):
-    fixtures = ['lexicon-sample.json']
-
-    def test_word_list(self):
-        resp = self.client.get('/api/words/')
-        self.assertEqual(200, resp.status_code)
-
-    def test_word_show(self):
-        resp = self.client.get('/api/words/1/')
-        self.assertEqual(200, resp.status_code)
-
-    def test_word_search_several_results(self):
-        resp = self.client.get('/api/words/?search=e')
-        self.assertEqual(200, resp.status_code)
-
-        resp_json = resp.json()
-        self.assertEqual(4, len(resp_json))
-
-    def test_word_search_no_results(self):
-        resp = self.client.get('/api/words/?search=foo')
-        self.assertEqual(200, resp.status_code)
-
-        resp_json = resp.json()
-        self.assertEqual(0, len(resp_json))
+from linguatec_lexicon.models import (
+    Entry, Example, GramaticalCategory, Lexicon, VerbalConjugation, Word)
 
 
 class WordManagerTestCase(TestCase):
@@ -145,6 +119,25 @@ class ImporterTestCase(TestCase):
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
         self.assertEqual(NUMBER_OF_ENTRIES, Entry.objects.count())
 
+    def test_word_with_verbal_conjugation(self):
+        NUMBER_OF_WORDS = 2
+        NUMBER_OF_CONJUGATIONS = 2
+
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(
+            base_path, 'fixtures/verbal-conjugation.xlsx')
+        call_command('importdata', sample_path)
+
+        self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
+        self.assertEqual(NUMBER_OF_CONJUGATIONS,
+                         VerbalConjugation.objects.count())
+
+        # check that conjugation is related to proper entry
+        word = Word.objects.get(term="abarcar")
+        entry = word.entries.get(translation__contains="adubir")
+        self.assertIsNotNone(entry.conjugation)
+
+
 
 class ImportGramCatTestCase(TestCase):
     def test_import(self):
@@ -155,7 +148,6 @@ class ImportGramCatTestCase(TestCase):
 
         self.assertEqual(NUMBER_OF_GRAMCATS,
                          GramaticalCategory.objects.count())
-
 
     def test_purge_and_import(self):
         NUMBER_OF_GRAMCATS = 46
@@ -168,79 +160,34 @@ class ImportGramCatTestCase(TestCase):
         call_command('importgramcat', sample_path, purge=True)
 
         self.assertNotEqual(NUMBER_OF_GRAMCATS + existing_gramcats,
-                         GramaticalCategory.objects.count())
+                            GramaticalCategory.objects.count())
 
 
-class VerbalConjugationValidatorTestCase(TestCase):
-    INPUT = """
-            Adubir es modelo para la conjugación regular
-            de los verbos regulares terminados en –IR.
-            conjug. IND. pres. adubo, adubes, adube,
-            adubimos, adubiz, aduben; pret. imp.
-            adubiba, adubibas, adubiba, adubíbanos,
-            adubíbaz, adubiban; pret. indef. adubié,
-            adubiés, adubió, adubiemos, adubiez,
-            adubioron/adubión; fut. adubiré, adubirás,
-            adubirá, adubiremos, adubirez, adubirán;
-            cond. adubirba, adubirbas, adubirba,
-            adubírbanos, adubírbaz, adubirban; SUBJ.
-            pres. aduba, adubas, aduba, adubamos,
-            adubaz, aduban; pret. imp. adubise,
-            adubises, adubise, adubísenos, adubísez,
-            adubisen; IMP. adube, adubiz; INF. adubir;
-            GER. adubindo; PART. adubito/a.
-            """
-    INPUT2 = """
-            Adubir es modelo para la conjugación regular
-            de los verbos regulares terminados en –IR.
-            conjug. IND. pres. adubo, adubes, adube,
-            adubimos, adubiz, aduben; pret. imp.
-            adubiba, adubibas, adubiba, adubíbanos,
-            adubíbaz, adubiban; pret. indef. adubié,
-            adubiés, adubió, adubiemos, adubiez,
-            adubioron/adubión; fut. adubiré, adubirás,
-            adubirá, adubiremos, adubirez, adubirán;
-            cond. adubirba, adubirbas, adubirba,
-            adubírbanos, adubírbaz, adubirban; SUBJ.
-            pres. aduba, adubas, aduba, adubamos,
-            adubaz, aduban; pret. imp. adubise,
-            adubises, adubise, adubísenos, adubísez,
-            adubisen; IMP. adube, adubiz; INF. adubir;
-            GER. adubindo;
-            """
-    INPUT3 = """
-            Adubir es modelo para la conjugación regular
-            de los verbos regulares terminados en –IR.
-            conjug. IND. pres. adubes, adube,
-            adubimos, adubiz, aduben; pret. imp.
-            adubiba, adubibas, adubiba, adubíbanos,
-            adubíbaz, adubiban; pret. indef. adubié,
-            adubiés, adubió, adubiemos, adubiez,
-            adubioron/adubión; fut. adubiré, adubirás,
-            adubirá, adubiremos, adubirez, adubirán;
-            cond. adubirba, adubirbas, adubirba,
-            adubírbanos, adubírbaz, adubirban; SUBJ.
-            pres. aduba, adubas, aduba, adubamos,
-            adubaz, aduban; pret. imp. adubise,
-            adubises, adubise, adubísenos, adubísez,
-            adubisen; IMP. adube, adubiz; INF. adubir;
-            GER. adubindo; PART. adubito/a.
-            """
+class VerbalConjugationModelTestCase(TestCase):
+    def setUp(self):
+        # importdata requires that GramaticalCategories are initialized
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
+        call_command('importgramcat', sample_path, verbosity=0)
 
-    def test_valid_input(self):
-        value = self.INPUT
-        verbal_validator = VerbalConjugationValidator()
-        verbal_validator(value)
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(
+            base_path, 'fixtures/verbal-conjugation.xlsx')
+        call_command('importdata', sample_path)
 
-    def test_invalid_input_missing_participle_mood(self):
-        value = self.INPUT2
-        verbal_validator = VerbalConjugationValidator()
-        self.assertRaises(ValidationError, verbal_validator, value)
+    def test_extract_verbal_conjugation(self):
+        word = Word.objects.get(term="abarcar")
+        entry = word.entries.get(translation__contains="adubir")
+        self.assertIsNotNone(entry.conjugation)
 
-    def test_invalid_input_incomplete_infinitive_present_conjugation(self):
-        value = self.INPUT3
-        verbal_validator = VerbalConjugationValidator()
-        self.assertRaises(ValidationError, verbal_validator, value)
+        parsed_conjugation = entry.conjugation.parse_raw
+        self.assertIn("conjugation", parsed_conjugation)
+
+    def test_extract_verbal_model(self):
+        word = Word.objects.get(term="zambullir")
+        entry = word.entries.get(translation__contains="capuzar")
+        parsed_conjugation = entry.conjugation.parse_raw
+        self.assertIn("model", parsed_conjugation)
 
 
 class MultipleGramCatsTestCase(TestCase):

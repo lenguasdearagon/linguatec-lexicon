@@ -1,5 +1,7 @@
 from django.db import models
+from django.utils.functional import cached_property
 
+from linguatec_lexicon import validators
 
 class Lexicon(models.Model):
     """
@@ -86,3 +88,43 @@ class GramaticalCategory(models.Model):
 
     def __str__(self):
         return self.abbreviation
+
+
+class VerbalConjugation(models.Model):
+    KEYWORD_MODEL = "modelo. conjug."
+    KEYWORD_CONJUGATION = "conjug."
+
+    entry = models.OneToOneField('Entry', on_delete=models.CASCADE, related_name="conjugation")
+    raw = models.TextField('Raw imported content.')
+
+    @cached_property
+    def parse_raw(self):
+        beg = None
+        parsed = {}
+        raw_lowcase = self.raw.lower()
+        if self.KEYWORD_MODEL in raw_lowcase:
+            # CASO 1
+            beg = raw_lowcase.find(self.KEYWORD_MODEL)
+            parsed["model"] = raw_lowcase[beg:].lstrip(self.KEYWORD_MODEL).strip()
+
+        elif self.KEYWORD_CONJUGATION in raw_lowcase:
+            # CASO 2A
+            beg = raw_lowcase.find(self.KEYWORD_CONJUGATION)
+            conjugation = validators.VerbalConjugationValidator()(self.raw)
+            parsed["conjugation"] = conjugation
+
+        parsed["intro"] = self.raw[:beg].strip()
+
+        return parsed
+
+    @property
+    def intro(self):
+        return self.parse_raw.get('intro', None)
+
+    @property
+    def conjugation(self):
+        return self.parse_raw.get('conjugation', None)
+
+    @property
+    def model(self):
+        return self.parse_raw.get('model', None)

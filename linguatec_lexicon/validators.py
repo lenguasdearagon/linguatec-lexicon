@@ -21,6 +21,33 @@ def validate_morfcat(value):
         raise ValidationError(_('Enter a valid value.'))
 
 
+def validate_column_verb_conjugation(value):
+    """
+    This column should contain full conjugation or refer to other
+    verb as model.
+    """
+    from linguatec_lexicon.models import VerbalConjugation
+
+    cleaned_data = {}
+    value_lowered = value.lower()
+
+    if VerbalConjugation.KEYWORD_MODEL in value_lowered:
+        model = value_lowered.split(
+            VerbalConjugation.KEYWORD_CONJUGATION)[1].strip()
+        if len(model.split()) > 1:
+            raise ValidationError(
+                _('Expected only one word (verb) as {}'.format(VerbalConjugation.KEYWORD_MODEL)))
+        cleaned_data['model'] = model
+
+    elif VerbalConjugation.KEYWORD_CONJUGATION in value_lowered:
+        cleaned_data['conjugation'] = VerbalConjugationValidator()(value)
+    else:
+        raise ValidationError(_('Missing keyword. Verb should have '
+                                'conjugation or link to another verb as model.'))
+
+    return cleaned_data
+
+
 @deconstructible
 class VerbalConjugationValidator:
     # Verbal moods
@@ -71,12 +98,18 @@ class VerbalConjugationValidator:
                 raise ValidationError(_('Verbal mood %s not found.') % mood)
 
         # Validate that conjugations are complete
+        cleaned_data = {}
         for mood in self.MOODS:
+            current_mood = {}
             mood_value = self.extract_mood(value, mood)
             for tense in self.MOOD_TENSES[mood]:
                 count = self.MOOD_NUMBER_OF_CONJUGATIONS[mood]
-                self.validate_number_of_conjugations(
+                conjugation = self.validate_number_of_conjugations(
                     mood_value, mood, tense, count)
+                current_mood[tense] = conjugation
+            cleaned_data[mood] = current_mood
+
+        return cleaned_data
 
     def extract_mood(self, value, mood):
         mood_idx = self.MOODS.index(mood)
@@ -108,10 +141,10 @@ class VerbalConjugationValidator:
         conjugation = self.extract_conjugation(value)
         if len(conjugation) != count:
             raise ValidationError(
-                _('Invalid number of conjugations for %s - %s. Should be %d' % (mood, tense, count)))
+                _('Invalid number of conjugations for %s - %s. Should be %d. %s found' % (mood, tense, count, len(conjugation))))
         logger.debug("%s %s: %s" % (mood, tense, conjugation))
 
-        return True
+        return conjugation
 
     def __eq__(self, other):
         return isinstance(other, VerbalConjugationValidator)
