@@ -10,32 +10,6 @@ from linguatec_lexicon.models import (
     Entry, Example, GramaticalCategory, Lexicon, VerbalConjugation, Word)
 
 
-class ApiTestCase(TestCase):
-    fixtures = ['lexicon-sample.json']
-
-    def test_word_list(self):
-        resp = self.client.get('/api/words/')
-        self.assertEqual(200, resp.status_code)
-
-    def test_word_show(self):
-        resp = self.client.get('/api/words/1/')
-        self.assertEqual(200, resp.status_code)
-
-    def test_word_search_several_results(self):
-        resp = self.client.get('/api/words/?search=e')
-        self.assertEqual(200, resp.status_code)
-
-        resp_json = resp.json()
-        self.assertEqual(4, len(resp_json))
-
-    def test_word_search_no_results(self):
-        resp = self.client.get('/api/words/?search=foo')
-        self.assertEqual(200, resp.status_code)
-
-        resp_json = resp.json()
-        self.assertEqual(0, len(resp_json))
-
-
 class WordManagerTestCase(TestCase):
     fixtures = ['lexicon-sample.json']
 
@@ -206,13 +180,13 @@ class VerbalConjugationModelTestCase(TestCase):
         entry = word.entries.get(translation__contains="adubir")
         self.assertIsNotNone(entry.conjugation)
 
-        parsed_conjugation = entry.conjugation.parse_raw()
+        parsed_conjugation = entry.conjugation.parse_raw
         self.assertIn("conjugation", parsed_conjugation)
 
     def test_extract_verbal_model(self):
         word = Word.objects.get(term="zambullir")
         entry = word.entries.get(translation__contains="capuzar")
-        parsed_conjugation = entry.conjugation.parse_raw()
+        parsed_conjugation = entry.conjugation.parse_raw
         self.assertIn("model", parsed_conjugation)
 
 

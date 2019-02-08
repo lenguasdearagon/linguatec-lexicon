@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.functional import cached_property
 
 from linguatec_lexicon import validators
 
@@ -96,7 +97,7 @@ class VerbalConjugation(models.Model):
     entry = models.OneToOneField('Entry', on_delete=models.CASCADE, related_name="conjugation")
     raw = models.TextField('Raw imported content.')
 
-    # TODO(@slamora) @cached property???
+    @cached_property
     def parse_raw(self):
         beg = None
         parsed = {}
@@ -115,3 +116,15 @@ class VerbalConjugation(models.Model):
         parsed["intro"] = self.raw[:beg].strip()
 
         return parsed
+
+    @property
+    def intro(self):
+        return self.parse_raw.get('intro', None)
+
+    @property
+    def conjugation(self):
+        return self.parse_raw.get('conjugation', None)
+
+    @property
+    def model(self):
+        return self.parse_raw.get('model', None)
