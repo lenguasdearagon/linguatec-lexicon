@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Entry, Example, VerbalConjugation, Word
+from .models import Entry, Example, GramaticalCategory, VerbalConjugation, Word
 
 
 class ExampleSerializer(serializers.ModelSerializer):
@@ -31,3 +31,9 @@ class WordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
         fields = ('url', 'term', 'gramcats', 'entries')
+
+
+class GramaticalCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GramaticalCategory
+        fields = ('abbreviation', 'title')

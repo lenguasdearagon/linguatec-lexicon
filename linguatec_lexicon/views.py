@@ -4,13 +4,14 @@ import tempfile
 from io import StringIO
 
 from django.core.management import call_command
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views.generic.base import TemplateView
 from rest_framework import filters, viewsets
+from rest_framework.response import Response
 
 from .forms import ValidatorForm
-from .models import Word
-from .serializers import WordSerializer
+from .models import GramaticalCategory, Word
+from .serializers import GramaticalCategorySerializer, WordSerializer
 
 
 class DataValidatorView(TemplateView):
@@ -63,3 +64,22 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = WordSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('term',)
+
+
+class GramaticalCategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint that allows words to be retrieved.
+    """
+    queryset = GramaticalCategory.objects.all().order_by('abbreviation')
+    serializer_class = GramaticalCategorySerializer
+
+
+    from rest_framework.decorators import action
+    @action(detail=False, )
+    def show(self, request):
+        abbr = self.request.query_params.get('abbr', None)
+
+        gramcat = get_object_or_404(self.queryset, abbreviation=abbr)
+
+        serializer = self.get_serializer(gramcat)
+        return Response(serializer.data)

@@ -27,6 +27,32 @@ class ApiTestCase(TestCase):
         self.assertEqual(0, len(resp_json))
 
 
+class GramaticalCategoryAPITestCase(TestCase):
+    fixtures = ['gramcatical-categories.json']
+
+    def test_gramcat_list(self):
+        resp = self.client.get('/api/gramcats/')
+        self.assertEqual(200, resp.status_code)
+
+    def test_gramcat_show_by_id(self):
+        resp = self.client.get('/api/gramcats/1/')
+        self.assertEqual(200, resp.status_code)
+
+        resp_json = resp.json()
+        self.assertIn('abbreviation', resp_json)
+        self.assertEqual('adj.', resp_json['abbreviation'])
+        self.assertEqual('adjetivo', resp_json['title'])
+
+    def test_gramcat_show_by_abbr(self):
+        resp = self.client.get('/api/gramcats/show/?abbr=adj.')
+        self.assertEqual(200, resp.status_code)
+
+        resp_json = resp.json()
+        self.assertIn('abbreviation', resp_json)
+        self.assertEqual('adj.', resp_json['abbreviation'])
+        self.assertEqual('adjetivo', resp_json['title'])
+
+
 class VerbsAPITestCase(TestCase):
     fixtures = ['verbal-conjugation.json']
 
