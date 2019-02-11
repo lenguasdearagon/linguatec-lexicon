@@ -1,0 +1,370 @@
+[
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 1,
+    "fields": {
+        "abbreviation": "adj.",
+        "title": "adjetivo"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 2,
+    "fields": {
+        "abbreviation": "adj. c.",
+        "title": "adjetivo cantidad"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 3,
+    "fields": {
+        "abbreviation": "adj. calif.",
+        "title": "adjetivo calificativo"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 4,
+    "fields": {
+        "abbreviation": "adj. f.",
+        "title": "adjetivo femenino"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 5,
+    "fields": {
+        "abbreviation": "adj. indef.",
+        "title": "adjetivo indefinido"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 6,
+    "fields": {
+        "abbreviation": "adj. inv.",
+        "title": "adjetivo invariable"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 7,
+    "fields": {
+        "abbreviation": "adj. m.",
+        "title": "adjetivo masculino"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 8,
+    "fields": {
+        "abbreviation": "adj. num.",
+        "title": "adjetivo numeral"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 9,
+    "fields": {
+        "abbreviation": "adv.",
+        "title": "adverbio"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 10,
+    "fields": {
+        "abbreviation": "adv. c.",
+        "title": "adverbio cantidad"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 11,
+    "fields": {
+        "abbreviation": "adv. l.",
+        "title": "adverbio lugar"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 12,
+    "fields": {
+        "abbreviation": "adv. m.",
+        "title": "adverbio modo"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 13,
+    "fields": {
+        "abbreviation": "adv. t",
+        "title": "adverbio tiempo"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 14,
+    "fields": {
+        "abbreviation": "conj.",
+        "title": "conjunci\u00f3n"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 15,
+    "fields": {
+        "abbreviation": "contr.",
+        "title": "contracci\u00f3n"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 16,
+    "fields": {
+        "abbreviation": "expr.",
+        "title": "expresi\u00f3n"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 17,
+    "fields": {
+        "abbreviation": "loc. advl.",
+        "title": "locuci\u00f3n adverbial"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 18,
+    "fields": {
+        "abbreviation": "part.",
+        "title": "participio"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 19,
+    "fields": {
+        "abbreviation": "per. vl.",
+        "title": "per\u00edfrasis verbal"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 20,
+    "fields": {
+        "abbreviation": "prep.",
+        "title": "preposici\u00f3n"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 21,
+    "fields": {
+        "abbreviation": "pron. f.",
+        "title": "pronombre femenino"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 22,
+    "fields": {
+        "abbreviation": "pron. indef.",
+        "title": "pronombre indefinido"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 23,
+    "fields": {
+        "abbreviation": "pron. interrog.",
+        "title": "pronombre interrogativo"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 24,
+    "fields": {
+        "abbreviation": "pron. m.",
+        "title": "pronombre masculino"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 25,
+    "fields": {
+        "abbreviation": "pron. neutro",
+        "title": "pronombre neutro"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 26,
+    "fields": {
+        "abbreviation": "pron. pers.",
+        "title": "pronombre personal"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 27,
+    "fields": {
+        "abbreviation": "pron. pers. 2.\u00aa pers. m. y f. sing.",
+        "title": "pronombre personal de 2\u00aa persona, masculino y femenino singular"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 28,
+    "fields": {
+        "abbreviation": "pron. pers. t\u00f3nico de 1\u00aa pers. de sing.",
+        "title": "pronombre personal t\u00f3nico de 1\u00aa persona de singular"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 29,
+    "fields": {
+        "abbreviation": "s. f.",
+        "title": "sustantivo femenino"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 30,
+    "fields": {
+        "abbreviation": "s. m.",
+        "title": "sustantivo masculino"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 31,
+    "fields": {
+        "abbreviation": "v.",
+        "title": "verbo"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 32,
+    "fields": {
+        "abbreviation": "v. cond.",
+        "title": "verbo condicional"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 33,
+    "fields": {
+        "abbreviation": "v. fut.",
+        "title": "verbo futuro"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 34,
+    "fields": {
+        "abbreviation": "v. ger.",
+        "title": "verbo gerundio"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 35,
+    "fields": {
+        "abbreviation": "v. imp.",
+        "title": "verbo imperativo"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 36,
+    "fields": {
+        "abbreviation": "v. ind.",
+        "title": "verbo indicativo"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 37,
+    "fields": {
+        "abbreviation": "v. intr.",
+        "title": "verbo intransitivo"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 38,
+    "fields": {
+        "abbreviation": "v. irreg.",
+        "title": "verbo irregular"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 39,
+    "fields": {
+        "abbreviation": "v. part.",
+        "title": "verbo particip\u00eco"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 40,
+    "fields": {
+        "abbreviation": "v. pres.",
+        "title": "verbo presente"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 41,
+    "fields": {
+        "abbreviation": "v. pret. imperf.",
+        "title": "verbo pret\u00e9rito imperfecto"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 42,
+    "fields": {
+        "abbreviation": "v. pret. indef.",
+        "title": "verbo pret\u00e9rito indefinido"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 43,
+    "fields": {
+        "abbreviation": "v. prnl.",
+        "title": "verbo pronominal"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 44,
+    "fields": {
+        "abbreviation": "v. reg.",
+        "title": "verbo regular"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 45,
+    "fields": {
+        "abbreviation": "v. subj.",
+        "title": "verbo subjuntivo"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 46,
+    "fields": {
+        "abbreviation": "v. tr.",
+        "title": "verbo transitivo"
+    }
+}
+]

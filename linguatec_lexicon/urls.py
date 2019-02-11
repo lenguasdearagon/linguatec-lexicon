@@ -6,6 +6,7 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register(r'words', views.WordViewSet)
+router.register(r'gramcats', views.GramaticalCategoryViewSet)
 
 # Wire up our API using automatic URL routing.
 urlpatterns = [
