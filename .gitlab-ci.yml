@@ -1,16 +1,30 @@
 # src https://docs.gitlab.com/ce/ci/examples/test-and-deploy-python-application-to-heroku.html
 # src https://gitlab.com/help/ci/quick_start/README
 
+# version used for develop the application (production is going to use python3.5)
+image: python:3.6-stretch
+
+# src https://gitlab.com/gitlab-examples/postgres/blob/master/.gitlab-ci.yml
+services:
+  - postgres:9.6    # debian stable version of postgresql
+
+# src https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/gitlab/ci/templates/Django.gitlab-ci.yml
+# src https://gitlab.com/gableroux/gitlab-ci-example-django/blob/master/.gitlab-ci.yml
 test:
+  # This folder is cached between builds
+  # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
+  cache:
+    paths:
+    - ~/.cache/pip/
+  before_script:
+    - python3 -V   # Print out python version for debugging
+    - pip3 install . # add linguatec_lexicon to PYTHONPATH
+    - pip3 install -r tests/requirements.txt
+    - pip3 install psycopg2-binary # postgresql client
+  variables:
+    DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
   script:
-  - apt-get update -qy
-  - apt-get install -y --no-install-recommends python3-pip python3-dev
-  - pip3 install virtualenv
-  - virtualenv env
-  - source env/bin/activate
-  - pip3 install -r tests/requirements.txt
-  - pip3 install . # add linguatec_lexicon to PYTHONPATH
-  - ./runtests.py
+  - ./runtests.py --settings tests.test_postgres
 
 staging:
   type: deploy

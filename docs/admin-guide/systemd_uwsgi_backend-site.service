@@ -1,0 +1,17 @@
+[Unit]
+Description=uwsgi for backend_proj, a django web application
+After=syslog.target network.target
+
+[Service]
+WorkingDirectory=/srv
+ExecStart=/usr/local/bin/uwsgi --ini /etc/uwsgi/backend-site.ini
+# Requires systemd version 211 or newer
+RuntimeDirectory=uwsgi
+Restart=always
+KillSignal=SIGQUIT
+Type=notify
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target
