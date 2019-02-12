@@ -80,7 +80,7 @@ class Example(models.Model):
         return self.phrase
 
 class GramaticalCategory(models.Model):
-    abbreviation = models.CharField(unique=True, max_length=32)
+    abbreviation = models.CharField(unique=True, max_length=64)
     title = models.CharField(max_length=128)
 
     class Meta:
