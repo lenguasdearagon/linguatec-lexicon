@@ -105,7 +105,7 @@ class VerbalConjugation(models.Model):
         if self.KEYWORD_MODEL in raw_lowcase:
             # CASO 1
             beg = raw_lowcase.find(self.KEYWORD_MODEL)
-            parsed["model"] = raw_lowcase[beg:].lstrip(self.KEYWORD_MODEL).strip()
+            parsed["model"] = raw_lowcase.split(self.KEYWORD_MODEL)[1].strip()
 
         elif self.KEYWORD_CONJUGATION in raw_lowcase:
             # CASO 2A

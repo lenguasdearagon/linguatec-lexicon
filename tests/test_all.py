@@ -188,6 +188,20 @@ class VerbalConjugationModelTestCase(TestCase):
         entry = word.entries.get(translation__contains="capuzar")
         parsed_conjugation = entry.conjugation.parse_raw
         self.assertIn("model", parsed_conjugation)
+        self.assertIn("trobar", parsed_conjugation["model"])
+
+    def test_extract_verbal_model_2(self):
+        v = VerbalConjugation(raw='atrebuyir (modelo. conjug. muyir)')
+        parsed_conjugation = v.parse_raw
+        self.assertIn("model", parsed_conjugation)
+        self.assertIn("muyir", parsed_conjugation["model"])
+
+    def test_extract_neither_conjugation_neither_model(self):
+        v = VerbalConjugation(raw='Lorem ipsum.')
+        parsed_conjugation = v.parse_raw
+        self.assertIn("intro", parsed_conjugation)
+        self.assertEqual(v.raw, parsed_conjugation["intro"])
+
 
 
 class MultipleGramCatsTestCase(TestCase):
