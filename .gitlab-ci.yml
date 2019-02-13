@@ -8,14 +8,20 @@ image: python:3.6-stretch
 services:
   - postgres:9.6    # debian stable version of postgresql
 
-# src https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/gitlab/ci/templates/Django.gitlab-ci.yml
-# src https://gitlab.com/gableroux/gitlab-ci-example-django/blob/master/.gitlab-ci.yml
+# This folder is cached between builds
+# http://docs.gitlab.com/ce/ci/yaml/README.html#cache
+# thanks https://fleschenberg.net/gitlab-pip-cache/
+# extra src https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/gitlab/ci/templates/Django.gitlab-ci.yml
+# extra src https://gitlab.com/gableroux/gitlab-ci-example-django/blob/master/.gitlab-ci.yml
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/pip-cache"
+
+cache:
+  paths:
+    - "$CI_PROJECT_DIR/pip-cache"
+  key: "$CI_PROJECT_ID"
+
 test:
-  # This folder is cached between builds
-  # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
-  cache:
-    paths:
-    - ~/.cache/pip/
   before_script:
     - python3 -V   # Print out python version for debugging
     - pip3 install . # add linguatec_lexicon to PYTHONPATH
