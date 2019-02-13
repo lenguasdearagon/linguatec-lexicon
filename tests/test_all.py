@@ -123,18 +123,17 @@ class ImporterTestCase(TestCase):
 
 
 class ImportGramCatTestCase(TestCase):
+    NUMBER_OF_GRAMCATS = 71
+
     def test_import(self):
-        NUMBER_OF_GRAMCATS = 46
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path)
 
-        self.assertEqual(NUMBER_OF_GRAMCATS,
+        self.assertEqual(self.NUMBER_OF_GRAMCATS,
                          GramaticalCategory.objects.count())
 
     def test_purge_and_import(self):
-        NUMBER_OF_GRAMCATS = 46
-
         GramaticalCategory.objects.create(abbreviation="f.", title="foo")
         existing_gramcats = GramaticalCategory.objects.count()
 
@@ -142,7 +141,7 @@ class ImportGramCatTestCase(TestCase):
         sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path, purge=True)
 
-        self.assertNotEqual(NUMBER_OF_GRAMCATS + existing_gramcats,
+        self.assertNotEqual(self.NUMBER_OF_GRAMCATS + existing_gramcats,
                             GramaticalCategory.objects.count())
 
 
