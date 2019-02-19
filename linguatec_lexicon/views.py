@@ -6,7 +6,7 @@ from io import StringIO
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404, render
 from django.views.generic.base import TemplateView
-from rest_framework import filters, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -63,13 +63,9 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = Word.objects.all().order_by('term')
     serializer_class = WordSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('term',)
 
     @action(detail=False)
     def search(self, request):
-        #queryset = self.filter_queryset(self.get_queryset())
-
         query = self.request.query_params.get('q', None)
         if query is not None:
             query = query.strip()
