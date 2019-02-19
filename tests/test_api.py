@@ -1,3 +1,5 @@
+import unittest
+
 from django.test import TestCase
 
 
@@ -13,14 +15,14 @@ class ApiTestCase(TestCase):
         self.assertEqual(200, resp.status_code)
 
     def test_word_search_several_results(self):
-        resp = self.client.get('/api/words/?search=e')
+        resp = self.client.get('/api/words/search/?q=echar')
         self.assertEqual(200, resp.status_code)
 
         resp_json = resp.json()
-        self.assertEqual(4, len(resp_json))
+        self.assertEqual(1, len(resp_json))
 
     def test_word_search_no_results(self):
-        resp = self.client.get('/api/words/?search=foo')
+        resp = self.client.get('/api/words/search/?q=foo')
         self.assertEqual(200, resp.status_code)
 
         resp_json = resp.json()
@@ -67,3 +69,64 @@ class VerbsAPITestCase(TestCase):
         for entry in response['entries']:
             if 'capuzar' in entry['translation']:
                 self.assertIn('model', entry['conjugation'])
+
+
+class SearchTestCase(TestCase):
+    fixtures = ['lexicons.json',
+                'gramcatical-categories.json', 'words-search.json']
+
+    def do_and_check_query(self, query, expected_results):
+        resp = self.client.get('/api/words/search/?q={}'.format(query))
+        self.assertEqual(200, resp.status_code)
+
+        expected_results = set(expected_results)
+        results = set([x['term'] for x in resp.json()])
+
+        self.assertSetEqual(expected_results, results)
+
+    def test_exact_match(self):
+        query = "garza"
+        expected_results = ["garza"]
+        self.do_and_check_query(query, expected_results)
+
+    @unittest.skip("TODO desinence")
+    def test_desincence_match(self):
+        query = "enemistada"
+        expected_results = ["enemistado/a"]
+        self.do_and_check_query(query, expected_results)
+
+    def test_expression_startswith(self):
+        query = "espino"
+        expected_results = ["espino", "espino blanco"]
+        self.do_and_check_query(query, expected_results)
+
+    def test_expression_startswith_two(self):
+        query = "echar"
+        expected_results = ["echar", "echar a", "echar a perder",
+                            "echar a voleo", "echar de menos", "echar hojas"]
+        self.do_and_check_query(query, expected_results)
+
+    def test_expression_endswith(self):
+        query = "atención"
+        expected_results = ["atención", "prestar atención"]
+        self.do_and_check_query(query, expected_results)
+
+    @unittest.skip("TODO desinence")
+    def test_desinence_expression(self):
+        query = "añico"
+        expected_results = ["añico", "hacerse añicos"]
+        self.do_and_check_query(query, expected_results)
+
+    @unittest.skip("TODO desinence")
+    def test_desinence_expression_two(self):
+        query = "bastar"
+        expected_results = [
+            "bastar", "bastarse por uno mismo", "bastarse para andar"]
+        self.do_and_check_query(query, expected_results)
+
+    def test_exclude_results(self):
+        # word in query is contained but should be excluded
+        query = "casa"
+        expected_results = ["casa"]
+        #should_be_excluded_in_terms = ["casar", "escasamente"]
+        self.do_and_check_query(query, expected_results)

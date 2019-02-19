@@ -1,7 +1,9 @@
-from django.db import models
+from django.db import connection, models
+from django.db.models import Q
 from django.utils.functional import cached_property
 
 from linguatec_lexicon import validators
+
 
 class Lexicon(models.Model):
     """
@@ -26,12 +28,24 @@ class Lexicon(models.Model):
     def __str__(self):
         return self.name
 
-# FIXME(@slamora) currently unused because search is implemented using
-# django-rest-frameworks filters that provides a more powerfull search
-# than using exact match.
+
 class WordManager(models.Manager):
     def search(self, query):
-        return self.filter(term=query)
+        if connection.vendor == 'postgresql':
+            iregex = r"\y{0}\y"
+        elif connection.vendor == 'sqlite':
+            iregex=r"\b{0}\b"
+        else:
+            filter_query = (
+                Q(term=query) |
+                Q(term__startswith=query) |
+                Q(term__endswith=query)
+            )
+            qs = self.filter(filter_query)
+            return qs
+
+        qs = self.filter(term__iregex=iregex.format(query))
+        return qs
 
 
 class Word(models.Model):
@@ -68,6 +82,7 @@ class Entry(models.Model):
     def __str__(self):
         return self.translation
 
+
 class Example(models.Model):
     """
     The Example class stores examples of usage of a Entry.
@@ -78,6 +93,7 @@ class Example(models.Model):
 
     def __str__(self):
         return self.phrase
+
 
 class GramaticalCategory(models.Model):
     abbreviation = models.CharField(unique=True, max_length=64)

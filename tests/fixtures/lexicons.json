@@ -1,0 +1,12 @@
+[
+    {
+        "model": "linguatec_lexicon.lexicon",
+        "pk": 1,
+        "fields": {
+            "name": "diccionario linguatec",
+            "description": "",
+            "src_language": "es",
+            "dst_language": "ar"
+        }
+    }
+]
