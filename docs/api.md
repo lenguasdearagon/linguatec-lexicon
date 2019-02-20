@@ -1,6 +1,7 @@
 ## REST API
+All the listing methods (list, search) are paginated, by default '30' items are returned and a maximum of '100' can be retrieved in a query.
 
-### Documentation TODO 
+### Documentation TODO
 - [ ] Include query examples
 - [ ] Add output example
 
