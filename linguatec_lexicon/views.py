@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from .forms import ValidatorForm
@@ -57,12 +58,18 @@ class DataValidatorView(TemplateView):
         return context
 
 
+class DefaultLimitOffsetPagination(LimitOffsetPagination):
+    default_limit = 30
+    max_limit = 100
+
+
 class WordViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows words to be viewed.
     """
     queryset = Word.objects.all().order_by('term')
     serializer_class = WordSerializer
+    pagination_class = DefaultLimitOffsetPagination
 
     @action(detail=False)
     def search(self, request):
@@ -87,6 +94,7 @@ class GramaticalCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = GramaticalCategory.objects.all().order_by('abbreviation')
     serializer_class = GramaticalCategorySerializer
+    pagination_class = DefaultLimitOffsetPagination
 
     @action(detail=False, )
     def show(self, request):

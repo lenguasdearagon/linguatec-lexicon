@@ -14,19 +14,19 @@ class ApiTestCase(TestCase):
         resp = self.client.get('/api/words/1/')
         self.assertEqual(200, resp.status_code)
 
-    def test_word_search_several_results(self):
+    def test_word_search_with_results(self):
         resp = self.client.get('/api/words/search/?q=echar')
         self.assertEqual(200, resp.status_code)
 
         resp_json = resp.json()
-        self.assertEqual(1, len(resp_json))
+        self.assertEqual(1, resp_json["count"])
 
     def test_word_search_no_results(self):
         resp = self.client.get('/api/words/search/?q=foo')
         self.assertEqual(200, resp.status_code)
 
         resp_json = resp.json()
-        self.assertEqual(0, len(resp_json))
+        self.assertEqual(0, resp_json["count"])
 
 
 class GramaticalCategoryAPITestCase(TestCase):
@@ -80,7 +80,8 @@ class SearchTestCase(TestCase):
         self.assertEqual(200, resp.status_code)
 
         expected_results = set(expected_results)
-        results = set([x['term'] for x in resp.json()])
+        results = resp.json()["results"]
+        results = set([x['term'] for x in results])
 
         self.assertSetEqual(expected_results, results)
 
