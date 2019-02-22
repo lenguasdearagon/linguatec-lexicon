@@ -1,3 +1,4 @@
+from django.contrib.postgres.search import TrigramSimilarity
 from django.db import connection, models
 from django.db.models import Q
 from django.utils.functional import cached_property
@@ -45,6 +46,19 @@ class WordManager(models.Manager):
             return qs
 
         qs = self.filter(term__iregex=iregex.format(query))
+        return qs
+
+    def search_near(self, query):
+        # https://docs.djangoproject.com/en/2.1/ref/contrib/postgres/search/#trigram-similarity
+        # https://www.postgresql.org/docs/current/pgtrgm.html
+        # TODO which is the limit of similarity:
+        # 0 means totally different
+        # 1 means identical
+        MIN_SIMILARITY = 0.2
+        qs = self.annotate(
+            similarity=TrigramSimilarity('term', query),
+        ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
+
         return qs
 
 

@@ -131,3 +131,25 @@ class SearchTestCase(TestCase):
         expected_results = ["casa"]
         #should_be_excluded_in_terms = ["casar", "escasamente"]
         self.do_and_check_query(query, expected_results)
+
+
+class NearWordTestCase(TestCase):
+    fixtures = ['lexicons.json',
+                'gramcatical-categories.json', 'words-search.json']
+
+    def test_no_results(self):
+        query = "robot"
+        resp = self.client.get('/api/words/near/?q={}'.format(query))
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(0, resp.json()["count"])
+
+    def test_typo(self):
+        query = "batsar"
+        resp = self.client.get('/api/words/near/?q={}'.format(query))
+        self.assertEqual(200, resp.status_code)
+
+        resp_json = resp.json()
+        self.assertEqual(1, resp_json["count"])
+
+        near_words = [x["term"] for x in resp_json["results"]]
+        self.assertIn("bastar", near_words)
