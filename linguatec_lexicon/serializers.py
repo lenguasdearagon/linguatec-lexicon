@@ -33,6 +33,12 @@ class WordSerializer(serializers.ModelSerializer):
         fields = ('url', 'term', 'gramcats', 'entries')
 
 
+class WordNearSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Word
+        fields = ('url', 'term')
+
+
 class GramaticalCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = GramaticalCategory

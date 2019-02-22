@@ -13,7 +13,7 @@ from rest_framework.response import Response
 
 from .forms import ValidatorForm
 from .models import GramaticalCategory, Word
-from .serializers import GramaticalCategorySerializer, WordSerializer
+from .serializers import GramaticalCategorySerializer, WordSerializer, WordNearSerializer
 
 
 class DataValidatorView(TemplateView):
@@ -73,6 +73,7 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False)
     def near(self, request):
+        self.serializer_class = WordNearSerializer
         query = self.request.query_params.get('q', None)
         queryset = Word.objects.search_near(query)
 
