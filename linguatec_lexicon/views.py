@@ -13,7 +13,7 @@ from rest_framework.response import Response
 
 from .forms import ValidatorForm
 from .models import GramaticalCategory, Word
-from .serializers import GramaticalCategorySerializer, WordSerializer
+from .serializers import GramaticalCategorySerializer, WordSerializer, WordNearSerializer
 
 
 class DataValidatorView(TemplateView):
@@ -70,6 +70,20 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Word.objects.all().order_by('term')
     serializer_class = WordSerializer
     pagination_class = DefaultLimitOffsetPagination
+
+    @action(detail=False)
+    def near(self, request):
+        self.serializer_class = WordNearSerializer
+        query = self.request.query_params.get('q', None)
+        queryset = Word.objects.search_near(query)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     @action(detail=False)
     def search(self, request):
