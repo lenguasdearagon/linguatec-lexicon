@@ -9,31 +9,6 @@ from linguatec_lexicon.models import (
 from linguatec_lexicon.validators import validate_column_verb_conjugation
 
 
-def read_input_file(input_file):
-    # TODO how to force dataframe to have 6 columns!!
-    df = pd.DataFrame()
-
-    xlsx = pd.ExcelFile(input_file)
-
-    for sheet in xlsx.sheet_names:
-        # we define na_values and keep_default_na because defaults na_values
-        # includes empty string. We don't want that pandas replaces empty
-        # cells with 'nan'
-        partial = xlsx.parse(sheet, header=None,
-                             usecols='A:F', skiprows=[0, 1])
-        # names=['colA', 'colB', 'colC', 'colD', 'colE', 'colF'])
-        df = df.append(partial, ignore_index=True, sort=False)
-
-    df_obj = df.select_dtypes(['object'])
-    df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
-    df = df.fillna('')  # replace NaN with blank string
-
-    # TODO change this confusing split
-    #df[1] = df[1].str.split(' y ')
-
-    return df
-
-
 def split_data_frame_list(df, target_column):
     # thanks src https://gist.github.com/jlln/338b4b0b55bd6984f883#gistcomment-2676729
     """
@@ -68,6 +43,13 @@ def extract_gramcats(db):
     return gramcats
 
 
+def is_verb(gramcats):
+    for gramcat in gramcats:
+        if gramcat.abbreviation.startswith('v.'):
+            return True
+    return False
+
+
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
@@ -80,7 +62,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.dry_run = options['dry_run']
         self.verbosity = options['verbosity']
-        input_file = options['input_file']
+        self.input_file = options['input_file']
 
         # check that GramaticalCategories are initialized
         if not GramaticalCategory.objects.all().exists():
@@ -90,14 +72,14 @@ class Command(BaseCommand):
                 "data for example running manage.py importgramcat."
             )
 
-        self.stdout.write("INFO\tinput file: %s\n" % input_file, ending='')
+        self.stdout.write("INFO\tinput file: %s\n" % self.input_file)
 
-        db = read_input_file(input_file)
+        db = self.read_input_file()
 
         # TODO add arg to print (or not gramcats)
         #gramcats = extract_gramcats(db)
 
-        cleaned_data = self.populate_models(db)
+        self.populate_models(db)
 
         if self.errors:
             self.stdout.write(self.style.ERROR(
@@ -108,10 +90,29 @@ class Command(BaseCommand):
 
         elif not self.dry_run:
             # Write data into the database
-            self.write_to_database(cleaned_data)
+            self.write_to_database()
 
-    def get_or_create_word(self, term, cleaned_data):
-        for word in cleaned_data:
+    def read_input_file(self):
+        df = pd.DataFrame()
+
+        xlsx = pd.ExcelFile(self.input_file)
+
+        for sheet in xlsx.sheet_names:
+            # we define na_values and keep_default_na because defaults na_values
+            # includes empty string. We don't want that pandas replaces empty
+            # cells with 'nan'
+            partial = xlsx.parse(sheet, header=None, usecols='A:F')
+            # names=['colA', 'colB', 'colC', 'colD', 'colE', 'colF'])
+            df = df.append(partial, ignore_index=True, sort=False)
+
+        df_obj = df.select_dtypes(['object'])
+        df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
+        df = df.fillna('')  # replace NaN with blank string
+
+        return df
+
+    def get_or_create_word(self, term):
+        for word in self.cleaned_data:
             if word.term == term:
                 return (False, word)
 
@@ -119,125 +120,138 @@ class Command(BaseCommand):
         new_word.clean_entries = []
         return (True, new_word)
 
+    def populate_word(self, w_str):
+        # avoid duplicated word.term
+        created, word = self.get_or_create_word(w_str)
+        if created:
+            self.cleaned_data.append(word)
+
+        return word
+
+    def populate_gramcats(self, word, g_str):
+        gramcats = []
+        if not g_str:
+            self.errors.append({
+                "word": word.term,
+                "column": "B",
+                "message": "missing gramatical category"
+            })
+        else:
+            for abbr in g_str.split("//"):
+                abbr = abbr.strip()
+                try:
+                    gramcats.append(
+                        GramaticalCategory.objects.get(abbreviation=abbr))
+                except GramaticalCategory.DoesNotExist:
+                    self.errors.append({
+                        "word": word.term,
+                        "column": "B",
+                        "message": "unkown gramatical category '{}'".format(abbr)
+                    })
+        word.is_verb = is_verb(gramcats)
+        return gramcats
+
+    def populate_entries(self, word, gramcats, entries_str):
+        for translation in entries_str.split('//'):
+            entry = Entry(word=word, translation=translation.strip())
+            entry.clean_gramcats = gramcats
+            entry.clean_examples = []
+            word.clean_entries.append(entry)
+
+    def populate_examples(self, word, ex_str):
+        if pd.isnull(ex_str) or ex_str == '':
+            return
+
+        ex_strs = [x.strip() for x in ex_str.split('//')]
+        if len(word.clean_entries) < len(ex_strs):
+            self.errors.append({
+                "word": word.term,
+                "column": "E",
+                "message": "there are more examples '{}' than entries'{}'".format(
+                    len(ex_strs), len(word.clean_entries))
+            })
+            # invalid format, don't try to extract it!
+            return
+
+        for i, value in enumerate(ex_strs):  # subelement
+            we = word.clean_entries[i]  # word entry
+            if value:
+                # TODO could be several examples separated by ';'
+                we.clean_examples.append(Example(phrase=value))
+
+    def populate_verbal_conjugation(self, word, conjugation_str):
+        # check if word is a verb
+        if conjugation_str and not word.is_verb:
+            self.errors.append({
+                "word": word.term,
+                "column": "F",
+                "message": "only verbs can have verbal conjugation data",
+            })
+            return
+
+        raw_conjugations = [x.strip()
+                            for x in conjugation_str.split('//')]
+
+        # check number of conjugations VS number of entries
+        if len(word.clean_entries) < len(raw_conjugations):
+            self.errors.append({
+                "word": word.term,
+                "column": "F",
+                "message": "there are more conjugations '{}' than entries'{}'".format(
+                    len(word.clean_entries), len(conjugation_str))
+            })
+            # invalid format, don't try to extract it!
+            return
+
+        for i, raw_conjugation in enumerate(raw_conjugations):
+            if raw_conjugation:
+                try:
+                    validate_column_verb_conjugation(raw_conjugation)
+                except ValidationError as e:
+                    self.errors.append({
+                        "word": word.term,
+                        "column": "F",
+                        "message": str(e.message),
+                    })
+                else:
+                    word.clean_entries[i].clean_conjugation = VerbalConjugation(
+                        raw=raw_conjugation)
+
     def populate_models(self, db):
         self.errors = []
-        cleaned_data = []
+        self.cleaned_data = []
         for row in db.itertuples(name=None):
             # itertuples by default return the index as the first element of the tuple.
 
             # filter empty rows
-            if pd.isnull(row):
-                continue
             # TODO how to ignore empty rows in an elegant way?
-            if pd.isna(row[1]) or pd.isnull(row[1]) or row[1] == '':
+            if pd.isnull(row) or pd.isna(row[1]) or pd.isnull(row[1]) or row[1] == '':
                 continue
 
             # column A is word (required)
-            w_str = row[1]
-            # avoid duplicated word.term
-            created, w = self.get_or_create_word(w_str, cleaned_data)
-            if created:
-                cleaned_data.append(w)
+            word = self.populate_word(row[1])
 
-            # column B is gramcat (required) # TODO several gramcats issue #42
-            g_str = row[2]
-
-            gramcats = []
-            if not g_str:
-                self.errors.append({
-                    "word": w_str,
-                    "column": "B",
-                    "message": "missing gramatical category"
-                })
-            else:
-                for abbr in g_str.split("//"):
-                    abbr = abbr.strip()
-                    try:
-                        gramcats.append(
-                            GramaticalCategory.objects.get(abbreviation=abbr))
-                    except GramaticalCategory.DoesNotExist:
-                        self.errors.append({
-                            "word": w_str,
-                            "column": "B",
-                            "message": "unkown gramatical category '{}'".format(abbr)
-                        })
+            # column B is gramcat (required)
+            gramcats = self.populate_gramcats(word, row[2])
 
             # column C is entry (required)
-            en_str = row[3]
-            en_strs = en_str.split(' // ')
-            for s in en_strs:  # subelement
-                entry = Entry(word=w, translation=s)
-                entry.clean_gramcats = gramcats
-                entry.clean_examples = []
-                w.clean_entries.append(entry)
+            self.populate_entries(word, gramcats, row[3])
 
             # column E is example (optional)
             try:
                 ex_str = row[5]
             except IndexError:
                 continue
-            else:
-                if pd.notnull(ex_str) and ex_str != '':
-                    ex_strs = [x.strip() for x in ex_str.split('//')]
-                    if len(w.clean_entries) < len(ex_strs):
-                        self.errors.append({
-                            "word": w_str,
-                            "column": "E",
-                            "message": "there are more examples '{}' than entries'{}'".format(
-                                len(w.clean_entries), len(ex_strs))
-                        })
-                        continue  # invalid format, don't try to extract it!
-                    for i, value in enumerate(ex_strs):  # subelement
-                        we = w.clean_entries[i]  # word entry
-                        if value:
-                            # TODO could be several examples separated by ';'
-                            we.clean_examples.append(Example(phrase=value))
+            self.populate_examples(word, ex_str)
 
             # column F is verb conjugation
             try:
                 conjugation_str = row[6]
             except IndexError:
                 continue
-            else:
-                # check if word is a verb
-                if conjugation_str and not 'v.' in g_str:
-                    self.errors.append({
-                        "word": w_str,
-                        "column": "F",
-                        "message": "only verbs can have verbal conjugation data",
-                    })
-                    continue
+            self.populate_verbal_conjugation(word, conjugation_str)
 
-                raw_conjugations = [x.strip()
-                                for x in conjugation_str.split('//')]
-
-                # check number of conjugations VS number of entries
-                if len(w.clean_entries) < len(raw_conjugations):
-                    self.errors.append({
-                        "word": w_str,
-                        "column": "F",
-                        "message": "there are more conjugations '{}' than entries'{}'".format(
-                            len(w.clean_entries), len(conjugation_str))
-                    })
-                    continue  # invalid format, don't try to extract it!
-
-                for i, raw_conjugation in enumerate(raw_conjugations):
-                    if raw_conjugation:
-                        try:
-                            validate_column_verb_conjugation(raw_conjugation)
-                        except ValidationError as e:
-                            self.errors.append({
-                                "word": w_str,
-                                "column": "F",
-                                "message": str(e.message),
-                            })
-                        else:
-                            w.clean_entries[i].clean_conjugation = VerbalConjugation(
-                                raw=raw_conjugation)
-
-        return cleaned_data
-
-    def write_to_database(self, cleaned_data):
+    def write_to_database(self):
         # TODO allow to use an existing Lexicon or pass as args the new Lexicon parameters
         lex, _ = Lexicon.objects.get_or_create(
             src_language="es",
@@ -248,7 +262,7 @@ class Command(BaseCommand):
         count_words = 0
         count_entries = 0
         count_examples = 0
-        for word in cleaned_data:
+        for word in self.cleaned_data:
             word.lexicon_id = lex.pk
             word.save()
             count_words += 1
