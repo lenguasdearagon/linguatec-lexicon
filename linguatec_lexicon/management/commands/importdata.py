@@ -72,7 +72,7 @@ class Command(BaseCommand):
         # TODO add arg to print (or not gramcats)
         #gramcats = extract_gramcats(db)
 
-        cleaned_data = self.populate_models(db)
+        self.populate_models(db)
 
         if self.errors:
             self.stdout.write(self.style.ERROR(
@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
         elif not self.dry_run:
             # Write data into the database
-            self.write_to_database(cleaned_data)
+            self.write_to_database()
 
     def read_input_file(self):
         df = pd.DataFrame()
@@ -104,8 +104,8 @@ class Command(BaseCommand):
 
         return df
 
-    def get_or_create_word(self, term, cleaned_data):
-        for word in cleaned_data:
+    def get_or_create_word(self, term):
+        for word in self.cleaned_data:
             if word.term == term:
                 return (False, word)
 
@@ -113,25 +113,27 @@ class Command(BaseCommand):
         new_word.clean_entries = []
         return (True, new_word)
 
+    def populate_word(self, w_str):
+        # avoid duplicated word.term
+        created, word = self.get_or_create_word(w_str)
+        if created:
+            self.cleaned_data.append(word)
+
+        return word
+
     def populate_models(self, db):
         self.errors = []
-        cleaned_data = []
+        self.cleaned_data = []
         for row in db.itertuples(name=None):
             # itertuples by default return the index as the first element of the tuple.
 
             # filter empty rows
-            if pd.isnull(row):
-                continue
             # TODO how to ignore empty rows in an elegant way?
-            if pd.isna(row[1]) or pd.isnull(row[1]) or row[1] == '':
+            if pd.isnull(row) or pd.isna(row[1]) or pd.isnull(row[1]) or row[1] == '':
                 continue
 
             # column A is word (required)
-            w_str = row[1]
-            # avoid duplicated word.term
-            created, w = self.get_or_create_word(w_str, cleaned_data)
-            if created:
-                cleaned_data.append(w)
+            word = self.populate_word(row[1])
 
             # column B is gramcat (required)
             g_str = row[2]
@@ -139,7 +141,7 @@ class Command(BaseCommand):
             gramcats = []
             if not g_str:
                 self.errors.append({
-                    "word": w_str,
+                    "word": word.term,
                     "column": "B",
                     "message": "missing gramatical category"
                 })
@@ -151,7 +153,7 @@ class Command(BaseCommand):
                             GramaticalCategory.objects.get(abbreviation=abbr))
                     except GramaticalCategory.DoesNotExist:
                         self.errors.append({
-                            "word": w_str,
+                            "word": word.term,
                             "column": "B",
                             "message": "unkown gramatical category '{}'".format(abbr)
                         })
@@ -160,10 +162,10 @@ class Command(BaseCommand):
             en_str = row[3]
             en_strs = en_str.split(' // ')
             for s in en_strs:  # subelement
-                entry = Entry(word=w, translation=s)
+                entry = Entry(word=word, translation=s)
                 entry.clean_gramcats = gramcats
                 entry.clean_examples = []
-                w.clean_entries.append(entry)
+                word.clean_entries.append(entry)
 
             # column E is example (optional)
             try:
@@ -173,16 +175,16 @@ class Command(BaseCommand):
             else:
                 if pd.notnull(ex_str) and ex_str != '':
                     ex_strs = [x.strip() for x in ex_str.split('//')]
-                    if len(w.clean_entries) < len(ex_strs):
+                    if len(word.clean_entries) < len(ex_strs):
                         self.errors.append({
-                            "word": w_str,
+                            "word": word.term,
                             "column": "E",
                             "message": "there are more examples '{}' than entries'{}'".format(
-                                len(w.clean_entries), len(ex_strs))
+                                len(word.clean_entries), len(ex_strs))
                         })
                         continue  # invalid format, don't try to extract it!
                     for i, value in enumerate(ex_strs):  # subelement
-                        we = w.clean_entries[i]  # word entry
+                        we = word.clean_entries[i]  # word entry
                         if value:
                             # TODO could be several examples separated by ';'
                             we.clean_examples.append(Example(phrase=value))
@@ -196,7 +198,7 @@ class Command(BaseCommand):
                 # check if word is a verb
                 if conjugation_str and not 'v.' in g_str:
                     self.errors.append({
-                        "word": w_str,
+                        "word": word.term,
                         "column": "F",
                         "message": "only verbs can have verbal conjugation data",
                     })
@@ -206,12 +208,12 @@ class Command(BaseCommand):
                                     for x in conjugation_str.split('//')]
 
                 # check number of conjugations VS number of entries
-                if len(w.clean_entries) < len(raw_conjugations):
+                if len(word.clean_entries) < len(raw_conjugations):
                     self.errors.append({
-                        "word": w_str,
+                        "word": word.term,
                         "column": "F",
                         "message": "there are more conjugations '{}' than entries'{}'".format(
-                            len(w.clean_entries), len(conjugation_str))
+                            len(word.clean_entries), len(conjugation_str))
                     })
                     continue  # invalid format, don't try to extract it!
 
@@ -221,17 +223,16 @@ class Command(BaseCommand):
                             validate_column_verb_conjugation(raw_conjugation)
                         except ValidationError as e:
                             self.errors.append({
-                                "word": w_str,
+                                "word": word.term,
                                 "column": "F",
                                 "message": str(e.message),
                             })
                         else:
-                            w.clean_entries[i].clean_conjugation = VerbalConjugation(
+                            word.clean_entries[i].clean_conjugation = VerbalConjugation(
                                 raw=raw_conjugation)
 
-        return cleaned_data
 
-    def write_to_database(self, cleaned_data):
+    def write_to_database(self):
         # TODO allow to use an existing Lexicon or pass as args the new Lexicon parameters
         lex, _ = Lexicon.objects.get_or_create(
             src_language="es",
@@ -242,7 +243,7 @@ class Command(BaseCommand):
         count_words = 0
         count_entries = 0
         count_examples = 0
-        for word in cleaned_data:
+        for word in self.cleaned_data:
             word.lexicon_id = lex.pk
             word.save()
             count_words += 1
