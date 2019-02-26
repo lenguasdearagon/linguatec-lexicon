@@ -151,6 +151,13 @@ class Command(BaseCommand):
         word.is_verb = is_verb(gramcats)
         return gramcats
 
+    def populate_entries(self, word, gramcats, entries_str):
+        for translation in entries_str.split('//'):
+            entry = Entry(word=word, translation=translation.strip())
+            entry.clean_gramcats = gramcats
+            entry.clean_examples = []
+            word.clean_entries.append(entry)
+
     def populate_models(self, db):
         self.errors = []
         self.cleaned_data = []
@@ -169,13 +176,7 @@ class Command(BaseCommand):
             gramcats = self.populate_gramcats(word, row[2])
 
             # column C is entry (required)
-            en_str = row[3]
-            en_strs = en_str.split(' // ')
-            for s in en_strs:  # subelement
-                entry = Entry(word=word, translation=s)
-                entry.clean_gramcats = gramcats
-                entry.clean_examples = []
-                word.clean_entries.append(entry)
+            self.populate_entries(word, gramcats, row[3])
 
             # column E is example (optional)
             try:
@@ -240,7 +241,6 @@ class Command(BaseCommand):
                         else:
                             word.clean_entries[i].clean_conjugation = VerbalConjugation(
                                 raw=raw_conjugation)
-
 
     def write_to_database(self):
         # TODO allow to use an existing Lexicon or pass as args the new Lexicon parameters
