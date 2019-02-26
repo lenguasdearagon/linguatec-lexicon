@@ -95,8 +95,7 @@ class Command(BaseCommand):
             # we define na_values and keep_default_na because defaults na_values
             # includes empty string. We don't want that pandas replaces empty
             # cells with 'nan'
-            partial = xlsx.parse(sheet, header=None,
-                                 usecols='A:F', skiprows=[0, 1])
+            partial = xlsx.parse(sheet, header=None, usecols='A:F')
             # names=['colA', 'colB', 'colC', 'colD', 'colE', 'colF'])
             df = df.append(partial, ignore_index=True, sort=False)
 
