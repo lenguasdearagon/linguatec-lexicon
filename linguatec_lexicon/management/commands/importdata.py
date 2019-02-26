@@ -43,6 +43,13 @@ def extract_gramcats(db):
     return gramcats
 
 
+def is_verb(gramcats):
+    for gramcat in gramcats:
+        if gramcat.abbreviation.startswith('v.'):
+            return True
+    return False
+
+
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
@@ -121,6 +128,29 @@ class Command(BaseCommand):
 
         return word
 
+    def populate_gramcats(self, word, g_str):
+        gramcats = []
+        if not g_str:
+            self.errors.append({
+                "word": word.term,
+                "column": "B",
+                "message": "missing gramatical category"
+            })
+        else:
+            for abbr in g_str.split("//"):
+                abbr = abbr.strip()
+                try:
+                    gramcats.append(
+                        GramaticalCategory.objects.get(abbreviation=abbr))
+                except GramaticalCategory.DoesNotExist:
+                    self.errors.append({
+                        "word": word.term,
+                        "column": "B",
+                        "message": "unkown gramatical category '{}'".format(abbr)
+                    })
+        word.is_verb = is_verb(gramcats)
+        return gramcats
+
     def populate_models(self, db):
         self.errors = []
         self.cleaned_data = []
@@ -136,27 +166,7 @@ class Command(BaseCommand):
             word = self.populate_word(row[1])
 
             # column B is gramcat (required)
-            g_str = row[2]
-
-            gramcats = []
-            if not g_str:
-                self.errors.append({
-                    "word": word.term,
-                    "column": "B",
-                    "message": "missing gramatical category"
-                })
-            else:
-                for abbr in g_str.split("//"):
-                    abbr = abbr.strip()
-                    try:
-                        gramcats.append(
-                            GramaticalCategory.objects.get(abbreviation=abbr))
-                    except GramaticalCategory.DoesNotExist:
-                        self.errors.append({
-                            "word": word.term,
-                            "column": "B",
-                            "message": "unkown gramatical category '{}'".format(abbr)
-                        })
+            gramcats = self.populate_gramcats(word, row[2])
 
             # column C is entry (required)
             en_str = row[3]
@@ -196,7 +206,7 @@ class Command(BaseCommand):
                 continue
             else:
                 # check if word is a verb
-                if conjugation_str and not 'v.' in g_str:
+                if conjugation_str and not word.is_verb:
                     self.errors.append({
                         "word": word.term,
                         "column": "F",
