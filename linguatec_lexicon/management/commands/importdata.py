@@ -86,7 +86,6 @@ class Command(BaseCommand):
             self.write_to_database(cleaned_data)
 
     def read_input_file(self):
-        # TODO how to force dataframe to have 6 columns!!
         df = pd.DataFrame()
 
         xlsx = pd.ExcelFile(self.input_file)
@@ -102,9 +101,6 @@ class Command(BaseCommand):
         df_obj = df.select_dtypes(['object'])
         df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
         df = df.fillna('')  # replace NaN with blank string
-
-        # TODO change this confusing split
-        #df[1] = df[1].str.split(' y ')
 
         return df
 
@@ -137,7 +133,7 @@ class Command(BaseCommand):
             if created:
                 cleaned_data.append(w)
 
-            # column B is gramcat (required) # TODO several gramcats issue #42
+            # column B is gramcat (required)
             g_str = row[2]
 
             gramcats = []
