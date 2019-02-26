@@ -72,7 +72,7 @@ class Command(BaseCommand):
                 "data for example running manage.py importgramcat."
             )
 
-        self.stdout.write("INFO\tinput file: %s\n" % self.input_file, ending='')
+        self.stdout.write("INFO\tinput file: %s\n" % self.input_file)
 
         db = self.read_input_file()
 
@@ -158,6 +158,27 @@ class Command(BaseCommand):
             entry.clean_examples = []
             word.clean_entries.append(entry)
 
+    def populate_examples(self, word, ex_str):
+        if pd.isnull(ex_str) or ex_str == '':
+            return
+
+        ex_strs = [x.strip() for x in ex_str.split('//')]
+        if len(word.clean_entries) < len(ex_strs):
+            self.errors.append({
+                "word": word.term,
+                "column": "E",
+                "message": "there are more examples '{}' than entries'{}'".format(
+                    len(ex_strs), len(word.clean_entries))
+            })
+            # invalid format, don't try to extract it!
+            return
+
+        for i, value in enumerate(ex_strs):  # subelement
+            we = word.clean_entries[i]  # word entry
+            if value:
+                # TODO could be several examples separated by ';'
+                we.clean_examples.append(Example(phrase=value))
+
     def populate_models(self, db):
         self.errors = []
         self.cleaned_data = []
@@ -183,22 +204,7 @@ class Command(BaseCommand):
                 ex_str = row[5]
             except IndexError:
                 continue
-            else:
-                if pd.notnull(ex_str) and ex_str != '':
-                    ex_strs = [x.strip() for x in ex_str.split('//')]
-                    if len(word.clean_entries) < len(ex_strs):
-                        self.errors.append({
-                            "word": word.term,
-                            "column": "E",
-                            "message": "there are more examples '{}' than entries'{}'".format(
-                                len(word.clean_entries), len(ex_strs))
-                        })
-                        continue  # invalid format, don't try to extract it!
-                    for i, value in enumerate(ex_strs):  # subelement
-                        we = word.clean_entries[i]  # word entry
-                        if value:
-                            # TODO could be several examples separated by ';'
-                            we.clean_examples.append(Example(phrase=value))
+            self.populate_examples(word, ex_str)
 
             # column F is verb conjugation
             try:
