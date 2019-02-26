@@ -9,31 +9,6 @@ from linguatec_lexicon.models import (
 from linguatec_lexicon.validators import validate_column_verb_conjugation
 
 
-def read_input_file(input_file):
-    # TODO how to force dataframe to have 6 columns!!
-    df = pd.DataFrame()
-
-    xlsx = pd.ExcelFile(input_file)
-
-    for sheet in xlsx.sheet_names:
-        # we define na_values and keep_default_na because defaults na_values
-        # includes empty string. We don't want that pandas replaces empty
-        # cells with 'nan'
-        partial = xlsx.parse(sheet, header=None,
-                             usecols='A:F', skiprows=[0, 1])
-        # names=['colA', 'colB', 'colC', 'colD', 'colE', 'colF'])
-        df = df.append(partial, ignore_index=True, sort=False)
-
-    df_obj = df.select_dtypes(['object'])
-    df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
-    df = df.fillna('')  # replace NaN with blank string
-
-    # TODO change this confusing split
-    #df[1] = df[1].str.split(' y ')
-
-    return df
-
-
 def split_data_frame_list(df, target_column):
     # thanks src https://gist.github.com/jlln/338b4b0b55bd6984f883#gistcomment-2676729
     """
@@ -80,7 +55,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.dry_run = options['dry_run']
         self.verbosity = options['verbosity']
-        input_file = options['input_file']
+        self.input_file = options['input_file']
 
         # check that GramaticalCategories are initialized
         if not GramaticalCategory.objects.all().exists():
@@ -90,9 +65,9 @@ class Command(BaseCommand):
                 "data for example running manage.py importgramcat."
             )
 
-        self.stdout.write("INFO\tinput file: %s\n" % input_file, ending='')
+        self.stdout.write("INFO\tinput file: %s\n" % self.input_file, ending='')
 
-        db = read_input_file(input_file)
+        db = self.read_input_file()
 
         # TODO add arg to print (or not gramcats)
         #gramcats = extract_gramcats(db)
@@ -109,6 +84,30 @@ class Command(BaseCommand):
         elif not self.dry_run:
             # Write data into the database
             self.write_to_database(cleaned_data)
+
+    def read_input_file(self):
+        # TODO how to force dataframe to have 6 columns!!
+        df = pd.DataFrame()
+
+        xlsx = pd.ExcelFile(self.input_file)
+
+        for sheet in xlsx.sheet_names:
+            # we define na_values and keep_default_na because defaults na_values
+            # includes empty string. We don't want that pandas replaces empty
+            # cells with 'nan'
+            partial = xlsx.parse(sheet, header=None,
+                                 usecols='A:F', skiprows=[0, 1])
+            # names=['colA', 'colB', 'colC', 'colD', 'colE', 'colF'])
+            df = df.append(partial, ignore_index=True, sort=False)
+
+        df_obj = df.select_dtypes(['object'])
+        df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
+        df = df.fillna('')  # replace NaN with blank string
+
+        # TODO change this confusing split
+        #df[1] = df[1].str.split(' y ')
+
+        return df
 
     def get_or_create_word(self, term, cleaned_data):
         for word in cleaned_data:
@@ -209,7 +208,7 @@ class Command(BaseCommand):
                     continue
 
                 raw_conjugations = [x.strip()
-                                for x in conjugation_str.split('//')]
+                                    for x in conjugation_str.split('//')]
 
                 # check number of conjugations VS number of entries
                 if len(w.clean_entries) < len(raw_conjugations):
