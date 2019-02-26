@@ -179,6 +179,44 @@ class Command(BaseCommand):
                 # TODO could be several examples separated by ';'
                 we.clean_examples.append(Example(phrase=value))
 
+    def populate_verbal_conjugation(self, word, conjugation_str):
+        # check if word is a verb
+        if conjugation_str and not word.is_verb:
+            self.errors.append({
+                "word": word.term,
+                "column": "F",
+                "message": "only verbs can have verbal conjugation data",
+            })
+            return
+
+        raw_conjugations = [x.strip()
+                            for x in conjugation_str.split('//')]
+
+        # check number of conjugations VS number of entries
+        if len(word.clean_entries) < len(raw_conjugations):
+            self.errors.append({
+                "word": word.term,
+                "column": "F",
+                "message": "there are more conjugations '{}' than entries'{}'".format(
+                    len(word.clean_entries), len(conjugation_str))
+            })
+            # invalid format, don't try to extract it!
+            return
+
+        for i, raw_conjugation in enumerate(raw_conjugations):
+            if raw_conjugation:
+                try:
+                    validate_column_verb_conjugation(raw_conjugation)
+                except ValidationError as e:
+                    self.errors.append({
+                        "word": word.term,
+                        "column": "F",
+                        "message": str(e.message),
+                    })
+                else:
+                    word.clean_entries[i].clean_conjugation = VerbalConjugation(
+                        raw=raw_conjugation)
+
     def populate_models(self, db):
         self.errors = []
         self.cleaned_data = []
@@ -211,42 +249,7 @@ class Command(BaseCommand):
                 conjugation_str = row[6]
             except IndexError:
                 continue
-            else:
-                # check if word is a verb
-                if conjugation_str and not word.is_verb:
-                    self.errors.append({
-                        "word": word.term,
-                        "column": "F",
-                        "message": "only verbs can have verbal conjugation data",
-                    })
-                    continue
-
-                raw_conjugations = [x.strip()
-                                    for x in conjugation_str.split('//')]
-
-                # check number of conjugations VS number of entries
-                if len(word.clean_entries) < len(raw_conjugations):
-                    self.errors.append({
-                        "word": word.term,
-                        "column": "F",
-                        "message": "there are more conjugations '{}' than entries'{}'".format(
-                            len(word.clean_entries), len(conjugation_str))
-                    })
-                    continue  # invalid format, don't try to extract it!
-
-                for i, raw_conjugation in enumerate(raw_conjugations):
-                    if raw_conjugation:
-                        try:
-                            validate_column_verb_conjugation(raw_conjugation)
-                        except ValidationError as e:
-                            self.errors.append({
-                                "word": word.term,
-                                "column": "F",
-                                "message": str(e.message),
-                            })
-                        else:
-                            word.clean_entries[i].clean_conjugation = VerbalConjugation(
-                                raw=raw_conjugation)
+            self.populate_verbal_conjugation(word, conjugation_str)
 
     def write_to_database(self):
         # TODO allow to use an existing Lexicon or pass as args the new Lexicon parameters
