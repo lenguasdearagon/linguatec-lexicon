@@ -121,6 +121,20 @@ class ImporterTestCase(TestCase):
         entry = word.entries.get(translation__contains="adubir")
         self.assertIsNotNone(entry.conjugation)
 
+    def test_word_with_partial_verbal_conjugation(self):
+        NUMBER_OF_WORDS = 3
+        NUMBER_OF_CONJUGATIONS = 3
+
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(
+            base_path, 'fixtures/partial-verbal-conjugation.xlsx')
+        call_command('importdata', sample_path, allow_partial=True)
+
+        self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
+        self.assertEqual(NUMBER_OF_CONJUGATIONS,
+                         VerbalConjugation.objects.count())
+
+
 
 class ImportGramCatTestCase(TestCase):
     NUMBER_OF_GRAMCATS = 71
