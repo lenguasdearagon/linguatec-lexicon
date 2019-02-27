@@ -8,11 +8,6 @@ from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
-# TODO move to settings or similar
-logging.basicConfig(format='%(levelname)-8s {%(filename)s:%(lineno)d} [%(funcName)s] %(message)s',
-                    datefmt='%Y-%m-%d:%H:%M:%S',
-                    level=logging.DEBUG)
-
 
 def validate_morfcat(value):
     # TODO reimplement when gramcat are stored in the DB
