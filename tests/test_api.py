@@ -1,5 +1,6 @@
 import unittest
 
+from django.db import connection
 from django.test import TestCase
 
 
@@ -133,6 +134,7 @@ class SearchTestCase(TestCase):
         self.do_and_check_query(query, expected_results)
 
 
+@unittest.skipUnless(connection.vendor == 'postgresql', "requires PostgreSQL backend")
 class NearWordTestCase(TestCase):
     fixtures = ['lexicons.json',
                 'gramcatical-categories.json', 'words-search.json']
