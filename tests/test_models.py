@@ -136,6 +136,19 @@ class VerbalConjugationModelTestCase(TestCase):
         self.assertIn("intro", parsed_conjugation)
         self.assertEqual(v.raw, parsed_conjugation["intro"])
 
+    def test_partial_verbal_conjugation(self):
+        """Related to issue #66"""
+        value = """
+        enzertar (irreg.) conjug. IND. pres. enzierto, enziertas...;
+        SUBJ. pres. enzierte, enziertes…; IMP. enzierta, enzertaz;
+        INF. enzertar; GER. enzertando; PART. enzertato/a.
+        """
+        value = value.replace("\n", "").strip()
+        v = VerbalConjugation(raw=value)
+        parsed_conjugation = v.parse_raw
+        self.assertIn("intro", parsed_conjugation)
+        self.assertEqual(v.raw, parsed_conjugation["intro"])
+
 
 class WordManagerTestCase(TestCase):
     fixtures = ['lexicon-sample.json']
