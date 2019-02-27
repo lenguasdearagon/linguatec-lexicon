@@ -104,12 +104,10 @@ Then enable default site:
 
 The backend is the part of the software that manages and processes the data in the appropriate way to its functioning.
 
-Setup virtual environment setup for backend. It requires an additional package to install: *psycopg*, a python client for postgresql database:
+Setup virtual environment setup for backend:
 
     virtualenv /srv/backend_proj_env
     source /srv/backend_proj_env/bin/activate
-    # python client for postgresql
-    pip3 install psycopg2-binary
 
 Get the source and install its particular dependencies:
 

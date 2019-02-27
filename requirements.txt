@@ -1,6 +1,7 @@
 django
 django-extensions
 djangorestframework
+psycopg2-binary
 
 # importdata
 pandas
