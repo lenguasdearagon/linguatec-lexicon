@@ -1,4 +1,5 @@
 from django.contrib.postgres.search import TrigramSimilarity
+from django.core.exceptions import ValidationError
 from django.db import connection, models
 from django.db.models import Q
 from django.utils.functional import cached_property
@@ -133,15 +134,18 @@ class VerbalConjugation(models.Model):
         parsed = {}
         raw_lowcase = self.raw.lower()
         if self.KEYWORD_MODEL in raw_lowcase:
-            # CASO 1
             beg = raw_lowcase.find(self.KEYWORD_MODEL)
             parsed["model"] = raw_lowcase.split(self.KEYWORD_MODEL)[1].strip()
 
         elif self.KEYWORD_CONJUGATION in raw_lowcase:
-            # CASO 2A
             beg = raw_lowcase.find(self.KEYWORD_CONJUGATION)
-            conjugation = validators.VerbalConjugationValidator()(self.raw)
-            parsed["conjugation"] = conjugation
+            # wordaround to allow partial conjugations see #66
+            try:
+                conjugation = validators.VerbalConjugationValidator()(self.raw)
+            except ValidationError:
+                beg = None
+            else:
+                parsed["conjugation"] = conjugation
 
         parsed["intro"] = self.raw[:beg].strip()
 

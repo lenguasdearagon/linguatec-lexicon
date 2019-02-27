@@ -58,11 +58,16 @@ class Command(BaseCommand):
             '--dry-run', action='store_true', dest='dry_run',
             help="Just validate input file; don't actually import to database.",
         )
+        parser.add_argument(
+            '--allow-partial', action='store_true', dest='allow_partial',
+            help="Allow verbs with partial or unknown format conjugations. USE WITH CAUTION",
+        )
 
     def handle(self, *args, **options):
         self.dry_run = options['dry_run']
         self.verbosity = options['verbosity']
         self.input_file = options['input_file']
+        self.allow_partial = options['allow_partial']
 
         # check that GramaticalCategories are initialized
         if not GramaticalCategory.objects.all().exists():
@@ -208,12 +213,17 @@ class Command(BaseCommand):
                 try:
                     validate_column_verb_conjugation(raw_conjugation)
                 except ValidationError as e:
-                    self.errors.append({
-                        "word": word.term,
-                        "column": "F",
-                        "message": str(e.message),
-                    })
+                    if not self.allow_partial:
+                        self.errors.append({
+                            "word": word.term,
+                            "column": "F",
+                            "message": str(e.message),
+                        })
+                    partial = True
                 else:
+                    partial = False
+                # workaround issue 66 allow partial conjugations (or unformated data)
+                if not partial or partial and self.allow_partial:
                     word.clean_entries[i].clean_conjugation = VerbalConjugation(
                         raw=raw_conjugation)
 
