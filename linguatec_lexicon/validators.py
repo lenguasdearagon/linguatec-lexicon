@@ -9,13 +9,6 @@ from django.utils.translation import gettext_lazy as _
 logger = logging.getLogger(__name__)
 
 
-def validate_morfcat(value):
-    # TODO reimplement when gramcat are stored in the DB
-    from . import settings
-    if value not in settings.GRAMATICAL_CATEGORIES:
-        raise ValidationError(_('Enter a valid value.'))
-
-
 def validate_column_verb_conjugation(value):
     """
     This column should contain full conjugation or refer to other
