@@ -61,3 +61,13 @@ pip install .
 ./runtests.py
 ```
 
+#### tests coverage
+To run tests coverage:
+1. Install coverage package:
+    pip install coverage
+
+2. Run coverage command. **IMPORTANT** tests should be run by a only process, check [coverage docs](https://coverage.readthedocs.io/en/latest/subprocess.html) for more details.
+    coverage run --source linguatec_lexicon runtests.py --settings tests.test_postgres_vm --parallel 1
+    coverage html
+
+3. Visit linguatec-lexicon/htmlcov/index.html with your favourite browser.
