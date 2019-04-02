@@ -70,6 +70,8 @@ class VerbsAPITestCase(TestCase):
         for entry in response['entries']:
             if 'capuzar' in entry['translation']:
                 self.assertIn('model', entry['conjugation'])
+                self.assertIn('model_word_id', entry['conjugation'])
+                self.assertEqual(entry['conjugation']['model_word_id'], 4434)
 
 
 class SearchTestCase(TestCase):

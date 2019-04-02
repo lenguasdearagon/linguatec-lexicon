@@ -12,7 +12,7 @@ class ExampleSerializer(serializers.ModelSerializer):
 class VerbalConjugationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VerbalConjugation
-        fields = ('intro', 'model', 'conjugation')
+        fields = ('intro', 'model', 'model_word', 'model_word_id', 'conjugation')
 
 
 class EntrySerializer(serializers.ModelSerializer):

@@ -26,11 +26,30 @@
         }
     },
     {
+        "model": "linguatec_lexicon.word",
+        "pk": 4434,
+        "fields": {
+            "lexicon": 1,
+            "term": "hallar"
+        }
+    },
+    {
         "model": "linguatec_lexicon.entry",
         "pk": 10,
         "fields": {
             "word": 8,
             "translation": "abarcar",
+            "gramcats": [
+                31
+            ]
+        }
+    },
+    {
+        "model": "linguatec_lexicon.entry",
+        "pk": 11,
+        "fields": {
+            "word": 4434,
+            "translation": "trobar, alcontrar",
             "gramcats": [
                 31
             ]
@@ -119,7 +138,7 @@
         "pk": 90,
         "fields": {
             "entry": 11822,
-            "raw": "Los verbos capuzar y zabucar son regulares de la 1\u00aa conjugaci\u00f3n. modelo. conjug. trobar"
+            "raw": "Los verbos capuzar y zabucar son regulares de la 1\u00aa conjugaci\u00f3n. modelo. conjug. trobar (hallar)"
         }
     }
 ]

@@ -1,15 +1,15 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from linguatec_lexicon.validators import (validate_column_verb_conjugation,
-                                          VerbalConjugationValidator)
+from linguatec_lexicon.validators import (
+    validate_column_verb_conjugation, validate_verb_reference_to_model, VerbalConjugationValidator)
 
 
 class ColumnFValidatorTestCase(TestCase):
     def test_verb_linking_conjugation_model(self):
         value = """
             Los verbos capuzar y zabucar son regulares de la
-            1ª conjugación. modelo. conjug. trobar
+            1ª conjugación. modelo. conjug. trobar (hallar)
             """
         clean_data = validate_column_verb_conjugation(value)
         self.assertIn('model', clean_data)
@@ -28,6 +28,34 @@ class ColumnFValidatorTestCase(TestCase):
             """
         clean_data = validate_column_verb_conjugation(value)
         self.assertIn('conjugation', clean_data)
+
+
+class VerbReferenceToModel(TestCase):
+    def test_valid(self):
+        VALUES = [
+            "trobar (hallar)",
+            "trobar(hallar)",
+            "trobar    (hallar)",
+        ]
+        EXPECTED_RESULT = ('trobar', 'hallar')
+        for value in VALUES:
+            result = validate_verb_reference_to_model(value)
+            self.assertEqual(EXPECTED_RESULT, result)
+
+    def test_error_missing_word(self):
+        value = "trobar"
+        self.assertRaises(ValidationError, validate_verb_reference_to_model, value)
+
+    def test_error_unexpected_format(self):
+        VALUES = [
+            "trobar (hallar",
+            "trobar hallar",
+            "trobar hallar)",
+            "(hallar)",
+        ]
+        for value in VALUES:
+            self.assertRaises(ValidationError, validate_verb_reference_to_model, value)
+
 
 
 class VerbalConjugationValidatorTestCase(TestCase):
