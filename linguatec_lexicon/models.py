@@ -168,3 +168,13 @@ class VerbalConjugation(models.Model):
     @property
     def model_word(self):
         return self.parse_raw.get('model_word', None)
+
+    @property
+    def model_word_id(self):
+        if self.model_word is None:
+            return None
+        try:
+            return Word.objects.get(term=self.model_word).pk
+        except Word.DoesNotExist:
+            # TODO log this error to detect database inconsistency
+            return None
