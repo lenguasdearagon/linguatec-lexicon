@@ -125,7 +125,7 @@ class VerbalConjugationModelTestCase(TestCase):
         self.assertIn("trobar", parsed_conjugation["model"])
 
     def test_extract_verbal_model_2(self):
-        v = VerbalConjugation(raw='atrebuyir (modelo. conjug. muyir)')
+        v = VerbalConjugation(raw='atrebuyir modelo. conjug. muyir (ordeñar)')
         parsed_conjugation = v.parse_raw
         self.assertIn("model", parsed_conjugation)
         self.assertIn("muyir", parsed_conjugation["model"])

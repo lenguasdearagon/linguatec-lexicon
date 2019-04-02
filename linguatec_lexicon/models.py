@@ -135,7 +135,9 @@ class VerbalConjugation(models.Model):
         raw_lowcase = self.raw.lower()
         if self.KEYWORD_MODEL in raw_lowcase:
             beg = raw_lowcase.find(self.KEYWORD_MODEL)
-            parsed["model"] = raw_lowcase.split(self.KEYWORD_MODEL)[1].strip()
+            model_raw = raw_lowcase.split(self.KEYWORD_MODEL)[1].strip()
+            model_parsed = validators.validate_verb_reference_to_model(model_raw)
+            parsed["model"], parsed["model_word"] = model_parsed
 
         elif self.KEYWORD_CONJUGATION in raw_lowcase:
             beg = raw_lowcase.find(self.KEYWORD_CONJUGATION)
@@ -162,3 +164,7 @@ class VerbalConjugation(models.Model):
     @property
     def model(self):
         return self.parse_raw.get('model', None)
+
+    @property
+    def model_word(self):
+        return self.parse_raw.get('model_word', None)
