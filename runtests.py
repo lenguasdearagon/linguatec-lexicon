@@ -40,7 +40,8 @@ SUBDIRS_TO_SKIP = [
 ]
 
 ALWAYS_INSTALLED_APPS = [
-    'django.contrib.admin',
+    # 'django.contrib.admin',
+    # 'django.contrib.messages',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
