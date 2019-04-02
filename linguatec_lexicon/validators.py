@@ -1,7 +1,9 @@
 import logging
+import re
 import string
 
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 
@@ -20,12 +22,12 @@ def validate_column_verb_conjugation(value):
     value_lowered = value.lower()
 
     if VerbalConjugation.KEYWORD_MODEL in value_lowered:
-        model = value_lowered.split(
+        model_raw = value_lowered.split(
             VerbalConjugation.KEYWORD_CONJUGATION)[1].strip()
-        if len(model.split()) > 1:
-            raise ValidationError(
-                _('Expected only one word (verb) as {}'.format(VerbalConjugation.KEYWORD_MODEL)))
+
+        model, model_word = validate_verb_reference_to_model(model_raw)
         cleaned_data['model'] = model
+        cleaned_data['model_word'] = model_word
 
     elif VerbalConjugation.KEYWORD_CONJUGATION in value_lowered:
         cleaned_data['conjugation'] = VerbalConjugationValidator()(value)
@@ -34,6 +36,20 @@ def validate_column_verb_conjugation(value):
                                 'conjugation or link to another verb as model.'))
 
     return cleaned_data
+
+
+def validate_verb_reference_to_model(value):
+    from linguatec_lexicon.models import VerbalConjugation
+
+    REGEX = r'^(\w+)\s*\((\w+)\)$'
+    RegexValidator(
+        regex=REGEX,
+        message='Expected format as {} is "verb (word)" e.g. "trobar (hallar)"'.format(VerbalConjugation.KEYWORD_MODEL)
+    )(value)
+
+    match = re.match(REGEX, value)
+
+    return match.group(1, 2)
 
 
 @deconstructible
