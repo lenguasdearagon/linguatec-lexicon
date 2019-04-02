@@ -130,10 +130,10 @@ class VerbalConjugationValidator:
         tense_idx = mood_tenses.index(tense)
         next_tense = mood_tenses[tense_idx +
                                  1] if tense_idx + 1 < len(mood_tenses) else None
-        beg = value.find(tense)
-        end = value.find(next_tense) if next_tense is not None else None
+        beg = value.find(tense) + len(tense)
+        end = value.find(next_tense, beg) if next_tense is not None else None
 
-        return value[beg:end].lstrip(tense).strip().rstrip(';')
+        return value[beg:end].strip().rstrip(';')
 
     def extract_conjugation(self, value):
         stuff_chars = string.punctuation + string.whitespace

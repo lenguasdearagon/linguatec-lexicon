@@ -29,6 +29,59 @@ class ColumnFValidatorTestCase(TestCase):
         clean_data = validate_column_verb_conjugation(value)
         self.assertIn('conjugation', clean_data)
 
+    def test_verb_conjugation_model2(self):
+        value = """
+            Verbo irregular. conjug. IND. pres. tiengo, tiens/tienes, tiene/tien,
+            tenemos, tenez, tienen; pret. imp. teneba, tenebas, teneba, tenébanos,
+            tenébaz, teneban; pret. indef. tenié/tuve, teniés/tuves, tenió/tuvo,
+            teniemos /túvenos, teniez/túvez, tenioron/tuvon; fut. tendré, tendrás,
+            tendrá, tendremos, tendrez, tendrán; cond. tenerba, tenerbas, tenerba,
+            tenérbanos, tenérbaz, tenerban; SUBJ. pres. tienga, tiengas, tienga,
+            tiengamos/tengamos, tiengaz / tengaz, tiengan; pret. imp. tenese,
+            teneses, tenese, tenésenos, tenésez, tenesen; IMP. tiene, tenez; INF.
+            tener; GER. tenendo; PART. tenito/a.
+        """
+        EXPECTED_RESULT = {
+            'conjugation': {
+                'IND.': {
+                    'pres.': ['tiengo', 'tiens/tienes', 'tiene/tien', 'tenemos', 'tenez', 'tienen'],
+                    'pret. imp.': ['teneba', 'tenebas', 'teneba', 'tenébanos', 'tenébaz', 'teneban'],
+                    'pret. indef.': ['tenié/tuve', 'teniés/tuves', 'tenió/tuvo', 'teniemos /túvenos', 'teniez/túvez', 'tenioron/tuvon'],
+                    'fut.': ['tendré', 'tendrás', 'tendrá', 'tendremos', 'tendrez', 'tendrán'],
+                    'cond.': ['tenerba', 'tenerbas', 'tenerba', 'tenérbanos', 'tenérbaz', 'tenerban']
+                },
+                'SUBJ.': {
+                    'pres.': ['tienga', 'tiengas', 'tienga', 'tiengamos/tengamos', 'tiengaz / tengaz', 'tiengan'],
+                    'pret. imp.': ['tenese', 'teneses', 'tenese', 'tenésenos', 'tenésez', 'tenesen']
+                },
+                'IMP.': {'': ['tiene', 'tenez']},
+                'INF.': {'': ['tener']},
+                'GER.': {'': ['tenendo']},
+                'PART.': {'': ['tenito/a']}
+            }
+        }
+        clean_data = validate_column_verb_conjugation(value)
+        self.assertIn('conjugation', clean_data)
+        self.assertDictEqual(clean_data, EXPECTED_RESULT)
+
+    def test_extract_tense(self):
+        from linguatec_lexicon import validators
+        conjugation_validator = validators.VerbalConjugationValidator()
+        value = """
+        IND. pres. tiengo, tiens/tienes, tiene/tien,
+            tenemos, tenez, tienen; pret. imp. teneba, tenebas, teneba, tenébanos,
+            tenébaz, teneban; pret. indef. tenié/tuve, teniés/tuves, tenió/tuvo,
+            teniemos /túvenos, teniez/túvez, tenioron/tuvon; fut. tendré, tendrás,
+            tendrá, tendremos, tendrez, tendrán; cond. tenerba, tenerbas, tenerba,
+            tenérbanos, tenérbaz, tenerban;
+        """
+        EXPECTED_RESULT = ["teneba", "tenebas", "teneba", "tenébanos", "tenébaz", "teneban"]
+        mood = conjugation_validator.INDICATIVE
+        tense = conjugation_validator.PAST_IMPERFECT
+        tense_content = conjugation_validator.extract_tense(value, mood, tense)
+        result = conjugation_validator.extract_conjugation(tense_content)
+        self.assertEqual(result, EXPECTED_RESULT)
+
 
 class VerbReferenceToModel(TestCase):
     def test_valid(self):
@@ -55,7 +108,6 @@ class VerbReferenceToModel(TestCase):
         ]
         for value in VALUES:
             self.assertRaises(ValidationError, validate_verb_reference_to_model, value)
-
 
 
 class VerbalConjugationValidatorTestCase(TestCase):
