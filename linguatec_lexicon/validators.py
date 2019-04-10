@@ -23,7 +23,7 @@ def validate_column_verb_conjugation(value):
 
     if VerbalConjugation.KEYWORD_MODEL in value_lowered:
         model_raw = value_lowered.split(
-            VerbalConjugation.KEYWORD_CONJUGATION)[1].strip()
+            VerbalConjugation.KEYWORD_MODEL)[1].strip()
 
         model, model_word = validate_verb_reference_to_model(model_raw)
         cleaned_data['model'] = model
