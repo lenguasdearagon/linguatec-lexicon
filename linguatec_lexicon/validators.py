@@ -40,8 +40,7 @@ def validate_column_verb_conjugation(value):
 
 def validate_verb_reference_to_model(value):
     from linguatec_lexicon.models import VerbalConjugation
-
-    REGEX = r'^(\w+)\s*\((\w+)\)$'
+    REGEX = r'^(\w+)\s*\((\w+( \w+)?)\)$'
     RegexValidator(
         regex=REGEX,
         message='Expected format as {} is "verb (word)" e.g. "trobar (hallar)"'.format(VerbalConjugation.KEYWORD_MODEL)
