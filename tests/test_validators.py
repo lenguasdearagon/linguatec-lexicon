@@ -65,8 +65,7 @@ class ColumnFValidatorTestCase(TestCase):
         self.assertDictEqual(clean_data, EXPECTED_RESULT)
 
     def test_extract_tense(self):
-        from linguatec_lexicon import validators
-        conjugation_validator = validators.VerbalConjugationValidator()
+        conjugation_validator = VerbalConjugationValidator()
         value = """
         IND. pres. tiengo, tiens/tienes, tiene/tien,
             tenemos, tenez, tienen; pret. imp. teneba, tenebas, teneba, tenébanos,
@@ -81,6 +80,28 @@ class ColumnFValidatorTestCase(TestCase):
         tense_content = conjugation_validator.extract_tense(value, mood, tense)
         result = conjugation_validator.extract_conjugation(tense_content)
         self.assertEqual(result, EXPECTED_RESULT)
+
+    def test_mood_and_tenses_keep_order(self):
+        value = """
+            conjug. IND. pres. tiengo, tiens/tienes, tiene/tien,
+            tenemos, tenez, tienen; pret. imp. teneba, tenebas, teneba, tenébanos,
+            tenébaz, teneban; pret. indef. tenié/tuve, teniés/tuves, tenió/tuvo,
+            teniemos /túvenos, teniez/túvez, tenioron/tuvon; fut. tendré, tendrás,
+            tendrá, tendremos, tendrez, tendrán; cond. tenerba, tenerbas, tenerba,
+            tenérbanos, tenérbaz, tenerban; SUBJ. pres. tienga, tiengas, tienga,
+            tiengamos/tengamos, tiengaz / tengaz, tiengan; pret. imp. tenese,
+            teneses, tenese, tenésenos, tenésez, tenesen; IMP. tiene, tenez; INF.
+            tener; GER. tenendo; PART. tenito/a.
+        """
+        conjugation_validator = VerbalConjugationValidator()
+
+        clean_data = validate_column_verb_conjugation(value)
+        conjugation = clean_data["conjugation"]
+        self.assertEqual(list(conjugation.keys()), conjugation_validator.MOODS)
+
+        for mood in conjugation_validator.MOODS:
+            tenses = conjugation[mood]
+            self.assertEqual(list(tenses.keys()), conjugation_validator.MOOD_TENSES[mood])
 
 
 class VerbReferenceToModel(TestCase):
@@ -108,6 +129,25 @@ class VerbReferenceToModel(TestCase):
         ]
         for value in VALUES:
             self.assertRaises(ValidationError, validate_verb_reference_to_model, value)
+
+    def test_bug_both_keywords(self):
+        value = """
+        acazegar (irregular) conjug.
+        IND. pres. acaziego, acaziegas, acaziega, acazegamos, acazegaz, acaziegan;
+        SUBJ. pres. acaziegue, acaziegues, acaziegue, acazeguemos, acazeguez, acazieguen;
+        IMP. acaziega, acazegaz; INF. acazegar; GER. acazegando;
+        PART. acazegato/a-acazegau/acazegada.
+        El resto de los tiempos es regular. modelo. conjug. trobar (encontrar)
+        """
+        clean_data = validate_column_verb_conjugation(value)
+        self.assertIn('model', clean_data)
+        self.assertIn('model_word', clean_data)
+
+    def test_valid_reference_with_multiple_words(self):
+        value = "modelo. conjug. caler (ser necesario)"
+        clean_data = validate_column_verb_conjugation(value)
+        self.assertIn('model', clean_data)
+        self.assertIn('model_word', clean_data)
 
 
 class VerbalConjugationValidatorTestCase(TestCase):

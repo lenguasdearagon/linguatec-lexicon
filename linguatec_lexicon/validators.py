@@ -1,3 +1,4 @@
+import collections
 import logging
 import re
 import string
@@ -23,7 +24,7 @@ def validate_column_verb_conjugation(value):
 
     if VerbalConjugation.KEYWORD_MODEL in value_lowered:
         model_raw = value_lowered.split(
-            VerbalConjugation.KEYWORD_CONJUGATION)[1].strip()
+            VerbalConjugation.KEYWORD_MODEL)[1].strip()
 
         model, model_word = validate_verb_reference_to_model(model_raw)
         cleaned_data['model'] = model
@@ -40,8 +41,7 @@ def validate_column_verb_conjugation(value):
 
 def validate_verb_reference_to_model(value):
     from linguatec_lexicon.models import VerbalConjugation
-
-    REGEX = r'^(\w+)\s*\((\w+)\)$'
+    REGEX = r'^(\w+)\s*\((\w+( \w+)?)\)$'
     RegexValidator(
         regex=REGEX,
         message='Expected format as {} is "verb (word)" e.g. "trobar (hallar)"'.format(VerbalConjugation.KEYWORD_MODEL)
@@ -102,9 +102,10 @@ class VerbalConjugationValidator:
                 raise ValidationError(_('Verbal mood %s not found.') % mood)
 
         # Validate that conjugations are complete
-        cleaned_data = {}
+        # TODO check that order is kept when serialized as JSON
+        cleaned_data = collections.OrderedDict()
         for mood in self.MOODS:
-            current_mood = {}
+            current_mood = collections.OrderedDict()
             mood_value = self.extract_mood(value, mood)
             for tense in self.MOOD_TENSES[mood]:
                 count = self.MOOD_NUMBER_OF_CONJUGATIONS[mood]
