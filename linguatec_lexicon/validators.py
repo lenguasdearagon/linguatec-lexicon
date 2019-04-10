@@ -102,7 +102,7 @@ class VerbalConjugationValidator:
                 raise ValidationError(_('Verbal mood %s not found.') % mood)
 
         # Validate that conjugations are complete
-        # TODO check that order is kept when serialized as JSON
+        # use OrderedDict to keep order (even when serialized as JSON)
         cleaned_data = collections.OrderedDict()
         for mood in self.MOODS:
             current_mood = collections.OrderedDict()
