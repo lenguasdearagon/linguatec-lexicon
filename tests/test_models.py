@@ -1,6 +1,8 @@
 import os
+import unittest
 
 from django.core.management import call_command
+from django.db import connection
 from django.test import TestCase
 
 from linguatec_lexicon.models import (
@@ -164,3 +166,13 @@ class WordManagerTestCase(TestCase):
     def test_search_null_query(self):
         result = Word.objects.search(None)
         self.assertEqual(0, result.count())
+
+    @unittest.skipUnless(connection.vendor == 'postgresql', "requires PostgreSQL backend")
+    def test_search_sorted(self):
+        Word.objects.bulk_create([
+            Word(lexicon_id=1, term="hacer acopio"),
+            Word(lexicon_id=1, term="hacer camino"),
+            Word(lexicon_id=1, term="hacer"),
+        ])
+        result = Word.objects.search("hacer")
+        self.assertEqual(result[0].term, "hacer")

@@ -33,20 +33,26 @@ class Lexicon(models.Model):
 
 class WordManager(models.Manager):
     def search(self, query):
+        MIN_SIMILARITY = 0.3
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
             iregex=r"\b{0}\b"
+            return self.filter(term__iregex=iregex.format(query))
         else:
             filter_query = (
                 Q(term=query) |
                 Q(term__startswith=query) |
                 Q(term__endswith=query)
             )
-            qs = self.filter(filter_query)
-            return qs
+            return self.filter(filter_query)
 
-        qs = self.filter(term__iregex=iregex.format(query))
+
+        # sort results by trigram similarity
+        qs = self.filter(
+                term__iregex=iregex.format(query)
+            ).annotate(similarity=TrigramSimilarity('term', query)
+            ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
         return qs
 
     def search_near(self, query):
