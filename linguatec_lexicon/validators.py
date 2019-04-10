@@ -1,3 +1,4 @@
+import collections
 import logging
 import re
 import string
@@ -101,9 +102,10 @@ class VerbalConjugationValidator:
                 raise ValidationError(_('Verbal mood %s not found.') % mood)
 
         # Validate that conjugations are complete
-        cleaned_data = {}
+        # TODO check that order is kept when serialized as JSON
+        cleaned_data = collections.OrderedDict()
         for mood in self.MOODS:
-            current_mood = {}
+            current_mood = collections.OrderedDict()
             mood_value = self.extract_mood(value, mood)
             for tense in self.MOOD_TENSES[mood]:
                 count = self.MOOD_NUMBER_OF_CONJUGATIONS[mood]
