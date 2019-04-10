@@ -45,7 +45,8 @@ def extract_gramcats(db):
 
 def is_verb(gramcats):
     for gramcat in gramcats:
-        if gramcat.abbreviation.startswith('v.'):
+        if (gramcat.abbreviation.startswith('v.')
+                or gramcat.abbreviation in ['expr.', 'per. vl.']):
             return True
     return False
 
