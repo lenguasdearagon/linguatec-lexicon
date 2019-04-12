@@ -98,6 +98,7 @@ class Entry(models.Model):
     translation = models.TextField()
 
     class Meta:
+        ordering = ['pk']
         verbose_name_plural = "entries"
 
     def __str__(self):
