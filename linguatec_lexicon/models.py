@@ -84,7 +84,7 @@ class Word(models.Model):
         return self.term
 
     def gramcats(self):
-        return self.entries.values_list('gramcats__abbreviation', flat=True).distinct()
+        return set(self.entries.values_list('gramcats__abbreviation', flat=True))
 
 
 class Entry(models.Model):
