@@ -15,13 +15,20 @@ class VerbalConjugationSerializer(serializers.ModelSerializer):
         fields = ('intro', 'model', 'model_word', 'model_word_id', 'conjugation')
 
 
+class GramaticalCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GramaticalCategory
+        fields = ('abbreviation', 'title')
+
+
 class EntrySerializer(serializers.ModelSerializer):
+    gramcats = GramaticalCategorySerializer(many=True, read_only=True)
     examples = ExampleSerializer(many=True, read_only=True)
     conjugation = VerbalConjugationSerializer()
 
     class Meta:
         model = Entry
-        fields = ('translation', 'examples', 'conjugation')
+        fields = ('gramcats', 'translation', 'examples', 'conjugation')
 
 
 class WordSerializer(serializers.ModelSerializer):
@@ -37,9 +44,3 @@ class WordNearSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
         fields = ('url', 'id', 'term')
-
-
-class GramaticalCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GramaticalCategory
-        fields = ('abbreviation', 'title')
