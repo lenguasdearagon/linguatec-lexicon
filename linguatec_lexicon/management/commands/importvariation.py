@@ -22,7 +22,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.input_file = options['input_file']
-        self.variation = options['variation']
         self.verbosity = options['verbosity']
 
         # validate input_file
@@ -32,7 +31,7 @@ class Command(BaseCommand):
 
         # validate variation
         try:
-            variation = DiatopicVariation.objects.get(name=self.variation)
+            self.variation = DiatopicVariation.objects.get(name=options['variation'])
         except DiatopicVariation.DoesNotExist:
             raise CommandError('Diatopic variation "{}" does not exist'.format(self.variation))
 
@@ -47,7 +46,6 @@ class Command(BaseCommand):
 
         self.xlsx = pd.read_excel(self.input_file, header=None, names=['term', 'gramcats', 'translations'])
         self.populate_models()
-
 
         if self.errors:
             self.stdout.write(self.style.ERROR(
@@ -65,14 +63,24 @@ class Command(BaseCommand):
         self.cleaned_data = []
 
         for row in self.xlsx.itertuples():
-            print(row.term, row.gramcats, row.translations)
-
             word = self.retrieve_word(row.term)
-            gramcats = self.retrieve_gramcats(word, row.gramcats)
-            # self.populate_entries(word, gramcats, row[3])
+            if word is None:
+                continue
 
+            gramcats = self.retrieve_gramcats(word, row.gramcats)
+            self.populate_entries(word, gramcats, row.translations)
+            self.cleaned_data.append(word)
+
+            # TODO REMOVE XXX
             if(row[0] == 10):
-                break
+                    break
+
+    def populate_entries(self, word, gramcats, translations_raw):
+        word.clean_entries = []
+        for translation in translations_raw.split('//'):
+            entry = Entry(word=word, translation=translation.strip(), variation=self.variation)
+            entry.clean_gramcats = gramcats
+            word.clean_entries.append(entry)
 
     def retrieve_gramcats(self, word, gramcats_raw):
         gramcats = []
