@@ -47,7 +47,6 @@ class WordManager(models.Manager):
             )
             return self.filter(filter_query)
 
-
         # sort results by trigram similarity
         qs = self.filter(
                 term__iregex=iregex.format(query)
@@ -87,6 +86,16 @@ class Word(models.Model):
         return set(self.entries.values_list('gramcats__abbreviation', flat=True))
 
 
+class Region(models.Model):
+    name = models.CharField(unique=True, max_length=64)
+
+
+class DiatopicVariation(models.Model):
+    name = models.CharField(unique=True, max_length=64)
+    abbreviation = models.CharField(unique=True, max_length=64)
+    region = models.ForeignKey('Region', on_delete=models.CASCADE, related_name='variations')
+
+
 class Entry(models.Model):
     """
     The Entry class represents each translation (written in the
@@ -95,6 +104,7 @@ class Entry(models.Model):
     """
     word = models.ForeignKey('Word', on_delete=models.CASCADE, related_name="entries")
     gramcats = models.ManyToManyField('GramaticalCategory', related_name="entries")
+    variation = models.ForeignKey('DiatopicVariation', null=True, on_delete=models.CASCADE, related_name="entries")
     translation = models.TextField()
 
     class Meta:
