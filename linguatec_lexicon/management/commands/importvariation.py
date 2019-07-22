@@ -41,7 +41,7 @@ class Command(BaseCommand):
                 name=options['variation'])
         except DiatopicVariation.DoesNotExist:
             raise CommandError(
-                'Diatopic variation "{}" does not exist'.format(self.variation))
+                'Diatopic variation "{}" does not exist'.format(options['variation']))
 
         # check that GramaticalCategories are initialized
         if not GramaticalCategory.objects.all().exists():
@@ -72,7 +72,7 @@ class Command(BaseCommand):
         self.cleaned_data = []
 
         for row in self.xlsx.itertuples():
-            word = self.retrieve_word(row.term)
+            word = self.retrieve_word(row.count, row.term)
             if word is None:
                 continue
 
@@ -82,7 +82,19 @@ class Command(BaseCommand):
 
     def populate_entries(self, word, gramcats, translations_raw):
         word.clean_entries = []
-        for translation in translations_raw.split('//'):
+
+        try:
+            translations_list = translations_raw.split('//')
+        except AttributeError:
+            # e.g. empty cell is translated as float(nan)
+            self.errors.append({
+                "word": word.term,
+                "column": "C",
+                "message": 'Word "{}" contains empty or invalid translations.'.format(word.term)
+            })
+            return
+
+        for translation in translations_list:
             entry = Entry(word=word, translation=translation.strip(),
                           variation=self.variation)
             entry.clean_gramcats = gramcats
@@ -111,8 +123,17 @@ class Command(BaseCommand):
 
         return gramcats
 
-    def retrieve_word(self, term_raw):
-        term = term_raw.strip()
+    def retrieve_word(self, row_number, term_raw):
+        try:
+            term = term_raw.strip()
+        except AttributeError:
+            # e.g. empty cell is translated as float(nan)
+            self.errors.append({
+                "word": term_raw,
+                "column": "A",
+                "message": 'Row {} with empty or invalid value on column A.'.format(row_number)
+            })
+            return None
         try:
             return Word.objects.get(term=term)
         except Word.DoesNotExist:
@@ -126,7 +147,6 @@ class Command(BaseCommand):
         count_entries = 0
         for word in self.cleaned_data:
             for entry in word.clean_entries:
-                entry.word_id = word.pk
                 entry.save()
                 entry.gramcats.set(entry.clean_gramcats)
                 count_entries += 1
