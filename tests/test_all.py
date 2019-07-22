@@ -137,7 +137,7 @@ class ImporterTestCase(TestCase):
 
 
 class ImportGramCatTestCase(TestCase):
-    NUMBER_OF_GRAMCATS = 71
+    NUMBER_OF_GRAMCATS = 72
 
     def test_import(self):
         base_path = os.path.dirname(os.path.abspath(__file__))
