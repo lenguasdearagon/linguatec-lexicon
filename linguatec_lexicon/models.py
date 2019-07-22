@@ -89,11 +89,17 @@ class Word(models.Model):
 class Region(models.Model):
     name = models.CharField(unique=True, max_length=64)
 
+    def __str__(self):
+        return self.name
+
 
 class DiatopicVariation(models.Model):
     name = models.CharField(unique=True, max_length=64)
     abbreviation = models.CharField(unique=True, max_length=64)
     region = models.ForeignKey('Region', on_delete=models.CASCADE, related_name='variations')
+
+    def __str__(self):
+        return "{} ({})".format(self.name, self.region)
 
 
 class Entry(models.Model):
