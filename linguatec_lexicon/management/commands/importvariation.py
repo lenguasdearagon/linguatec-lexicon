@@ -72,7 +72,7 @@ class Command(BaseCommand):
         self.cleaned_data = []
 
         for row in self.xlsx.itertuples():
-            word = self.retrieve_word(row.count, row.term)
+            word = self.retrieve_word(row.Index + 1, row.term)
             if word is None:
                 continue
 
@@ -132,7 +132,7 @@ class Command(BaseCommand):
             self.errors.append({
                 "word": term_raw,
                 "column": "A",
-                "message": 'Row {} with empty or invalid value on column A.'.format(row_number)
+                "message": 'Empty or invalid value at row {}.'.format(row_number)
             })
             return None
         try:

@@ -194,3 +194,16 @@ class ImportVariationTestCase(TestCase):
         qs = Entry.objects.filter(variation__isnull=False).values(
             'word__id').order_by('word__id').distinct('word__id')
         self.assertEqual(self.NUMBER_OF_ENTRIES, qs.count())
+
+    def test_import_invalid_empty_row(self):
+        out = StringIO()
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(
+            base_path, 'fixtures/variation-empty-row.xlsx')
+        call_command('importvariation', sample_path,
+                     variation='benasqués', verbosity=3, stdout=out)
+
+        qs = Entry.objects.filter(variation__isnull=False).values(
+            'word__id').order_by('word__id').distinct('word__id')
+        self.assertEqual(0, qs.count())
+        self.assertIn('error', out.getvalue())
