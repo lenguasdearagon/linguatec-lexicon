@@ -114,7 +114,11 @@ class Entry(models.Model):
     translation = models.TextField()
 
     class Meta:
-        ordering = ['pk']
+        # TODO instead of depend on 'pk' find another method to
+        # guarante that the entries are sorted by relevancy.
+        # E.g. creating a positive integer field that stores their
+        # order in the imported Excel.
+        ordering = ['variation', 'pk']
         verbose_name_plural = "entries"
 
     def __str__(self):
