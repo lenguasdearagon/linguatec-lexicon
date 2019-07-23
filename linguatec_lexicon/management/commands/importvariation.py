@@ -124,6 +124,7 @@ class Command(BaseCommand):
         return gramcats
 
     def retrieve_word(self, row_number, term_raw):
+        # 1) exact match
         try:
             term = term_raw.strip()
         except AttributeError:
@@ -137,11 +138,28 @@ class Command(BaseCommand):
         try:
             return Word.objects.get(term=term)
         except Word.DoesNotExist:
+            pass
+
+        # 2) handle cases where only masculine form has been included
+        # instead of both. e.g. delicado --> delicado/a
+        try:
+            return Word.objects.get(term=term + "/a")
+        except Word.DoesNotExist:
+            # 3) trigam similarity (only as suggestion)
+            message = 'Word "{}" not found in the database.'.format(term)
+            suggestions = None
+            qs = Word.objects.search(term)[:4]
+            if qs.exists():
+                suggestions = ', '.join(qs.values_list('term', flat=True))
+                message += ' Did you mean: {}?'.format(suggestions)
+
             self.errors.append({
                 "word": term,
                 "column": "A",
-                "message": 'Word "{}" not found in the database.'.format(term)
+                "message": message,
+                "suggestions": suggestions
             })
+
 
     def write_to_database(self):
         count_entries = 0
