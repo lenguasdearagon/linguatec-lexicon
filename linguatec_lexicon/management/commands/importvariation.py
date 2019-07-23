@@ -61,9 +61,10 @@ class Command(BaseCommand):
             if self.verbosity >= 2:
                 for error in self.errors:
                     self.stdout.write(self.style.ERROR(json.dumps(error)))
-        elif not self.dry_run:
-            # Write data into the database
-            self.write_to_database()
+        else:
+            if not self.dry_run:
+                # Write data into the database
+                self.write_to_database()
             self.stdout.write(self.style.SUCCESS(
                 'Successfully imported file "{}" of diatopic variation "{}"'.format(self.input_file, self.variation)))
 
