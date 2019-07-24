@@ -58,7 +58,7 @@ class Command(BaseCommand):
         if self.errors:
             self.stdout.write(self.style.ERROR(
                 "Detected {} errors!".format(len(self.errors))))
-            if self.verbosity >= 2:
+            if self.verbosity > 2:
                 for error in self.errors:
                     self.stdout.write(self.style.ERROR(json.dumps(error)))
         else:
@@ -67,6 +67,15 @@ class Command(BaseCommand):
                 self.write_to_database()
             self.stdout.write(self.style.SUCCESS(
                 'Successfully imported file "{}" of diatopic variation "{}"'.format(self.input_file, self.variation)))
+
+        if self.verbosity > 1:
+            self.stdout.write(
+                "Excel stats: {} rows | {} valid rows | {} invalid rows".format(
+                    len(self.xlsx.index),
+                    len(self.cleaned_data),
+                    len(self.errors),
+                )
+            )
 
     def populate_models(self):
         self.errors = []
@@ -77,8 +86,12 @@ class Command(BaseCommand):
             if word is None:
                 continue
 
-            gramcats = self.retrieve_gramcats(word, row.gramcats)
-            self.populate_entries(word, gramcats, row.translations)
+            try:
+                gramcats = self.retrieve_gramcats(word, row.gramcats)
+                self.populate_entries(word, gramcats, row.translations)
+            except:
+                continue
+
             self.cleaned_data.append(word)
 
     def populate_entries(self, word, gramcats, translations_raw):
@@ -86,14 +99,14 @@ class Command(BaseCommand):
 
         try:
             translations_list = translations_raw.split('//')
-        except AttributeError:
+        except AttributeError as e:
             # e.g. empty cell is translated as float(nan)
             self.errors.append({
                 "word": word.term,
                 "column": "C",
                 "message": 'Word "{}" contains empty or invalid translations.'.format(word.term)
             })
-            return
+            raise ValueError(e)
 
         for translation in translations_list:
             entry = Entry(word=word, translation=translation.strip(),
@@ -104,23 +117,27 @@ class Command(BaseCommand):
     def retrieve_gramcats(self, word, gramcats_raw):
         gramcats = []
         if not gramcats_raw:
+            message = "missing gramatical category"
             self.errors.append({
                 "word": word.term,
                 "column": "B",
-                "message": "missing gramatical category"
+                "message": message
             })
-        else:
-            for abbr in gramcats_raw.split("//"):
-                abbr = abbr.strip()
-                try:
-                    gramcats.append(
-                        GramaticalCategory.objects.get(abbreviation=abbr))
-                except GramaticalCategory.DoesNotExist:
-                    self.errors.append({
-                        "word": word.term,
-                        "column": "B",
-                        "message": "unkown gramatical category '{}'".format(abbr)
-                    })
+            raise ValueError(message)
+
+        for abbr in gramcats_raw.split("//"):
+            abbr = abbr.strip()
+            try:
+                gramcats.append(
+                    GramaticalCategory.objects.get(abbreviation=abbr))
+            except GramaticalCategory.DoesNotExist:
+                message = "unkown gramatical category '{}'".format(abbr)
+                self.errors.append({
+                    "word": word.term,
+                    "column": "B",
+                    "message": message
+                })
+                raise ValueError(message)
 
         return gramcats
 
