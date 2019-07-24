@@ -2,12 +2,13 @@ import os
 import unittest
 from io import StringIO
 
-from django.core.management import call_command
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.test import TestCase
 
-from linguatec_lexicon.models import (
-    Entry, Example, GramaticalCategory, Lexicon, VerbalConjugation, Word)
+from linguatec_lexicon.models import (DiatopicVariation, Entry, Example,
+                                      GramaticalCategory, Lexicon, Region,
+                                      VerbalConjugation, Word)
 
 
 class ImporterTestCase(TestCase):
@@ -135,9 +136,8 @@ class ImporterTestCase(TestCase):
                          VerbalConjugation.objects.count())
 
 
-
 class ImportGramCatTestCase(TestCase):
-    NUMBER_OF_GRAMCATS = 71
+    NUMBER_OF_GRAMCATS = 72
 
     def test_import(self):
         base_path = os.path.dirname(os.path.abspath(__file__))
@@ -159,3 +159,51 @@ class ImportGramCatTestCase(TestCase):
                             GramaticalCategory.objects.count())
 
 
+class ImportVariationTestCase(TestCase):
+    NUMBER_OF_ENTRIES = 115
+
+    def setUp(self):
+        # Create Regions
+        ribagorza = Region.objects.create(name="Ribagorza")
+
+        # Create DiatopicVariation
+        DiatopicVariation.objects.create(
+            name="benasqués",
+            abbreviation="Benas.",
+            region=ribagorza,
+        )
+
+        # initialize GramaticalCategories
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
+        call_command('importgramcat', sample_path, verbosity=0)
+
+        # initialize words on main language
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(
+            base_path, 'fixtures/variation-sample-common.xlsx')
+        call_command('importdata', sample_path)
+
+    def test_import(self):
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(
+            base_path, 'fixtures/variation-sample-benasques.xlsx')
+        call_command('importvariation', sample_path,
+                     variation='benasqués', verbosity=4)
+
+        qs = Entry.objects.filter(variation__isnull=False).values(
+            'word__id').order_by('word__id').distinct('word__id')
+        self.assertEqual(self.NUMBER_OF_ENTRIES, qs.count())
+
+    def test_import_invalid_empty_row(self):
+        out = StringIO()
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(
+            base_path, 'fixtures/variation-empty-row.xlsx')
+        call_command('importvariation', sample_path,
+                     variation='benasqués', verbosity=3, stdout=out)
+
+        qs = Entry.objects.filter(variation__isnull=False).values(
+            'word__id').order_by('word__id').distinct('word__id')
+        self.assertEqual(0, qs.count())
+        self.assertIn('error', out.getvalue())

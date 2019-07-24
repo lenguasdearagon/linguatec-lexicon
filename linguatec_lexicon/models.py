@@ -47,7 +47,6 @@ class WordManager(models.Manager):
             )
             return self.filter(filter_query)
 
-
         # sort results by trigram similarity
         qs = self.filter(
                 term__iregex=iregex.format(query)
@@ -87,6 +86,22 @@ class Word(models.Model):
         return set(self.entries.values_list('gramcats__abbreviation', flat=True))
 
 
+class Region(models.Model):
+    name = models.CharField(unique=True, max_length=64)
+
+    def __str__(self):
+        return self.name
+
+
+class DiatopicVariation(models.Model):
+    name = models.CharField(unique=True, max_length=64)
+    abbreviation = models.CharField(unique=True, max_length=64)
+    region = models.ForeignKey('Region', on_delete=models.CASCADE, related_name='variations')
+
+    def __str__(self):
+        return "{} ({})".format(self.name, self.region)
+
+
 class Entry(models.Model):
     """
     The Entry class represents each translation (written in the
@@ -95,10 +110,15 @@ class Entry(models.Model):
     """
     word = models.ForeignKey('Word', on_delete=models.CASCADE, related_name="entries")
     gramcats = models.ManyToManyField('GramaticalCategory', related_name="entries")
+    variation = models.ForeignKey('DiatopicVariation', null=True, on_delete=models.CASCADE, related_name="entries")
     translation = models.TextField()
 
     class Meta:
-        ordering = ['pk']
+        # TODO instead of depend on 'pk' find another method to
+        # guarante that the entries are sorted by relevancy.
+        # E.g. creating a positive integer field that stores their
+        # order in the imported Excel.
+        ordering = ['variation', 'pk']
         verbose_name_plural = "entries"
 
     def __str__(self):

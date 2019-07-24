@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from .models import Entry, Example, GramaticalCategory, VerbalConjugation, Word
+from .models import (DiatopicVariation, Entry, Example, GramaticalCategory,
+                     VerbalConjugation, Word)
 
 
 class ExampleSerializer(serializers.ModelSerializer):
@@ -12,7 +13,8 @@ class ExampleSerializer(serializers.ModelSerializer):
 class VerbalConjugationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VerbalConjugation
-        fields = ('intro', 'model', 'model_word', 'model_word_id', 'conjugation')
+        fields = ('intro', 'model', 'model_word',
+                  'model_word_id', 'conjugation')
 
 
 class GramaticalCategorySerializer(serializers.ModelSerializer):
@@ -21,14 +23,24 @@ class GramaticalCategorySerializer(serializers.ModelSerializer):
         fields = ('abbreviation', 'title')
 
 
+class DiatopicVariationSerializer(serializers.ModelSerializer):
+    region = serializers.SlugRelatedField(slug_field='name', read_only=True)
+
+    class Meta:
+        model = DiatopicVariation
+        fields = ('name', 'abbreviation', 'region')
+
+
 class EntrySerializer(serializers.ModelSerializer):
     gramcats = GramaticalCategorySerializer(many=True, read_only=True)
     examples = ExampleSerializer(many=True, read_only=True)
     conjugation = VerbalConjugationSerializer()
+    variation = DiatopicVariationSerializer()
 
     class Meta:
         model = Entry
-        fields = ('gramcats', 'translation', 'examples', 'conjugation')
+        fields = ('variation', 'gramcats', 'translation',
+                  'examples', 'conjugation')
 
 
 class WordSerializer(serializers.ModelSerializer):
