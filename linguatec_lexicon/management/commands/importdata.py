@@ -46,7 +46,7 @@ def extract_gramcats(db):
 def is_verb(gramcats):
     for gramcat in gramcats:
         if (gramcat.abbreviation.startswith('v.')
-                or gramcat.abbreviation in ['expr.', 'per. vl.']):
+                or gramcat.abbreviation in ['expr.', 'per. vl.', 'loc. vl.']):
             return True
     return False
 
@@ -185,13 +185,14 @@ class Command(BaseCommand):
                 # TODO could be several examples separated by ';'
                 we.clean_examples.append(Example(phrase=value))
 
-    def populate_verbal_conjugation(self, word, conjugation_str):
+    def populate_verbal_conjugation(self, word, gramcats, conjugation_str):
         # check if word is a verb
         if conjugation_str and not word.is_verb:
+            gramcats = [x.abbreviation for x in gramcats]
             self.errors.append({
                 "word": word.term,
                 "column": "F",
-                "message": "only verbs can have verbal conjugation data",
+                "message": "only verbs can have verbal conjugation data (found {})".format(gramcats),
             })
             return
 
@@ -260,7 +261,7 @@ class Command(BaseCommand):
                 conjugation_str = row[6]
             except IndexError:
                 continue
-            self.populate_verbal_conjugation(word, conjugation_str)
+            self.populate_verbal_conjugation(word, gramcats, conjugation_str)
 
     def write_to_database(self):
         # TODO allow to use an existing Lexicon or pass as args the new Lexicon parameters
