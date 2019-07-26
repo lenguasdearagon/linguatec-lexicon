@@ -118,19 +118,18 @@ class Command(BaseCommand):
         return df
 
     def get_or_create_word(self, term):
-        for word in self.cleaned_data:
-            if word.term == term:
-                return (False, word)
-
-        new_word = Word(term=term)
-        new_word.clean_entries = []
-        return (True, new_word)
+        try:
+            return (False, self.cleaned_data[term])
+        except KeyError:
+            new_word = Word(term=term)
+            new_word.clean_entries = []
+            return (True, new_word)
 
     def populate_word(self, w_str):
         # avoid duplicated word.term
         created, word = self.get_or_create_word(w_str)
         if created:
-            self.cleaned_data.append(word)
+            self.cleaned_data[word.term] = word
 
         return word
 
@@ -231,7 +230,7 @@ class Command(BaseCommand):
 
     def populate_models(self, db):
         self.errors = []
-        self.cleaned_data = []
+        self.cleaned_data = {}
         for row in db.itertuples(name=None):
             # itertuples by default return the index as the first element of the tuple.
 
@@ -274,7 +273,7 @@ class Command(BaseCommand):
         count_words = 0
         count_entries = 0
         count_examples = 0
-        for word in self.cleaned_data:
+        for _, word in self.cleaned_data.items():
             word.lexicon_id = lex.pk
             word.save()
             count_words += 1
