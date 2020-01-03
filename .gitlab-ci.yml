@@ -31,28 +31,3 @@ test:
     DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
   script:
   - ./runtests.py --settings tests.test_postgres
-
-staging:
-  type: deploy
-  before_script:
-  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-  - mkdir -p ~/.ssh
-  - eval $(ssh-agent -s)
-  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-  - ssh-add <(echo "$STAGING_PRIVATE_KEY")
-  script:
-  - apt-get update -qy
-  - apt-get install -y --no-install-recommends python3-pip python3-dev
-  - ssh -p22 linguatec@api.conectividadcolectiva.org "rm -rf linguatec-lexicon/"
-  - ssh -p22 linguatec@api.conectividadcolectiva.org "mkdir -p linguatec-lexicon/sandbox"
-  - ssh -p22 linguatec@api.conectividadcolectiva.org "ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts"
-  - ssh -p22 linguatec@api.conectividadcolectiva.org "git clone git@gitlab.com:linguatec/linguatec-lexicon.git linguatec-lexicon/source"
-  - ssh -p22 linguatec@api.conectividadcolectiva.org "virtualenv -p /usr/bin/python3 linguatec-lexicon/env"
-  - ssh -p22 linguatec@api.conectividadcolectiva.org "linguatec-lexicon/env/bin/pip install -r linguatec-lexicon/source/requirements.txt"
-  - ssh -p22 linguatec@api.conectividadcolectiva.org "linguatec-lexicon/env/bin/pip install -e linguatec-lexicon/source/"
-  # Requires to have a properly configured django project at ~/sandbox
-  - ssh -p22 linguatec@api.conectividadcolectiva.org "linguatec-lexicon/env/bin/python ~/sandbox/manage.py migrate --noinput"
-  - ssh -p22 linguatec@api.conectividadcolectiva.org "linguatec-lexicon/env/bin/python ~/sandbox/manage.py collectstatic --noinput"
-  # TODO reload apache2
-  only:
-  - master
