@@ -176,3 +176,7 @@ class WordManagerTestCase(TestCase):
         ])
         result = Word.objects.search("hacer")
         self.assertEqual(result[0].term, "hacer")
+
+    def test_search_query_unbalanced_parenthesis(self):
+        result = Word.objects.search("largo(a")
+        self.assertEqual(0, result.count())
