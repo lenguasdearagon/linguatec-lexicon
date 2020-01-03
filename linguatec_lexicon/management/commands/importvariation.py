@@ -51,7 +51,7 @@ class Command(BaseCommand):
                 "data for example running manage.py importgramcat."
             )
 
-        self.xlsx = pd.read_excel(self.input_file, header=None,
+        self.xlsx = pd.read_excel(self.input_file, header=None, usecols="A:C",
                                   names=['term', 'gramcats', 'translations'])
         self.populate_models()
 

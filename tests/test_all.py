@@ -207,3 +207,14 @@ class ImportVariationTestCase(TestCase):
             'word__id').order_by('word__id').distinct('word__id')
         self.assertEqual(0, qs.count())
         self.assertIn('error', out.getvalue())
+
+    def test_import_ignore_extra_cols(self):
+        FIXTURE_NUMBER_OF_ENTRIES = 4
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/variation-sample-benasques-extra-cols.xlsx')
+        call_command('importvariation', sample_path,
+                     variation='benasqués', verbosity=4)
+
+        qs = Entry.objects.filter(variation__isnull=False).values(
+            'word__id').order_by('word__id').distinct('word__id')
+        self.assertEqual(FIXTURE_NUMBER_OF_ENTRIES, qs.count())
