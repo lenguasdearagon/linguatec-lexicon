@@ -215,3 +215,11 @@ class ImportVariationTestCase(TestCase):
         qs = Entry.objects.filter(variation__isnull=False).values(
             'word__id').order_by('word__id').distinct('word__id')
         self.assertEqual(FIXTURE_NUMBER_OF_ENTRIES, qs.count())
+
+    def test_import_variation_optional_on_dry_run(self):
+        sample_path = self.get_fixture_path('variation-sample-benasques.xlsx')
+        call_command('importvariation', sample_path, dry_run=True, verbosity=4)
+
+        qs = Entry.objects.filter(variation__isnull=False).values(
+            'word__id').order_by('word__id').distinct('word__id')
+        self.assertEqual(0, qs.count())
