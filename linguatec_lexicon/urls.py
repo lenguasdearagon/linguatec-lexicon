@@ -11,5 +11,6 @@ router.register(r'gramcats', views.GramaticalCategoryViewSet)
 # Wire up our API using automatic URL routing.
 urlpatterns = [
     url(r'^', include(router.urls)),
-    path('validator/', views.DataValidatorView.as_view(), name='validator')
+    path('validator/', views.DataValidatorView.as_view(), name='validator'),
+    path('validator-diatopic-variation/', views.DiatopicVariationValidatorView.as_view(), name='validator-variation'),
 ]

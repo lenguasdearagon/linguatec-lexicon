@@ -1,14 +1,14 @@
 {% extends 'rest_framework/base.html' %}
 {% load i18n static %}
 
-{% block title %}Data validator{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block branding %}
-<a class="navbar-brand" rel="nofollow" href="/">Data Validator</a>
+<a class="navbar-brand" rel="nofollow" href="/">{{ title }}</a>
 {% endblock %}
 
 {% block content %}
-<h1>Data validator</h1>
+<h1>{{ title }}</h1>
 <div class="row">
     <div class="col-12">
         <div>
