@@ -16,13 +16,23 @@ class Command(BaseCommand):
         parser.add_argument('input_file', type=str)
         parser.add_argument(
             '--variation',
-            required=True,
             help='Diatopical variation of the data to be imported'
         )
         parser.add_argument(
             '--dry-run', action='store_true', dest='dry_run',
             help="Just validate input file; don't actually import to database.",
         )
+
+    def clean_variation(self, value):
+        if self.dry_run:
+            return value
+
+        # validate variation
+        try:
+            return DiatopicVariation.objects.get(name=value)
+        except DiatopicVariation.DoesNotExist:
+            raise CommandError(
+                'Diatopic variation "{}" does not exist'.format(value))
 
     def handle(self, *args, **options):
         self.input_file = options['input_file']
@@ -35,13 +45,7 @@ class Command(BaseCommand):
             raise CommandError(
                 'Unexpected filetype "{}". Should be an Excel document (XLSX)'.format(file_extension))
 
-        # validate variation
-        try:
-            self.variation = DiatopicVariation.objects.get(
-                name=options['variation'])
-        except DiatopicVariation.DoesNotExist:
-            raise CommandError(
-                'Diatopic variation "{}" does not exist'.format(options['variation']))
+        self.variation = self.clean_variation(options['variation'])
 
         # check that GramaticalCategories are initialized
         if not GramaticalCategory.objects.all().exists():
@@ -51,7 +55,7 @@ class Command(BaseCommand):
                 "data for example running manage.py importgramcat."
             )
 
-        self.xlsx = pd.read_excel(self.input_file, header=None,
+        self.xlsx = pd.read_excel(self.input_file, header=None, usecols="A:C",
                                   names=['term', 'gramcats', 'translations'])
         self.populate_models()
 

@@ -34,6 +34,11 @@ class Lexicon(models.Model):
 class WordManager(models.Manager):
     def search(self, query):
         MIN_SIMILARITY = 0.3
+
+        # escape special characters to avoid problems like unbalanced parenthesis
+        if query is not None:
+            query = query.replace("(", "\(").replace(")", "\)")
+
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':

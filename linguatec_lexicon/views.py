@@ -18,6 +18,7 @@ from .serializers import GramaticalCategorySerializer, WordSerializer, WordNearS
 
 class DataValidatorView(TemplateView):
     template_name = "linguatec_lexicon/datavalidator.html"
+    title = "Data validator"
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
@@ -27,26 +28,25 @@ class DataValidatorView(TemplateView):
             xlsx_file = form.cleaned_data['input_file']
 
             # store uploaded file as a temporal file
-            tmp_fd, tmp_file = tempfile.mkstemp()
+            tmp_fd, tmp_file = tempfile.mkstemp(suffix='.xlsx')
             f = os.fdopen(tmp_fd, 'wb')  # open the tmp file for writing
             f.write(xlsx_file.read())  # write the tmp file
             f.close()
 
-            # validate user file
-            out = StringIO()
-            call_command('importdata', tmp_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
-
-            context['input_file'] = form.cleaned_data['input_file']
-
+            # validate uploaded file and handle errors (if any)
+            out = self.validate(tmp_file)
             errors = []
             for line in out.getvalue().split('\n'):
                 try:
                     data = json.loads(line)
-                except json.JSONDecodeError as e:
+                except json.JSONDecodeError:
                     continue
                 errors.append(data)
 
-            context['errors'] = errors
+            context.update({
+                'errors': errors,
+                'input_file': xlsx_file,
+            })
             return self.render_to_response(context)
 
         context['form'] = form
@@ -54,8 +54,25 @@ class DataValidatorView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = ValidatorForm()
+        context.update({
+            'form':  ValidatorForm(),
+            'title': self.title,
+        })
         return context
+
+    def validate(self, xlsx_file):
+        out = StringIO()
+        call_command('importdata', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
+        return out
+
+
+class DiatopicVariationValidatorView(DataValidatorView):
+    title = "Diatopic variation validator"
+
+    def validate(self, xlsx_file):
+        out = StringIO()
+        call_command('importvariation', xlsx_file, variation='benasqués', dry_run=True, no_color=True, verbosity=3, stdout=out)
+        return out
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
