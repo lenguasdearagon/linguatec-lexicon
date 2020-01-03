@@ -162,6 +162,10 @@ class ImportGramCatTestCase(TestCase):
 class ImportVariationTestCase(TestCase):
     NUMBER_OF_ENTRIES = 115
 
+    def get_fixture_path(self, name):
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(base_path, 'fixtures/{}'.format(name))
+
     def setUp(self):
         # Create Regions
         ribagorza = Region.objects.create(name="Ribagorza")
@@ -174,20 +178,15 @@ class ImportVariationTestCase(TestCase):
         )
 
         # initialize GramaticalCategories
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
+        sample_path = self.get_fixture_path('gramcat-es-ar.csv')
         call_command('importgramcat', sample_path, verbosity=0)
 
         # initialize words on main language
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(
-            base_path, 'fixtures/variation-sample-common.xlsx')
+        sample_path = self.get_fixture_path('variation-sample-common.xlsx')
         call_command('importdata', sample_path)
 
     def test_import(self):
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(
-            base_path, 'fixtures/variation-sample-benasques.xlsx')
+        sample_path = self.get_fixture_path('variation-sample-benasques.xlsx')
         call_command('importvariation', sample_path,
                      variation='benasqués', verbosity=4)
 
@@ -197,9 +196,7 @@ class ImportVariationTestCase(TestCase):
 
     def test_import_invalid_empty_row(self):
         out = StringIO()
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(
-            base_path, 'fixtures/variation-empty-row.xlsx')
+        sample_path = self.get_fixture_path('variation-empty-row.xlsx')
         call_command('importvariation', sample_path,
                      variation='benasqués', verbosity=3, stdout=out)
 
@@ -210,8 +207,8 @@ class ImportVariationTestCase(TestCase):
 
     def test_import_ignore_extra_cols(self):
         FIXTURE_NUMBER_OF_ENTRIES = 4
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(base_path, 'fixtures/variation-sample-benasques-extra-cols.xlsx')
+
+        sample_path = self.get_fixture_path('variation-sample-benasques-extra-cols.xlsx')
         call_command('importvariation', sample_path,
                      variation='benasqués', verbosity=4)
 
