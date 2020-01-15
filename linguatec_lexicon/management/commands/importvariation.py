@@ -55,7 +55,7 @@ class Command(BaseCommand):
                 "data for example running manage.py importgramcat."
             )
 
-        self.xlsx = pd.read_excel(self.input_file, header=None, usecols="A:C",
+        self.xlsx = pd.read_excel(self.input_file, sheet_name=None, header=None, usecols="A:C",
                                   names=['term', 'gramcats', 'translations'])
         self.populate_models()
 
@@ -75,7 +75,7 @@ class Command(BaseCommand):
         if self.verbosity > 1:
             self.stdout.write(
                 "Excel stats: {} rows | {} valid rows | {} invalid rows".format(
-                    len(self.xlsx.index),
+                    sum([len(sheet.index) for sheet in self.xlsx.values()]),
                     len(self.cleaned_data),
                     len(self.errors),
                 )
@@ -85,21 +85,22 @@ class Command(BaseCommand):
         self.errors = []
         self.cleaned_data = []
 
-        for row in self.xlsx.itertuples():
-            word = self.retrieve_word(row.Index + 1, row.term)
-            if word is None:
-                continue
+        for sheet_name, sheet in self.xlsx.items():
+            for row in sheet.itertuples():
+                word = self.retrieve_word(row.Index + 1, row.term)
+                if word is None:
+                    continue
 
-            try:
-                gramcats = self.retrieve_gramcats(word, row.gramcats)
-                self.populate_entries(word, gramcats, row.translations)
-            except ValidationError as e:
-                self.errors.append({
-                    "word": word.term,
-                    "column": "B",
-                    "message": e.message,
-                })
-                continue
+                try:
+                    gramcats = self.retrieve_gramcats(word, row.gramcats)
+                    self.populate_entries(word, gramcats, row.translations)
+                except ValidationError as e:
+                    self.errors.append({
+                        "word": word.term,
+                        "column": "B",
+                        "message": e.message,
+                    })
+                    continue
 
             self.cleaned_data.append(word)
 
