@@ -95,28 +95,25 @@ class Command(BaseCommand):
                     gramcats = self.retrieve_gramcats(word, row.gramcats)
                     self.populate_entries(word, gramcats, row.translations)
                 except ValidationError as e:
+                    message = e.message % e.params if e.params else e.message
                     self.errors.append({
                         "word": word.term,
-                        "column": "B",
-                        "message": e.message,
+                        "column": "{}!{}".format(sheet_name, e.code),
+                        "message": message,
                     })
                     continue
 
-            self.cleaned_data.append(word)
+                self.cleaned_data.append(word)
 
     def populate_entries(self, word, gramcats, translations_raw):
         word.clean_entries = []
 
         try:
             translations_list = translations_raw.split('//')
-        except AttributeError as e:
+        except AttributeError:
             # e.g. empty cell is translated as float(nan)
-            self.errors.append({
-                "word": word.term,
-                "column": "C",
-                "message": 'Word "{}" contains empty or invalid translations.'.format(word.term)
-            })
-            raise ValueError(e)
+            message = 'Word %(word)s contains empty or invalid translations.'
+            raise ValidationError(message, code='C', params={'word': word.term})
 
         for translation in translations_list:
             entry = Entry(word=word, translation=translation.strip(),
@@ -127,7 +124,7 @@ class Command(BaseCommand):
     def retrieve_gramcats(self, word, gramcats_raw):
         if pd.isnull(gramcats_raw):
             message = "missing gramatical category"
-            raise ValidationError(message, code='invalid')
+            raise ValidationError(message, code='B')
 
         gramcats = []
         for abbr in gramcats_raw.split("//"):
@@ -136,8 +133,8 @@ class Command(BaseCommand):
                 gramcats.append(
                     GramaticalCategory.objects.get(abbreviation=abbr))
             except GramaticalCategory.DoesNotExist:
-                message = "unkown gramatical category %(value)"
-                raise ValidationError(message, code='invalid', params={'value': abbr})
+                message = "unkown gramatical category %(value)s"
+                raise ValidationError(message, code='B', params={'value': abbr})
 
         return gramcats
 

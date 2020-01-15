@@ -231,3 +231,11 @@ class ImportVariationTestCase(TestCase):
                      dry_run=True, verbosity=3, stdout=out)
 
         self.assertIn('error', out.getvalue())
+
+    def test_import_invalid_missing_translation(self):
+        out = StringIO()
+        sample_path = self.get_fixture_path('variation-missing-translation.xlsx')
+        call_command('importvariation', sample_path,
+                     dry_run=True, verbosity=3, stdout=out)
+
+        self.assertIn('error', out.getvalue())
