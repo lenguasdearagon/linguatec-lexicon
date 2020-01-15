@@ -162,11 +162,13 @@ class ImportGramCatTestCase(TestCase):
 class ImportVariationTestCase(TestCase):
     NUMBER_OF_ENTRIES = 115
 
-    def get_fixture_path(self, name):
+    @classmethod
+    def get_fixture_path(cls, name):
         base_path = os.path.dirname(os.path.abspath(__file__))
         return os.path.join(base_path, 'fixtures/{}'.format(name))
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         # Create Regions
         ribagorza = Region.objects.create(name="Ribagorza")
 
@@ -178,11 +180,11 @@ class ImportVariationTestCase(TestCase):
         )
 
         # initialize GramaticalCategories
-        sample_path = self.get_fixture_path('gramcat-es-ar.csv')
+        sample_path = cls.get_fixture_path('gramcat-es-ar.csv')
         call_command('importgramcat', sample_path, verbosity=0)
 
         # initialize words on main language
-        sample_path = self.get_fixture_path('variation-sample-common.xlsx')
+        sample_path = cls.get_fixture_path('variation-sample-common.xlsx')
         call_command('importdata', sample_path)
 
     def test_import(self):
@@ -227,6 +229,14 @@ class ImportVariationTestCase(TestCase):
     def test_import_invalid_missing_gramcat(self):
         out = StringIO()
         sample_path = self.get_fixture_path('variation-missing-gramcat.xlsx')
+        call_command('importvariation', sample_path,
+                     dry_run=True, verbosity=3, stdout=out)
+
+        self.assertIn('error', out.getvalue())
+
+    def test_import_invalid_missing_translation(self):
+        out = StringIO()
+        sample_path = self.get_fixture_path('variation-missing-translation.xlsx')
         call_command('importvariation', sample_path,
                      dry_run=True, verbosity=3, stdout=out)
 

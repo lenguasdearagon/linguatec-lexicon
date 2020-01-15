@@ -2,7 +2,7 @@
 Package metadata definition.
 """
 
-VERSION = (0, 3, 1, 'alpha', 0)
+VERSION = (0, 3, 1, 'alpha', 1)
 
 
 def get_version():

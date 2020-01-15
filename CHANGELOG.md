@@ -5,7 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## master
-- [fixed]: `importvariation` error when gramcat (column B) is missing.
+- [changed] `importvariation` supports XLSX with multiple sheets.
+- [fixed] `importvariation` error when gramcat (column B) is missing.
+- [fixed] `importvariation` error when translation (column C) is missing.
 
 ## [0.3] - 2020-01-03
 - [added] Diatopic variation validator view.
