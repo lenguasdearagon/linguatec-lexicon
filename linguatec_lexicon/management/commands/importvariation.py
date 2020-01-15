@@ -93,7 +93,12 @@ class Command(BaseCommand):
             try:
                 gramcats = self.retrieve_gramcats(word, row.gramcats)
                 self.populate_entries(word, gramcats, row.translations)
-            except:
+            except ValidationError as e:
+                self.errors.append({
+                    "word": word.term,
+                    "column": "B",
+                    "message": e.message,
+                })
                 continue
 
             self.cleaned_data.append(word)
@@ -119,29 +124,19 @@ class Command(BaseCommand):
             word.clean_entries.append(entry)
 
     def retrieve_gramcats(self, word, gramcats_raw):
-        gramcats = []
-        if not gramcats_raw:
+        if pd.isnull(gramcats_raw):
             message = "missing gramatical category"
-            self.errors.append({
-                "word": word.term,
-                "column": "B",
-                "message": message
-            })
-            raise ValueError(message)
+            raise ValidationError(message, code='invalid')
 
+        gramcats = []
         for abbr in gramcats_raw.split("//"):
             abbr = abbr.strip()
             try:
                 gramcats.append(
                     GramaticalCategory.objects.get(abbreviation=abbr))
             except GramaticalCategory.DoesNotExist:
-                message = "unkown gramatical category '{}'".format(abbr)
-                self.errors.append({
-                    "word": word.term,
-                    "column": "B",
-                    "message": message
-                })
-                raise ValueError(message)
+                message = "unkown gramatical category %(value)"
+                raise ValidationError(message, code='invalid', params={'value': abbr})
 
         return gramcats
 

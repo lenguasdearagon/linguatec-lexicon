@@ -223,3 +223,11 @@ class ImportVariationTestCase(TestCase):
         qs = Entry.objects.filter(variation__isnull=False).values(
             'word__id').order_by('word__id').distinct('word__id')
         self.assertEqual(0, qs.count())
+
+    def test_import_invalid_missing_gramcat(self):
+        out = StringIO()
+        sample_path = self.get_fixture_path('variation-missing-gramcat.xlsx')
+        call_command('importvariation', sample_path,
+                     dry_run=True, verbosity=3, stdout=out)
+
+        self.assertIn('error', out.getvalue())
