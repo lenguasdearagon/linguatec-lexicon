@@ -71,7 +71,7 @@ class DiatopicVariationValidatorView(DataValidatorView):
 
     def validate(self, xlsx_file):
         out = StringIO()
-        call_command('importvariation', xlsx_file, variation='benasqués', dry_run=True, no_color=True, verbosity=3, stdout=out)
+        call_command('importvariation', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
         return out
 
 
