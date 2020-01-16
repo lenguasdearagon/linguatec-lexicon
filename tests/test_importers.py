@@ -259,3 +259,11 @@ class ImportVariationTestCase(TestCase):
                      dry_run=True, verbosity=3, stdout=out)
 
         self.assertIn('error', out.getvalue())
+
+    def test_import_dry_run_and_variation(self):
+        # regression test: call with dry-run & variation parameters
+        out = StringIO()
+        sample_path = self.get_fixture_path('variation-sample-benasques.xlsx')
+        call_command('importvariation', sample_path,
+                     variation='benas', dry_run=True, verbosity=3, stdout=out)
+        self.assertNotIn('error', out.getvalue())
