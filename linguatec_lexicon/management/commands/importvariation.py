@@ -25,7 +25,7 @@ class Command(BaseCommand):
 
     def clean_variation(self, value):
         if self.dry_run:
-            return value
+            return None  # discard value because doesn't affect to data validation
 
         # validate variation
         try:
@@ -70,7 +70,7 @@ class Command(BaseCommand):
                 # Write data into the database
                 self.write_to_database()
             self.stdout.write(self.style.SUCCESS(
-                'Successfully imported file "{}" of diatopic variation "{}"'.format(self.input_file, self.variation)))
+                'Successfully imported file "{}" of diatopic variation "{}"'.format(self.input_file, options['variation'])))
 
         if self.verbosity > 1:
             self.stdout.write(
