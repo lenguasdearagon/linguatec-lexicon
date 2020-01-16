@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## master
 - [changed] `importvariation` supports XLSX with multiple sheets.
-- [fixed] `importvariation` error when gramcat (column B) is missing.
+- [changed] `importvariation` provide default gramcat when column B is missing (or
+    error if getting default fails).
 - [fixed] `importvariation` error when translation (column C) is missing.
 
 ## [0.3] - 2020-01-03

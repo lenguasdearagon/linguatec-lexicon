@@ -122,13 +122,10 @@ class Command(BaseCommand):
             word.clean_entries.append(entry)
 
     def retrieve_gramcats(self, word, gramcats_raw):
-        if pd.isnull(gramcats_raw):
-            message = "missing gramatical category"
-            raise ValidationError(message, code='B')
+        clean_gramcats = self.parse_or_get_default_gramcats(word, gramcats_raw)
 
         gramcats = []
-        for abbr in gramcats_raw.split("//"):
-            abbr = abbr.strip()
+        for abbr in clean_gramcats:
             try:
                 gramcats.append(
                     GramaticalCategory.objects.get(abbreviation=abbr))
@@ -137,6 +134,18 @@ class Command(BaseCommand):
                 raise ValidationError(message, code='B', params={'value': abbr})
 
         return gramcats
+
+    def parse_or_get_default_gramcats(self, word, gramcats_raw):
+        if pd.isnull(gramcats_raw):
+            # provide default value
+            clean_gramcats = word.gramcats()
+            if len(clean_gramcats) == 0:
+                message = "missing gramatical category"
+                raise ValidationError(message, code='B')
+            return clean_gramcats
+
+        clean_gramcats = [abbr.strip() for abbr in gramcats_raw.split("//")]
+        return clean_gramcats
 
     def retrieve_word(self, row_number, term_raw):
         # 1) exact match

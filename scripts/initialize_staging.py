@@ -3,8 +3,8 @@ import os
 import sys
 
 import django
+from django.core import management
 
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'linguatec.settings')
 try:
     django.setup()
 except django.core.exceptions.ImproperlyConfigured:
@@ -33,42 +33,81 @@ def init_diatopic_variations():
     """
     COMARCA         VARIEDAD	            ABREVIATURA
     ----------------------------------------------------
+    Alto Gállego	tensino                 Tens.
+    Alto Gállego	tensino panticuto       Pant.
+    Jacetania   	cheso	                Cheso
+    Jacetania	    ansotano    	        Ansot.
     Ribagorza	    benasqués	            Benas.
     Ribagorza	    bajorribagorzano    	Ribag.
     Sobrarbe	    chistabín	            Chist.
     Sobrarbe	    belsetán	            Belset.
     Sobrarbe	    habla de Sobrepuerto	Sobrep.
-    Alto Gállego	panticuto	            Pant.
-    Alto Gállego	tensino                 Tens.
-    Jacetania   	cheso	                Cheso
-    Jacetania	    ansotano    	        Ansot.
-
+    Somontano       Somontanos              Somon.
     """
 
     # Create Regions
-    ribagorza = Region.objects.create(name="Ribagorza")
-    sobrarbe = Region.objects.create(name="Sobrarbe")
-    # TODO complete creation of all regions
+    def create_region(name):
+        return Region.objects.create(name=name)
 
-    # Create DiatopicVariation
-    DiatopicVariation.objects.create(
-        name="benasqués",
-        abbreviation="Benas.",
-        region=ribagorza,
-    )
+    alto_gallego = create_region("Alto Gállego")
+    jacetania = create_region("Jacetania")
+    ribagorza = create_region("Ribagorza")
+    sobrarbe = create_region("Sobrarbe")
+    somontano = create_region("Somontanos")
 
-    DiatopicVariation.objects.create(
-        name="bajorribagorzano",
-        abbreviation="Ribag.",
-        region=ribagorza,
-    )
+    def create_variation(region, name, abbr):
+        return DiatopicVariation.objects.create(
+            name=name,
+            abbreviation=abbr,
+            region=region,
+        )
 
-    DiatopicVariation.objects.create(
-        name="chistabín",
-        abbreviation="Chist.",
-        region=sobrarbe,
-    )
-    # TODO complete with all diatopic variations
+    # Create DiatopicVariations
+    create_variation(alto_gallego, "Tensino", "Tens.")
+    create_variation(alto_gallego, "Tensino Panticuto", "Pant.")
+    create_variation(jacetania, "Ansotano", "Ansot.")
+    create_variation(jacetania, "Cheso", "Cheso")
+    create_variation(ribagorza, "Bajorribagorzano", "Ribag.")
+    create_variation(ribagorza, "Benasqués", "Benas.")
+    create_variation(sobrarbe, "Belsetán", "Belset.")
+    create_variation(sobrarbe, "Chistabín", "Chist.")
+    create_variation(sobrarbe, "Habla de Sobrepuerto","Sobrep.")
+    create_variation(somontano, "Somontanos", "Somon.")
+
+
+
+VARIANTS_MAPPING = {
+    "Tensino": "ALTO GÁLLEGO-tensino-2020-01-10.xlsx",
+    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2020-01-03.xlsx",
+    "Ansotano": "JACETANIA-ansotano-2020-01-10.xlsx",
+    "Cheso": "JACETANIA-cheso-2020-01-10.xlsx",
+    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2020-01-10.xlsx",
+    "Benasqués": "RIBAGORZA-benasques-2020-01-13.xlsx",
+    "Belsetán": "SOBRARBE-belsetán-2020-01-10.xlsx",
+    "Chistabín": "SOBRARBE-chistabín-2020-01-10.xlsx",
+    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2020-01-10.xlsx",
+    "Somontanos": "SOMONTANOS-2020-01-10.xlsx",
+}
+
+VARIANTS_PATH = '/home/santiago/trabajo/linguatec-v3/variedades'
+
+def validate_variations():
+    print("")
+    print("+"*80)
+    for xlsx in os.listdir(VARIANTS_PATH):
+        if not xlsx.endswith('xlsx'):
+            continue
+        xlsx_fullpath = os.path.join(VARIANTS_PATH, xlsx)
+        print("-" * 80)
+        print(xlsx_fullpath)
+        management.call_command('importvariation', xlsx_fullpath, verbosity=3, dry_run=True)
+
+def import_variations():
+    for variation, xlsx in VARIANTS_MAPPING.items():
+        print("-" * 80)
+        print(variation, xlsx)
+        xlsx_fullpath = os.path.join(VARIANTS_PATH, xlsx)
+        management.call_command('importvariation', xlsx_fullpath, verbosity=3, variation=variation)
 
 
 def main():
@@ -78,10 +117,10 @@ def main():
     """)
 
     print("\t1. Creating Lexicon")
-    # init_lexicon()
+    init_lexicon()
 
     print("\t2. Creating regions and diatopic variations")
-    # init_diatopic_variations()
+    init_diatopic_variations()
 
     print("""
         3. To import gramatical categories run:
@@ -93,7 +132,30 @@ def main():
         5. To import diatopic variations data run:
             ./manage.py importvariation variation_file.xlsx --variation variation_name --verbosity 3 --dry-run
     """)
+    # validate_variations()
+    import_variations()
 
+def help():
+    USAGE = ("""
+    USAGE
+    ---------------
+    {} [--drop]
+    """
+    )
+    print(USAGE.format(sys.argv[0]))
+
+    print("""
+    QUICK START
+    -------------------
+    DJANGO_SETTINGS_MODULE="lenguasaragon.settings_postgres"
+    export DJANGO_SETTINGS_MODULE
+    python initialize_staging.py --drop
+    python initialize_staging.py
+    time ./manage.py importdata -v3 ~/trabajo/linguatec-v3/vocabulario-castellano-aragones-2020-01-15-az.xlsx
+
+    ./manage.py importvariation -v3 --variation "Tensino" "ALTO GÁLLEGO-tensino-2020-01-10.xlsx"
+    ./manage.py importvariation -v3 --dry-run ~/trabajo/linguatec-v3/ALTO\ GÁLLEGO-tensino-2020-01-03.xlsx
+    """)
 
 def drop_all():
     DiatopicVariation.objects.all().delete()
@@ -106,12 +168,12 @@ if __name__ == '__main__':
     try:
         opts, args = getopt.getopt(argv, "h", ["help", "drop"])
     except getopt.GetoptError:
-        print('{} [--drop]'.format(sys.argv[0]))
+        help()
         sys.exit(2)
 
     for opt, arg in opts:
         if opt in ("-h", "--help"):
-            print('{} [--drop]'.format(sys.argv[0]))
+            help()
             sys.exit()
         elif opt == "--drop":
             drop_all()
