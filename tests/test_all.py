@@ -226,13 +226,31 @@ class ImportVariationTestCase(TestCase):
             'word__id').order_by('word__id').distinct('word__id')
         self.assertEqual(0, qs.count())
 
-    def test_import_invalid_missing_gramcat(self):
+    def test_import_invalid_unkown_gramcat(self):
         out = StringIO()
-        sample_path = self.get_fixture_path('variation-missing-gramcat.xlsx')
+        sample_path = self.get_fixture_path('variation-unkown-gramcat.xlsx')
         call_command('importvariation', sample_path,
                      dry_run=True, verbosity=3, stdout=out)
 
         self.assertIn('error', out.getvalue())
+
+    def test_import_missing_gramcat(self):
+        VARIATION_NAME = 'benasqués'
+        out = StringIO()
+        sample_path = self.get_fixture_path('variation-missing-gramcat.xlsx')
+        call_command('importvariation', sample_path,
+                     variation=VARIATION_NAME, verbosity=3, stdout=out)
+
+        self.assertNotIn('error', out.getvalue())
+
+        # should provide default value --> 'v.' (same as common entry)
+        common_entry = Word.objects.get(term='abarrancar')
+        variation_entry = Entry.objects.get(variation__name=VARIATION_NAME, word__term='abarrancar')
+
+        self.assertListEqual(
+            list(common_entry.gramcats()),
+            list(variation_entry.gramcats.values_list('abbreviation', flat=True))
+        )
 
     def test_import_invalid_missing_translation(self):
         out = StringIO()
