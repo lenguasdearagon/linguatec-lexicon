@@ -272,7 +272,7 @@ if __name__ == "__main__":
     if options.settings:
         os.environ['DJANGO_SETTINGS_MODULE'] = options.settings
     else:
-        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tests.test_sqlite')
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tests.settings_sqlite')
         options.settings = os.environ['DJANGO_SETTINGS_MODULE']
 
     failures = django_tests(

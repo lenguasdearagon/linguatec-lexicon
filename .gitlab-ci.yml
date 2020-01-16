@@ -30,4 +30,4 @@ test:
   variables:
     DATABASE_URL: "postgres://postgres:postgres@postgres:5432/postgres"
   script:
-  - ./runtests.py --settings tests.test_postgres
+  - ./runtests.py --settings tests.settings_postgres
