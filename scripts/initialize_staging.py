@@ -77,26 +77,25 @@ def init_diatopic_variations():
 
 
 VARIANTS_MAPPING = {
-    "Tensino": "ALTO GÁLLEGO-tensino-2020-01-10.xlsx",
-    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2020-01-03.xlsx",
-    "Ansotano": "JACETANIA-ansotano-2020-01-10.xlsx",
+    "Tensino": "ALTO GÁLLEGO-tensino-2020-01-17.xlsx",
+    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2020-01-17.xlsx",
+    "Ansotano": "JACETANIA-ansotano-2020-01-16.xlsx",
     "Cheso": "JACETANIA-cheso-2020-01-10.xlsx",
-    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2020-01-10.xlsx",
+    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2020-01-17.xlsx",
     "Benasqués": "RIBAGORZA-benasques-2020-01-13.xlsx",
     "Belsetán": "SOBRARBE-belsetán-2020-01-10.xlsx",
     "Chistabín": "SOBRARBE-chistabín-2020-01-10.xlsx",
     "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2020-01-10.xlsx",
-    "Somontanos": "SOMONTANOS-2020-01-10.xlsx",
+    "Somontanos": "SOMONTANOS-2020-01-17.xlsx",
 }
 
 VARIANTS_PATH = '/home/santiago/trabajo/linguatec-v3/variedades'
 
 def validate_variations():
-    print("")
-    print("+"*80)
-    for xlsx in os.listdir(VARIANTS_PATH):
-        if not xlsx.endswith('xlsx'):
-            continue
+    # for xlsx in os.listdir(VARIANTS_PATH):
+    #     if not xlsx.endswith('xlsx'):
+    #         continue
+    for _, xlsx in VARIANTS_MAPPING.items():
         xlsx_fullpath = os.path.join(VARIANTS_PATH, xlsx)
         print("-" * 80)
         print(xlsx_fullpath)
@@ -132,8 +131,6 @@ def main():
         5. To import diatopic variations data run:
             ./manage.py importvariation variation_file.xlsx --variation variation_name --verbosity 3 --dry-run
     """)
-    # validate_variations()
-    import_variations()
 
 def help():
     USAGE = ("""
@@ -151,10 +148,12 @@ def help():
     export DJANGO_SETTINGS_MODULE
     python initialize_staging.py --drop
     python initialize_staging.py
-    time ./manage.py importdata -v3 ~/trabajo/linguatec-v3/vocabulario-castellano-aragones-2020-01-15-az.xlsx
+    time ./manage.py importdata -v3 ~/trabajo/linguatec-v3/vocabulario-castellano-aragones-2020-01-16-az.xlsx
 
-    ./manage.py importvariation -v3 --variation "Tensino" "ALTO GÁLLEGO-tensino-2020-01-10.xlsx"
-    ./manage.py importvariation -v3 --dry-run ~/trabajo/linguatec-v3/ALTO\ GÁLLEGO-tensino-2020-01-03.xlsx
+    python initialize_staging.py --import-variations
+
+    # to import only a specific file
+    # ./manage.py importvariation -v3 --variation "Tensino" "ALTO GÁLLEGO-tensino-2020-01-10.xlsx"
     """)
 
 def drop_all():
@@ -166,7 +165,7 @@ def drop_all():
 if __name__ == '__main__':
     argv = sys.argv[1:]
     try:
-        opts, args = getopt.getopt(argv, "h", ["help", "drop"])
+        opts, args = getopt.getopt(argv, "h", ["help", "drop", "validate-variations", "import-variations"])
     except getopt.GetoptError:
         help()
         sys.exit(2)
@@ -177,6 +176,12 @@ if __name__ == '__main__':
             sys.exit()
         elif opt == "--drop":
             drop_all()
+            sys.exit()
+        elif opt == "--validate-variations":
+            validate_variations()
+            sys.exit()
+        elif opt == "--import-variations":
+            import_variations()
             sys.exit()
 
     main()
