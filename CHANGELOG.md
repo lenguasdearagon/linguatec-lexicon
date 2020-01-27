@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## master
 - [fixed] `importvariation` handle properly variation param on dry-run.
+- [fixed] Issue #83 searchs that starts with signs of punctuation.
 
 ## [0.3.1] - 2020-01-16
 - [changed] `importvariation` supports XLSX with multiple sheets.
