@@ -32,12 +32,23 @@ class Lexicon(models.Model):
 
 
 class WordManager(models.Manager):
-    def search(self, query):
-        MIN_SIMILARITY = 0.3
+    TERM_PUNCTUATION_SIGNS = '¡!¿?'
+
+    def _clean_search_query(self, query):
+        """Handle characters which breaks or generate issues with regex expression."""
+        if query is None:
+            return query
+
+        query = query.strip(self.TERM_PUNCTUATION_SIGNS)
 
         # escape special characters to avoid problems like unbalanced parenthesis
-        if query is not None:
-            query = query.replace("(", "\(").replace(")", "\)")
+        query = query.replace("(", "\(").replace(")", "\)")
+
+        return query
+
+    def search(self, query):
+        MIN_SIMILARITY = 0.3
+        query = self._clean_search_query(query)
 
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
