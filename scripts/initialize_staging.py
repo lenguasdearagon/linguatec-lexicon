@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import getopt
 import os
 import sys
@@ -77,16 +80,16 @@ def init_diatopic_variations():
 
 
 VARIANTS_MAPPING = {
-    "Tensino": "ALTO GÁLLEGO-tensino-2020-01-17.xlsx",
-    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2020-01-17.xlsx",
-    "Ansotano": "JACETANIA-ansotano-2020-01-16.xlsx",
-    "Cheso": "JACETANIA-cheso-2020-01-10.xlsx",
-    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2020-01-17.xlsx",
-    "Benasqués": "RIBAGORZA-benasques-2020-01-13.xlsx",
-    "Belsetán": "SOBRARBE-belsetán-2020-01-10.xlsx",
-    "Chistabín": "SOBRARBE-chistabín-2020-01-10.xlsx",
-    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2020-01-10.xlsx",
-    "Somontanos": "SOMONTANOS-2020-01-17.xlsx",
+    "Tensino": "ALTO GÁLLEGO-tensino-2020-01-20.xlsx",
+    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2020-01-20.xlsx",
+    "Ansotano": "JACETANIA-ansotano-2020-01-20.xlsx",
+    "Cheso": "JACETANIA-cheso-2020-01-20.xlsx",
+    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2020-01-20.xlsx",
+    "Benasqués": "RIBAGORZA-benasques-2020-01-20.xlsx",
+    "Belsetán": "SOBRARBE-belsetán-2020-01-20.xlsx",
+    "Chistabín": "SOBRARBE-chistabín-2020-01-20.xlsx",
+    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2020-01-20.xlsx",
+    "Somontanos": "SOMONTANOS-2020-01-20.xlsx",
 }
 
 VARIANTS_PATH = '/home/santiago/trabajo/linguatec-v3/variedades'
@@ -142,18 +145,19 @@ def help():
     print(USAGE.format(sys.argv[0]))
 
     print("""
-    QUICK START
-    -------------------
-    DJANGO_SETTINGS_MODULE="lenguasaragon.settings_postgres"
-    export DJANGO_SETTINGS_MODULE
-    python initialize_staging.py --drop
-    python initialize_staging.py
-    time ./manage.py importdata -v3 ~/trabajo/linguatec-v3/vocabulario-castellano-aragones-2020-01-16-az.xlsx
+QUICK START
+-------------------
+DJANGO_SETTINGS_MODULE="lenguasaragon.settings_postgres"
+export DJANGO_SETTINGS_MODULE
+python initialize_staging.py --drop
+python initialize_staging.py
+time ./manage.py importdata -v3 ~/trabajo/linguatec-v3/vocabulario-castellano-aragones-2020-01-27-az.xlsx
 
-    python initialize_staging.py --import-variations
+python initialize_staging.py --validate-variations
+python initialize_staging.py --import-variations
 
-    # to import only a specific file
-    # ./manage.py importvariation -v3 --variation "Tensino" "ALTO GÁLLEGO-tensino-2020-01-10.xlsx"
+# to import only a specific file
+# ./manage.py importvariation -v3 --variation "Tensino" "ALTO GÁLLEGO-tensino-2020-01-20.xlsx"
     """)
 
 def drop_all():
