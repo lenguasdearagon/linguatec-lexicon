@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 
 from linguatec_lexicon.models import (
@@ -63,12 +63,17 @@ class Command(BaseCommand):
             '--allow-partial', action='store_true', dest='allow_partial',
             help="Allow verbs with partial or unknown format conjugations. USE WITH CAUTION",
         )
+        parser.add_argument(
+            '--lexicon', dest='lexicon',
+            help="Allow verbs with partial or unknown format conjugations. USE WITH CAUTION",
+        )
 
     def handle(self, *args, **options):
         self.dry_run = options['dry_run']
         self.verbosity = options['verbosity']
         self.input_file = options['input_file']
         self.allow_partial = options['allow_partial']
+        self.lexicon = options['lexicon']
 
         # check that GramaticalCategories are initialized
         if not GramaticalCategory.objects.all().exists():
@@ -264,12 +269,18 @@ class Command(BaseCommand):
 
     def write_to_database(self):
         # TODO allow to use an existing Lexicon or pass as args the new Lexicon parameters
-        lex, _ = Lexicon.objects.get_or_create(
-            src_language="es",
-            dst_language="ar",
-            defaults={'name': "diccionario linguatec"}
-        )
-
+        if(self.lexicon):
+            try:
+                lex = Lexicon.objects.get(name = self.lexicon)
+            except Lexicon.DoesNotExist as e:
+                raise CommandError('Error: There is not a lexicon with that name\n ' + e)
+        else:
+            lex, _ = Lexicon.objects.get_or_create(
+                src_language="es",
+                dst_language="ar",
+                defaults={'name': "diccionario linguatec"}
+            )
+        
         count_words = 0
         count_entries = 0
         count_examples = 0
