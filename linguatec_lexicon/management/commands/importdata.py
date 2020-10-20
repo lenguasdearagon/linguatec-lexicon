@@ -84,10 +84,11 @@ class Command(BaseCommand):
             )
 
         # check that a lexicon with that name exist
-        try:
-            self.lexiconObject = Lexicon.objects.get(name = self.lexicon)
-        except Lexicon.DoesNotExist as e:
-            raise CommandError('Error: There is not a lexicon with that name\n ' + e)
+        if(self.lexicon):
+            try:
+                self.lexiconObject = Lexicon.objects.get(name = self.lexicon)
+            except Lexicon.DoesNotExist as e:
+                raise CommandError('Error: There is not a lexicon with that name\n ' + e)
 
         self.stdout.write("INFO\tinput file: %s\n" % self.input_file)
 
