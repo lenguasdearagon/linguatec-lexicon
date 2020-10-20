@@ -7,7 +7,7 @@ with the purpose of host a Spanish to Aragonese dictionary.
 
 Get the app code:
 ```bash
-git clone git@gitlab.com:linguatec/linguatec-lexicon.git
+git clone https://github.com/ribaguifi/linguatec-lexicon.git #old: git@gitlab.com:linguatec/linguatec-lexicon.git
 ```
 
 Create devel project site
@@ -52,7 +52,7 @@ To run the tests, clone the repository, and then:
 # Setup the virtual environment
 virtualenv env
 source env/bin/activate
-git clone git@gitlab.com:linguatec/linguatec-lexicon.git linguatec-lexicon
+git clone https://github.com/ribaguifi/linguatec-lexicon.git linguatec-lexicon #old: git@gitlab.com:linguatec/linguatec-lexicon.git
 cd linguatec-lexicon/
 pip install -r requirements.txt
 pip install .
