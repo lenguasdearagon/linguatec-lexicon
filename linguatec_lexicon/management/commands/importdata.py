@@ -65,7 +65,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--lexicon', dest='lexicon',
-            help="Allow verbs with partial or unknown format conjugations. USE WITH CAUTION",
+            help="Import data from a .xlsx to an already existing lexicon object",
         )
 
     def handle(self, *args, **options):
@@ -82,6 +82,12 @@ class Command(BaseCommand):
                 "Gramatical Categories should be initialized before importing "
                 "data for example running manage.py importgramcat."
             )
+
+        # check that a lexicon with that name exist
+        try:
+            self.lexiconObject = Lexicon.objects.get(name = self.lexicon)
+        except Lexicon.DoesNotExist as e:
+            raise CommandError('Error: There is not a lexicon with that name\n ' + e)
 
         self.stdout.write("INFO\tinput file: %s\n" % self.input_file)
 
@@ -270,10 +276,7 @@ class Command(BaseCommand):
     def write_to_database(self):
         # TODO allow to use an existing Lexicon or pass as args the new Lexicon parameters
         if(self.lexicon):
-            try:
-                lex = Lexicon.objects.get(name = self.lexicon)
-            except Lexicon.DoesNotExist as e:
-                raise CommandError('Error: There is not a lexicon with that name\n ' + e)
+            lex = self.lexiconObject
         else:
             lex, _ = Lexicon.objects.get_or_create(
                 src_language="es",
