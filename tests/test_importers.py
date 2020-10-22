@@ -135,6 +135,30 @@ class ImporterTestCase(TestCase):
         self.assertEqual(NUMBER_OF_CONJUGATIONS,
                          VerbalConjugation.objects.count())
 
+    def test_import_data_to_a_previous_lexicon(self):
+        lexicon_initial = Lexicon.objects.count()
+
+        NUMBER_OF_WORDS_FIRST_INPUT = 12
+        NUMBER_OF_ENTRIES_FIRST_INPUT = 16
+
+        NUMBER_OF_WORDS_SECOND_INPUT = 4
+        NUMBER_OF_ENTRIES_SECOND_INPUT = 4
+
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
+        call_command('importdata', sample_path)
+
+        lexicon_query_after = list(Lexicon.objects.all())
+        lexicon_name = lexicon_query_after[lexicon_initial].name
+
+        sample_path = os.path.join(base_path, 'fixtures/abcd.xlsx')
+        call_command('importdata', sample_path, lexicon=lexicon_name)
+
+        self.assertEqual(lexicon_initial + 1, Lexicon.objects.count())
+        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT + NUMBER_OF_WORDS_SECOND_INPUT, Word.objects.count())
+        self.assertEqual(NUMBER_OF_ENTRIES_FIRST_INPUT + NUMBER_OF_ENTRIES_SECOND_INPUT, Entry.objects.count())
+
+
 
 class ImportGramCatTestCase(TestCase):
     NUMBER_OF_GRAMCATS = 72
@@ -193,7 +217,7 @@ class ImportVariationTestCase(TestCase):
                      variation='benasqués', verbosity=4)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
-            'word__id').order_by('word__id').distinct('word__id')
+            'word__id').order_by('word__id').distinct()
         self.assertEqual(self.NUMBER_OF_ENTRIES, qs.count())
 
     def test_import_invalid_empty_row(self):
@@ -203,7 +227,7 @@ class ImportVariationTestCase(TestCase):
                      variation='benasqués', verbosity=3, stdout=out)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
-            'word__id').order_by('word__id').distinct('word__id')
+            'word__id').order_by('word__id').distinct()
         self.assertEqual(0, qs.count())
         self.assertIn('error', out.getvalue())
 
@@ -215,7 +239,7 @@ class ImportVariationTestCase(TestCase):
                      variation='benasqués', verbosity=4)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
-            'word__id').order_by('word__id').distinct('word__id')
+            'word__id').order_by('word__id').distinct()
         self.assertEqual(FIXTURE_NUMBER_OF_ENTRIES, qs.count())
 
     def test_import_variation_optional_on_dry_run(self):
@@ -223,7 +247,7 @@ class ImportVariationTestCase(TestCase):
         call_command('importvariation', sample_path, dry_run=True, verbosity=4)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
-            'word__id').order_by('word__id').distinct('word__id')
+            'word__id').order_by('word__id').distinct()
         self.assertEqual(0, qs.count())
 
     def test_import_invalid_unkown_gramcat(self):

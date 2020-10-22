@@ -64,7 +64,7 @@ class Command(BaseCommand):
             help="Allow verbs with partial or unknown format conjugations. USE WITH CAUTION",
         )
         parser.add_argument(
-            '--lexicon', dest='lexicon',
+            '--lexicon', action='store',dest='lexicon',
             help="Import data from a .xlsx to an already existing lexicon object",
         )
 
@@ -87,8 +87,8 @@ class Command(BaseCommand):
         if(self.lexicon):
             try:
                 self.lexiconObject = Lexicon.objects.get(name = self.lexicon)
-            except Lexicon.DoesNotExist as e:
-                raise CommandError('Error: There is not a lexicon with that name\n ' + e)
+            except Lexicon.DoesNotExist:
+                raise CommandError('Error: There is not a lexicon with that name: ' + self.lexicon)
 
         self.stdout.write("INFO\tinput file: %s\n" % self.input_file)
 
