@@ -111,7 +111,7 @@ Setup virtual environment setup for backend:
 
 Get the source and install its particular dependencies:
 
-    git clone https://gitlab.com/linguatec/linguatec-lexicon.git /srv/backend_git
+    git clone https://github.com/ribaguifi/linguatec-lexicon.git /srv/backend_git
     pip3 install -r /srv/backend_git/requirements.txt
     pip3 install -e /srv/backend_git/
 
@@ -186,7 +186,7 @@ Prepare a virtual environment to install the particular packages for the fronten
 
 Get the source and install its particular dependencies:
 
-    git clone https://gitlab.com/linguatec/linguatec-lexicon-frontend /srv/frontend_git
+    git clone https://github.com/ribaguifi/linguatec-lexicon-frontend.git /srv/frontend_git
     pip3 install -r /srv/frontend_git/requirements.txt
     pip3 install -e /srv/frontend_git/
 
