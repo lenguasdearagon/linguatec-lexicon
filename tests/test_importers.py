@@ -217,7 +217,7 @@ class ImportVariationTestCase(TestCase):
                      variation='benasqués', verbosity=4)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
-            'word__id').order_by('word__id').distinct()
+            'word__id').order_by('word__id').distinct('word__id')
         self.assertEqual(self.NUMBER_OF_ENTRIES, qs.count())
 
     def test_import_invalid_empty_row(self):
@@ -227,7 +227,7 @@ class ImportVariationTestCase(TestCase):
                      variation='benasqués', verbosity=3, stdout=out)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
-            'word__id').order_by('word__id').distinct()
+            'word__id').order_by('word__id').distinct('word__id')
         self.assertEqual(0, qs.count())
         self.assertIn('error', out.getvalue())
 
@@ -239,7 +239,7 @@ class ImportVariationTestCase(TestCase):
                      variation='benasqués', verbosity=4)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
-            'word__id').order_by('word__id').distinct()
+            'word__id').order_by('word__id').distinct('word__id')
         self.assertEqual(FIXTURE_NUMBER_OF_ENTRIES, qs.count())
 
     def test_import_variation_optional_on_dry_run(self):
@@ -247,7 +247,7 @@ class ImportVariationTestCase(TestCase):
         call_command('importvariation', sample_path, dry_run=True, verbosity=4)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
-            'word__id').order_by('word__id').distinct()
+            'word__id').order_by('word__id').distinct('word__id')
         self.assertEqual(0, qs.count())
 
     def test_import_invalid_unkown_gramcat(self):
