@@ -52,8 +52,8 @@ jobs:
           # exit-zero treats all errors as warnings.
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
 
-      - name: Run migrations
-        run: python3 manage.py migrate
+      #- name: Run migrations
+      #   run: python3 manage.py migrate
       - name: Run tests
         run: |
           runtests.py
