@@ -41,7 +41,7 @@ jobs:
           pip install flake8 pytest
           pip install coverage
           pip3 install -r requirements.txt
-          pip3 install -e linguatec-lexicon/
+          pip3 install -e .
           
           
           
