@@ -61,5 +61,5 @@ jobs:
         
         env:
           DATABASE_URL: postgis://testuser:s3cretPass@localhost:5432/test_lexicon
-          POSTGRES_HOST: postgres
+          POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
