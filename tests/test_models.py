@@ -100,6 +100,12 @@ class MultipleGramCatsTestCase(TestCase):
 
 
 class VerbalConjugationModelTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.lexicon = Lexicon.objects.create(
+            name='es-ar', src_language='es', dst_language='ar',
+        )
+
     def setUp(self):
         # importdata requires that GramaticalCategories are initialized
         base_path = os.path.dirname(os.path.abspath(__file__))
@@ -109,7 +115,7 @@ class VerbalConjugationModelTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/verbal-conjugation.xlsx')
-        call_command('importdata', sample_path)
+        call_command('importdata', sample_path, self.lexicon.name)
 
     def test_extract_verbal_conjugation(self):
         word = Word.objects.get(term="abarcar")

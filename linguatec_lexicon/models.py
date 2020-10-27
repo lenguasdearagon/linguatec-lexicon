@@ -21,7 +21,7 @@ class Lexicon(models.Model):
     for a collection of words in Spanish.
 
     """
-    name = models.CharField(max_length=32)
+    name = models.CharField(unique=True, max_length=32)
     description = models.TextField(blank=True)
     # TODO use ISO 639 codes??? https://www.iso.org/iso-639-language-codes.html
     src_language = models.CharField(max_length=16)
