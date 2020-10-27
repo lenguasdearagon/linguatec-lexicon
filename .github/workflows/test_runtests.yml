@@ -56,7 +56,7 @@ jobs:
       #   run: python3 manage.py migrate
       - name: Run tests
         run: |
-          runtests.py
+          python3 runtests.py
           coverage run --source linguatec_lexicon runtests.py --settings tests.settings_postgres --parallel 1
           coverage html
         
