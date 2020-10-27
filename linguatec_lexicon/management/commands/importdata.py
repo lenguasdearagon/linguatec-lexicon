@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 
 from linguatec_lexicon.models import (
@@ -56,6 +56,10 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('input_file', type=str)
         parser.add_argument(
+            'lexicon_name', type=str,
+            help="Select the lexicon where data will be imported",
+        )
+        parser.add_argument(
             '--dry-run', action='store_true', dest='dry_run',
             help="Just validate input file; don't actually import to database.",
         )
@@ -63,17 +67,13 @@ class Command(BaseCommand):
             '--allow-partial', action='store_true', dest='allow_partial',
             help="Allow verbs with partial or unknown format conjugations. USE WITH CAUTION",
         )
-        parser.add_argument(
-            '--lexicon', action='store',dest='lexicon',
-            help="Import data from a .xlsx to an already existing lexicon object",
-        )
 
     def handle(self, *args, **options):
         self.dry_run = options['dry_run']
         self.verbosity = options['verbosity']
         self.input_file = options['input_file']
         self.allow_partial = options['allow_partial']
-        self.lexicon = options['lexicon']
+        self.lexicon_name = options['lexicon_name']
 
         # check that GramaticalCategories are initialized
         if not GramaticalCategory.objects.all().exists():
@@ -84,11 +84,10 @@ class Command(BaseCommand):
             )
 
         # check that a lexicon with that name exist
-        if(self.lexicon):
-            try:
-                self.lexiconObject = Lexicon.objects.get(name = self.lexicon)
-            except Lexicon.DoesNotExist:
-                raise CommandError('Error: There is not a lexicon with that name: ' + self.lexicon)
+        try:
+            self.lexicon = Lexicon.objects.get(name = self.lexicon_name)
+        except Lexicon.DoesNotExist:
+            raise CommandError('Error: There is not a lexicon with that name: ' + self.lexicon_name)
 
         self.stdout.write("INFO\tinput file: %s\n" % self.input_file)
 
@@ -275,21 +274,11 @@ class Command(BaseCommand):
             self.populate_verbal_conjugation(word, gramcats, conjugation_str)
 
     def write_to_database(self):
-        # TODO allow to use an existing Lexicon or pass as args the new Lexicon parameters
-        if(self.lexicon):
-            lex = self.lexiconObject
-        else:
-            lex, _ = Lexicon.objects.get_or_create(
-                src_language="es",
-                dst_language="ar",
-                defaults={'name': "diccionario linguatec"}
-            )
-        
         count_words = 0
         count_entries = 0
         count_examples = 0
         for _, word in self.cleaned_data.items():
-            word.lexicon_id = lex.pk
+            word.lexicon_id = self.lexicon.pk
             word.save()
             count_words += 1
 
