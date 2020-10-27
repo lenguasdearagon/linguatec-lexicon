@@ -60,6 +60,6 @@ jobs:
           coverage html
         
         env:
-          DATABASE_URL: postgis://testuser:s3cretPass@localhost:5432/test_lexicon
-          POSTGRES_HOST: localhost
+          DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+          POSTGRES_HOST: postgres
           POSTGRES_PORT: 5432
