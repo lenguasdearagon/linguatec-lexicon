@@ -10,10 +10,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     services:
-      postgres:  
-        image: mdillon/postgis:10
+      postgres:
+        image: postgres
         ports:
           - 5432:5432
         env:
