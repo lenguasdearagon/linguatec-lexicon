@@ -46,7 +46,7 @@ class WordManager(models.Manager):
 
         return query
 
-    def search(self, query):
+    def search(self, query, lex):
         MIN_SIMILARITY = 0.3
         query = self._clean_search_query(query)
 
@@ -54,18 +54,18 @@ class WordManager(models.Manager):
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
             iregex=r"\b{0}\b"
-            return self.filter(term__iregex=iregex.format(query))
+            return self.filter(term__iregex=iregex.format(query),lexicon=lex)
         else:
             filter_query = (
                 Q(term=query) |
                 Q(term__startswith=query) |
                 Q(term__endswith=query)
             )
-            return self.filter(filter_query)
+            return self.filter(filter_query,lexicon=lex)
 
         # sort results by trigram similarity
         qs = self.filter(
-                term__iregex=iregex.format(query)
+                term__iregex=iregex.format(query),lexicon=lex
             ).annotate(similarity=TrigramSimilarity('term', query)
             ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
         return qs
