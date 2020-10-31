@@ -50,6 +50,10 @@ class WordManager(models.Manager):
         MIN_SIMILARITY = 0.3
         query = self._clean_search_query(query)
 
+        #Get and use the key of the Lexicon instead of the name
+        if lex != None:
+            key_lex = Lexicon.objects.get(name=lex)
+
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
@@ -57,7 +61,7 @@ class WordManager(models.Manager):
             if lex==None:
                 return self.filter(term__iregex=iregex.format(query))
             else:
-                return self.filter(term__iregex=iregex.format(query),lexicon=lex)
+                return self.filter(term__iregex=iregex.format(query),lexicon=key_lex)
         else:
             filter_query = (
                 Q(term=query) |
@@ -67,7 +71,7 @@ class WordManager(models.Manager):
             if lex==None:
                 return self.filter(filter_query)
             else:
-                return self.filter(filter_query,lexicon=lex)
+                return self.filter(filter_query,lexicon=key_lex)
 
         # sort results by trigram similarity
         if lex==None:
@@ -77,7 +81,7 @@ class WordManager(models.Manager):
                 ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
         else:
             qs = self.filter(
-                    term__iregex=iregex.format(query),lexicon=lex
+                    term__iregex=iregex.format(query),lexicon=key_lex
                 ).annotate(similarity=TrigramSimilarity('term', query)
                 ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
         return qs
