@@ -172,7 +172,7 @@ class Command(BaseCommand):
             # 3) trigam similarity (only as suggestion)
             message = 'Word "{}" not found in the database.'.format(term)
             suggestions = None
-            qs = Word.objects.search(term)[:4]
+            qs = Word.objects.search(term,None)[:4]
             if qs.exists():
                 suggestions = ', '.join(qs.values_list('term', flat=True))
                 message += ' Did you mean: {}?'.format(suggestions)

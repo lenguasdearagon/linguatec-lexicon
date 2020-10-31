@@ -54,20 +54,32 @@ class WordManager(models.Manager):
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
             iregex=r"\b{0}\b"
-            return self.filter(term__iregex=iregex.format(query),lexicon=lex)
+            if lex==None:
+                return self.filter(term__iregex=iregex.format(query))
+            else:
+                return self.filter(term__iregex=iregex.format(query),lexicon=lex)
         else:
             filter_query = (
                 Q(term=query) |
                 Q(term__startswith=query) |
                 Q(term__endswith=query)
             )
-            return self.filter(filter_query,lexicon=lex)
+            if lex==None:
+                return self.filter(filter_query)
+            else:
+                return self.filter(filter_query,lexicon=lex)
 
         # sort results by trigram similarity
-        qs = self.filter(
-                term__iregex=iregex.format(query),lexicon=lex
-            ).annotate(similarity=TrigramSimilarity('term', query)
-            ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
+        if lex==None:
+            qs = self.filter(
+                    term__iregex=iregex.format(query)
+                ).annotate(similarity=TrigramSimilarity('term', query)
+                ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
+        else:
+            qs = self.filter(
+                    term__iregex=iregex.format(query),lexicon=lex
+                ).annotate(similarity=TrigramSimilarity('term', query)
+                ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
         return qs
 
     def search_near(self, query):

@@ -162,15 +162,15 @@ class WordManagerTestCase(TestCase):
     fixtures = ['lexicon-sample.json']
 
     def test_search_found(self):
-        result = Word.objects.search("edad")
+        result = Word.objects.search("edad",1)
         self.assertEqual(1, result.count())
 
     def test_search_not_found(self):
-        result = Word.objects.search("no sense word")
+        result = Word.objects.search("no sense word",1)
         self.assertEqual(0, result.count())
 
     def test_search_null_query(self):
-        result = Word.objects.search(None)
+        result = Word.objects.search(None,1)
         self.assertEqual(0, result.count())
 
     @unittest.skipUnless(connection.vendor == 'postgresql', "requires PostgreSQL backend")
@@ -180,9 +180,9 @@ class WordManagerTestCase(TestCase):
             Word(lexicon_id=1, term="hacer camino"),
             Word(lexicon_id=1, term="hacer"),
         ])
-        result = Word.objects.search("hacer")
+        result = Word.objects.search("hacer",1)
         self.assertEqual(result[0].term, "hacer")
 
     def test_search_query_unbalanced_parenthesis(self):
-        result = Word.objects.search("largo(a")
+        result = Word.objects.search("largo(a",1)
         self.assertEqual(0, result.count())
