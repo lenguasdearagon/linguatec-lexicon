@@ -46,7 +46,7 @@ class WordManager(models.Manager):
 
         return query
 
-    def search(self, query, lex):
+    def search(self, query, lex=None):
         MIN_SIMILARITY = 0.3
         query = self._clean_search_query(query)
 
