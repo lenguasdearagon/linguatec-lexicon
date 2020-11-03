@@ -51,14 +51,14 @@ class WordManager(models.Manager):
         query = self._clean_search_query(query)
 
         #Get and use the key of the Lexicon instead of the name
-        if lex != None:
+        if lex is not None:
             key_lex = Lexicon.objects.get(name=lex)
 
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
             iregex=r"\b{0}\b"
-            if lex==None:
+            if lex is None:
                 return self.filter(term__iregex=iregex.format(query))
             else:
                 return self.filter(term__iregex=iregex.format(query),lexicon=key_lex)
@@ -68,13 +68,13 @@ class WordManager(models.Manager):
                 Q(term__startswith=query) |
                 Q(term__endswith=query)
             )
-            if lex==None:
+            if lex is None:
                 return self.filter(filter_query)
             else:
                 return self.filter(filter_query,lexicon=key_lex)
 
         # sort results by trigram similarity
-        if lex==None:
+        if lex is None:
             qs = self.filter(
                     term__iregex=iregex.format(query)
                 ).annotate(similarity=TrigramSimilarity('term', query)

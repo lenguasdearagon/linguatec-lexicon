@@ -110,7 +110,7 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
             query = query.strip()
         if lex is not None:
             lex = lex.strip()
-        queryset = Word.objects.search(query,lex)
+        queryset = Word.objects.search(query, lex)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
