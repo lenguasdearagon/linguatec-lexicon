@@ -53,37 +53,28 @@ class WordManager(models.Manager):
         #Get and use the key of the Lexicon instead of the name
         if lex is not None:
             key_lex = Lexicon.objects.get(name=lex)
+            qs = self.filter(lexicon=key_lex)
+        else:
+            qs = self
 
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
             iregex=r"\b{0}\b"
-            if lex is None:
-                return self.filter(term__iregex=iregex.format(query))
-            else:
-                return self.filter(term__iregex=iregex.format(query),lexicon=key_lex)
+            return qs.filter(term__iregex=iregex.format(query))
         else:
             filter_query = (
                 Q(term=query) |
                 Q(term__startswith=query) |
                 Q(term__endswith=query)
             )
-            if lex is None:
-                return self.filter(filter_query)
-            else:
-                return self.filter(filter_query,lexicon=key_lex)
+            return qs.filter(filter_query)
 
         # sort results by trigram similarity
-        if lex is None:
-            qs = self.filter(
-                    term__iregex=iregex.format(query)
-                ).annotate(similarity=TrigramSimilarity('term', query)
-                ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
-        else:
-            qs = self.filter(
-                    term__iregex=iregex.format(query),lexicon=key_lex
-                ).annotate(similarity=TrigramSimilarity('term', query)
-                ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
+        qs = qs.filter(
+                term__iregex=iregex.format(query)
+            ).annotate(similarity=TrigramSimilarity('term', query)
+            ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
         return qs
 
     def search_near(self, query):

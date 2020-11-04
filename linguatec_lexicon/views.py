@@ -105,11 +105,10 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False)
     def search(self, request):
         query = self.request.query_params.get('q', None)
-        lex = self.request.query_params.get('l', None)
+        lex = self.request.query_params.get('l', '')
         if query is not None:
             query = query.strip()
-        if lex is not None:
-            lex = lex.strip()
+        lex = lex.strip()
         queryset = Word.objects.search(query, lex)
         page = self.paginate_queryset(queryset)
         if page is not None:
