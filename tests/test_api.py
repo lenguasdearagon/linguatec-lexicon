@@ -16,14 +16,14 @@ class ApiTestCase(TestCase):
         self.assertEqual(200, resp.status_code)
 
     def test_word_search_with_results(self):
-        resp = self.client.get('/api/words/search/?q=echar')
+        resp = self.client.get('/api/words/search/?q=echar&l=diccionario linguatec')
         self.assertEqual(200, resp.status_code)
 
         resp_json = resp.json()
         self.assertEqual(1, resp_json["count"])
 
     def test_word_search_no_results(self):
-        resp = self.client.get('/api/words/search/?q=foo')
+        resp = self.client.get('/api/words/search/?q=foo&l=diccionario linguatec')
         self.assertEqual(200, resp.status_code)
 
         resp_json = resp.json()
@@ -79,7 +79,7 @@ class SearchTestCase(TestCase):
                 'gramcatical-categories.json', 'words-search.json']
 
     def do_and_check_query(self, query, expected_results):
-        resp = self.client.get('/api/words/search/?q={}'.format(query))
+        resp = self.client.get('/api/words/search/?q={}&l=diccionario linguatec'.format(query))
         self.assertEqual(200, resp.status_code)
 
         expected_results = set(expected_results)
