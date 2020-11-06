@@ -27,3 +27,12 @@ The `querystring` follows the format described by [Django admin search](https://
 | None	| icontains |
 
 For example, `=foo` should perform a search of `foo` in a case-insensitive **exact** match.
+
+
+### Search words by term
+List the words that have the same term as the value of q parameter. If there is not an exact match it list similar words.
+`GET /words/search/?q=term`
+
+### Search words by term and lexicon
+List the word that have the same term as the value of q parameter and the same lexicon (or lexicon key) as the value of l parameter. If there is not an exact match it list similar words.
+`GET /words/search/?q=term&l=lexicon`

@@ -51,12 +51,11 @@ class WordManager(models.Manager):
         query = self._clean_search_query(query)
 
         #Get and use the key of the Lexicon instead of the name
-        if lex is not None:
+        if lex is None or lex == '':
+            qs = self
+        else:
             key_lex = Lexicon.objects.get(name=lex)
             qs = self.filter(lexicon=key_lex)
-        else:
-            qs = self
-
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
