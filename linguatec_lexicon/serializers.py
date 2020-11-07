@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import (DiatopicVariation, Entry, Example, GramaticalCategory,
-                     VerbalConjugation, Word)
+                     VerbalConjugation, Word, Lexicon)
 
 
 class ExampleSerializer(serializers.ModelSerializer):
@@ -56,3 +56,9 @@ class WordNearSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
         fields = ('url', 'id', 'term')
+
+
+class LexiconSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lexicon
+        fields = ('term', 'src_language', 'dst_language')
