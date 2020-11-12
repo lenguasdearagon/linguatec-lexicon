@@ -33,7 +33,7 @@ class LexiconAPITestCase(TestCase):
     fixtures = ['lexicon-sample.json']
 
     def test_lexicon(self):
-        resp = self.client.get('/api/lexicon/get_lexicon_names/')
+        resp = self.client.get('/api/lexicons/')
         self.assertEqual(200, resp.status_code)
 
         resp_json = resp.json()
