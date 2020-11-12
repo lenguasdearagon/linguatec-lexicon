@@ -5,7 +5,7 @@ from . import views
 
 
 router = routers.DefaultRouter()
-router.register(r'lexicon', views.LexiconViewSet)
+router.register(r'lexicons', views.LexiconViewSet)
 router.register(r'words', views.WordViewSet)
 router.register(r'gramcats', views.GramaticalCategoryViewSet)
 
