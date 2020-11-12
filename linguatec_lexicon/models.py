@@ -21,18 +21,11 @@ class Lexicon(models.Model):
     for a collection of words in Spanish.
 
     """
-    
-    @property
-    def code(self):
-        return (self.src_language + '-' + self.dst_language)
-
     name = models.CharField(unique=True, max_length=32)
     description = models.TextField(blank=True)
     # TODO use ISO 639 codes??? https://www.iso.org/iso-639-language-codes.html
-    src_language = models.CharField(max_length=2)
-    dst_language = models.CharField(max_length=2)
-
-    unique_together = [['src_language', 'dst_language']]
+    src_language = models.CharField(max_length=16)
+    dst_language = models.CharField(max_length=16)
 
     def __str__(self):
         return self.name
@@ -61,7 +54,7 @@ class WordManager(models.Manager):
         if lex is None or lex == '':
             qs = self
         else:
-            key_lex = Lexicon.objects.get(src_language=lex[:2],dst_language=lex[3:])
+            key_lex = Lexicon.objects.get(name=lex)
             qs = self.filter(lexicon=key_lex)
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
