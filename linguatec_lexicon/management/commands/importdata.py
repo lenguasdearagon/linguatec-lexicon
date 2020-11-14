@@ -51,12 +51,19 @@ def is_verb(gramcats):
     return False
 
 
+def get_src_language_from_lexicon_code(lex_code):
+    return lex_code[:2]
+
+def get_dst_language_from_lexicon_code(lex_code):
+    return lex_code[3:]
+
+
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('input_file', type=str)
         parser.add_argument(
-            'lexicon_name', type=str,
+            'lexicon_code', type=str,
             help="Select the lexicon where data will be imported",
         )
         parser.add_argument(
@@ -73,7 +80,7 @@ class Command(BaseCommand):
         self.verbosity = options['verbosity']
         self.input_file = options['input_file']
         self.allow_partial = options['allow_partial']
-        self.lexicon_name = options['lexicon_name']
+        self.lexicon_code = options['lexicon_code']
 
         # check that GramaticalCategories are initialized
         if not GramaticalCategory.objects.all().exists():
@@ -83,11 +90,14 @@ class Command(BaseCommand):
                 "data for example running manage.py importgramcat."
             )
 
-        # check that a lexicon with that name exist
+        # check that a lexicon with that code exist
         try:
-            self.lexicon = Lexicon.objects.get(name = self.lexicon_name)
+            src = get_src_language_from_lexicon_code(self.lexicon_code)
+            dst = get_dst_language_from_lexicon_code(self.lexicon_code)
+
+            self.lexicon = Lexicon.objects.get(src_language = src, dst_language = dst)
         except Lexicon.DoesNotExist:
-            raise CommandError('Error: There is not a lexicon with that name: ' + self.lexicon_name)
+            raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 
         self.stdout.write("INFO\tinput file: %s\n" % self.input_file)
 

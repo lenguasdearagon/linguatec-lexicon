@@ -115,7 +115,7 @@ class VerbalConjugationModelTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/verbal-conjugation.xlsx')
-        call_command('importdata', sample_path, self.lexicon.name)
+        call_command('importdata', sample_path, self.lexicon.code)
 
     def test_extract_verbal_conjugation(self):
         word = Word.objects.get(term="abarcar")
