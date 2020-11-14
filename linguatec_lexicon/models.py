@@ -24,8 +24,17 @@ class Lexicon(models.Model):
     name = models.CharField(unique=True, max_length=32)
     description = models.TextField(blank=True)
     # TODO use ISO 639 codes??? https://www.iso.org/iso-639-language-codes.html
-    src_language = models.CharField(max_length=16)
-    dst_language = models.CharField(max_length=16)
+    src_language = models.CharField(max_length=2)
+    dst_language = models.CharField(max_length=2)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['src_language', 'dst_language'], name='src_language-dst_language')
+        ]
+
+    @property
+    def code(self):
+        return (self.src_language + '-' + self.dst_language)
 
     def __str__(self):
         return self.name
@@ -91,7 +100,12 @@ class Word(models.Model):
 
     """
     lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE, related_name="words")
-    term = models.CharField(unique=True, max_length=64)
+    term = models.CharField(max_length=64)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['lexicon', 'term'], name='lexicon-term')
+        ]
 
     objects = WordManager()
 

@@ -154,19 +154,28 @@ class ImporterTestCase(TestCase):
         NUMBER_OF_WORDS_FIRST_INPUT = 12
         NUMBER_OF_ENTRIES_FIRST_INPUT = 16
 
-        NUMBER_OF_WORDS_SECOND_INPUT = 4
-        NUMBER_OF_ENTRIES_SECOND_INPUT = 4
+        NUMBER_OF_WORDS_SECOND_INPUT = 12
+        NUMBER_OF_ENTRIES_SECOND_INPUT = 16
+
+        NUMBER_OF_WORDS_THIRD_INPUT = 4
+        NUMBER_OF_ENTRIES_THIRD_INPUT = 4
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
         call_command('importdata', sample_path, self.LEXICON_NAME)
 
+        sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
+        call_command('importdata', sample_path, another_lexicon.name)
+
         sample_path = os.path.join(base_path, 'fixtures/abcd.xlsx')
         call_command('importdata', sample_path, another_lexicon.name)
 
-        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT + NUMBER_OF_WORDS_SECOND_INPUT, Word.objects.count())
-        self.assertEqual(NUMBER_OF_ENTRIES_FIRST_INPUT + NUMBER_OF_ENTRIES_SECOND_INPUT, Entry.objects.count())
+        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT + NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT, Word.objects.count())
+        self.assertEqual(NUMBER_OF_ENTRIES_FIRST_INPUT + NUMBER_OF_ENTRIES_SECOND_INPUT + NUMBER_OF_ENTRIES_THIRD_INPUT, Entry.objects.count())
 
+        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT, Word.objects.filter(lexicon=(Lexicon.objects.get(name=self.LEXICON_NAME))).count())
+        self.assertEqual(NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT, Word.objects.filter(lexicon=another_lexicon).count())
+        self.assertEqual(2,Lexicon.objects.count())
 
 
 class ImportGramCatTestCase(TestCase):
