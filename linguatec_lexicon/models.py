@@ -76,14 +76,20 @@ class WordManager(models.Manager):
             ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
         return qs
 
-    def search_near(self, query):
+    def search_near(self, query, lex=None):
         # https://docs.djangoproject.com/en/2.1/ref/contrib/postgres/search/#trigram-similarity
         # https://www.postgresql.org/docs/current/pgtrgm.html
         # TODO which is the limit of similarity:
         # 0 means totally different
         # 1 means identical
+        if lex is None or lex == '':
+            qs = self
+        else:
+            key_lex = Lexicon.objects.get(name=lex)
+            qs = self.filter(lexicon=key_lex)
+
         MIN_SIMILARITY = 0.2
-        qs = self.annotate(
+        qs = qs.annotate(
             similarity=TrigramSimilarity('term', query),
         ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
 

@@ -84,7 +84,7 @@ class LexiconViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows lexicons to be viewed.
     """
-    queryset = Lexicon.objects.all().order_by('name')
+    queryset = Lexicon.objects.all().order_by('src_language','dst_language')
     serializer_class = LexiconSerializer
     pagination_class = DefaultLimitOffsetPagination
 
@@ -101,7 +101,9 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
     def near(self, request):
         self.serializer_class = WordNearSerializer
         query = self.request.query_params.get('q', None)
-        queryset = Word.objects.search_near(query)
+        lex = self.request.query_params.get('l', '')
+        lex = lex.strip()
+        queryset = Word.objects.search_near(query, lex)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
