@@ -55,25 +55,31 @@ class WordManager(models.Manager):
 
         return query
 
-    def search(self, query):
+    def search(self, query, lex=None):
         MIN_SIMILARITY = 0.3
         query = self._clean_search_query(query)
 
+        #Get and use the key of the Lexicon instead of the name
+        if lex is None or lex == '':
+            qs = self
+        else:
+            key_lex = Lexicon.objects.get(name=lex)
+            qs = self.filter(lexicon=key_lex)
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
             iregex=r"\b{0}\b"
-            return self.filter(term__iregex=iregex.format(query))
+            return qs.filter(term__iregex=iregex.format(query))
         else:
             filter_query = (
                 Q(term=query) |
                 Q(term__startswith=query) |
                 Q(term__endswith=query)
             )
-            return self.filter(filter_query)
+            return qs.filter(filter_query)
 
         # sort results by trigram similarity
-        qs = self.filter(
+        qs = qs.filter(
                 term__iregex=iregex.format(query)
             ).annotate(similarity=TrigramSimilarity('term', query)
             ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
