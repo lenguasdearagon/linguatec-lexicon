@@ -12,8 +12,8 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from .forms import ValidatorForm
-from .models import GramaticalCategory, Word
-from .serializers import GramaticalCategorySerializer, WordSerializer, WordNearSerializer
+from .models import GramaticalCategory, Word, Lexicon
+from .serializers import GramaticalCategorySerializer, WordSerializer, WordNearSerializer, LexiconSerializer
 
 
 class DataValidatorView(TemplateView):
@@ -80,6 +80,15 @@ class DefaultLimitOffsetPagination(LimitOffsetPagination):
     max_limit = 100
 
 
+class LexiconViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint that allows lexicons to be viewed.
+    """
+    queryset = Lexicon.objects.all().order_by('src_language','dst_language')
+    serializer_class = LexiconSerializer
+    pagination_class = DefaultLimitOffsetPagination
+
+
 class WordViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows words to be viewed.
@@ -92,7 +101,9 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
     def near(self, request):
         self.serializer_class = WordNearSerializer
         query = self.request.query_params.get('q', None)
-        queryset = Word.objects.search_near(query)
+        lex = self.request.query_params.get('l', '')
+        lex = lex.strip()
+        queryset = Word.objects.search_near(query, lex)
 
         page = self.paginate_queryset(queryset)
         if page is not None:
