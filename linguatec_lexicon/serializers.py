@@ -49,7 +49,7 @@ class WordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Word
-        fields = ('url', 'term', 'gramcats', 'entries')
+        fields = ('url', 'lexicon', 'term', 'gramcats', 'entries')
 
 
 class WordNearSerializer(serializers.ModelSerializer):
@@ -61,4 +61,4 @@ class WordNearSerializer(serializers.ModelSerializer):
 class LexiconSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lexicon
-        fields = ('code', 'src_language', 'dst_language')
+        fields = ('id', 'code', 'src_language', 'dst_language')
