@@ -102,14 +102,14 @@ def validate_variations():
         xlsx_fullpath = os.path.join(VARIANTS_PATH, xlsx)
         print("-" * 80)
         print(xlsx_fullpath)
-        management.call_command('importvariation', xlsx_fullpath, verbosity=3, dry_run=True)
+        management.call_command('importvariation', xlsx_fullpath, 'es-ar', verbosity=3, dry_run=True)
 
 def import_variations():
     for variation, xlsx in VARIANTS_MAPPING.items():
         print("-" * 80)
         print(variation, xlsx)
         xlsx_fullpath = os.path.join(VARIANTS_PATH, xlsx)
-        management.call_command('importvariation', xlsx_fullpath, verbosity=3, variation=variation)
+        management.call_command('importvariation', xlsx_fullpath, 'es-ar', verbosity=3, variation=variation)
 
 
 def main():
@@ -132,7 +132,7 @@ def main():
             ./manage.py importdata vocabulario-castellano-aragones.xlsx
 
         5. To import diatopic variations data run:
-            ./manage.py importvariation variation_file.xlsx --variation variation_name --verbosity 3 --dry-run
+            ./manage.py importvariation variation_file.xlsx lex_code --variation variation_name --verbosity 3 --dry-run
     """)
 
 def help():
@@ -157,7 +157,7 @@ python initialize_staging.py --validate-variations
 python initialize_staging.py --import-variations
 
 # to import only a specific file
-# ./manage.py importvariation -v3 --variation "Tensino" "ALTO GÁLLEGO-tensino-2020-01-20.xlsx"
+# ./manage.py importvariation -v3 --variation "Tensino" "ALTO GÁLLEGO-tensino-2020-01-20.xlsx es-ar"
     """)
 
 def drop_all():

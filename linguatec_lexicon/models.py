@@ -40,6 +40,13 @@ class Lexicon(models.Model):
         return self.name
 
 
+
+def get_src_language_from_lexicon_code(lex_code):
+    return lex_code[:2]
+
+def get_dst_language_from_lexicon_code(lex_code):
+    return lex_code[3:]
+
 class WordManager(models.Manager):
     TERM_PUNCTUATION_SIGNS = '¡!¿?'
 
@@ -63,7 +70,10 @@ class WordManager(models.Manager):
         if lex is None or lex == '':
             qs = self
         else:
-            key_lex = Lexicon.objects.get(name=lex)
+            src = get_src_language_from_lexicon_code(lex)
+            dst = get_dst_language_from_lexicon_code(lex)
+
+            key_lex = Lexicon.objects.get(src_language=src, dst_language=dst)
             qs = self.filter(lexicon=key_lex)
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
@@ -94,7 +104,10 @@ class WordManager(models.Manager):
         if lex is None or lex == '':
             qs = self
         else:
-            key_lex = Lexicon.objects.get(name=lex)
+            src = get_src_language_from_lexicon_code(lex)
+            dst = get_dst_language_from_lexicon_code(lex)
+
+            key_lex = Lexicon.objects.get(src_language=src, dst_language=dst)
             qs = self.filter(lexicon=key_lex)
 
         MIN_SIMILARITY = 0.2
@@ -243,7 +256,7 @@ class VerbalConjugation(models.Model):
         if self.model_word is None:
             return None
         try:
-            return Word.objects.get(term=self.model_word).pk
+            return Word.objects.get(term=self.model_word, lexicon=self.entry.word.lexicon).pk
         except Word.DoesNotExist:
             # TODO log this error to detect database inconsistency
             return None
