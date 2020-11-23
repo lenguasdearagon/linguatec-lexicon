@@ -100,6 +100,7 @@ class Command(BaseCommand):
                     write_list[2].append(entry.translation)
 
                 write_list[1] = list(set(write_list[1]))
+                write_list[1].sort()
                 write_list[1] = ' // '.join(write_list[1])
                 write_list[2] = ' // '.join(write_list[2])
                 writer.writerow(write_list)
