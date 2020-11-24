@@ -13,7 +13,7 @@ from linguatec_lexicon.models import (DiatopicVariation, Entry, Example,
 
 class ImporterTestCase(TestCase):
     LEXICON_NAME = 'es-ar'
-
+    LEXICON_CODE = 'es-ar'
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -48,7 +48,7 @@ class ImporterTestCase(TestCase):
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
-        call_command('importdata', sample_path, self.LEXICON_NAME)
+        call_command('importdata', sample_path, self.LEXICON_CODE)
 
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
         self.assertEqual(NUMBER_OF_ENTRIES, Entry.objects.count())
@@ -63,7 +63,7 @@ class ImporterTestCase(TestCase):
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/abcd.xlsx')
-        call_command('importdata', sample_path, self.LEXICON_NAME)
+        call_command('importdata', sample_path, self.LEXICON_CODE)
 
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
 
@@ -72,7 +72,7 @@ class ImporterTestCase(TestCase):
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
-        call_command('importdata', sample_path, self.LEXICON_NAME, dry_run=True)
+        call_command('importdata', sample_path, self.LEXICON_CODE, dry_run=True)
 
         self.assertEqual(lexicon_initial, Lexicon.objects.count())
         self.assertEqual(0, Word.objects.count())
@@ -84,7 +84,7 @@ class ImporterTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/invalid-gramcat-unknown.xlsx')
-        call_command('importdata', sample_path, self.LEXICON_NAME, stdout=out)
+        call_command('importdata', sample_path, self.LEXICON_CODE, stdout=out)
 
         # data shouldn't be imported if there are any errors
         self.assertEqual(0, Word.objects.count())
@@ -95,7 +95,7 @@ class ImporterTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/invalid-gramcat-empty.xlsx')
-        call_command('importdata', sample_path, self.LEXICON_NAME, stdout=out)
+        call_command('importdata', sample_path, self.LEXICON_CODE, stdout=out)
 
         # data shouldn't be imported if there are any errors
         self.assertEqual(0, Word.objects.count())
@@ -108,7 +108,7 @@ class ImporterTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/multiple-gramcats.xlsx')
-        call_command('importdata', sample_path, self.LEXICON_NAME)
+        call_command('importdata', sample_path, self.LEXICON_CODE)
 
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
         self.assertEqual(NUMBER_OF_ENTRIES, Entry.objects.count())
@@ -120,14 +120,14 @@ class ImporterTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/verbal-conjugation.xlsx')
-        call_command('importdata', sample_path, self.LEXICON_NAME)
+        call_command('importdata', sample_path, self.LEXICON_CODE)
 
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
         self.assertEqual(NUMBER_OF_CONJUGATIONS,
                          VerbalConjugation.objects.count())
 
         # check that conjugation is related to proper entry
-        word = Word.objects.get(term="abarcar")
+        word = Word.objects.get(term="abarcar",lexicon=Lexicon.objects.get(src_language=self.LEXICON_CODE[:2], dst_language=self.LEXICON_CODE[3:]))
         entry = word.entries.get(translation__contains="adubir")
         self.assertIsNotNone(entry.conjugation)
 
@@ -138,7 +138,7 @@ class ImporterTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/partial-verbal-conjugation.xlsx')
-        call_command('importdata', sample_path, self.LEXICON_NAME, allow_partial=True)
+        call_command('importdata', sample_path, self.LEXICON_CODE, allow_partial=True)
 
         self.assertEqual(NUMBER_OF_WORDS, Word.objects.count())
         self.assertEqual(NUMBER_OF_CONJUGATIONS,
@@ -154,19 +154,28 @@ class ImporterTestCase(TestCase):
         NUMBER_OF_WORDS_FIRST_INPUT = 12
         NUMBER_OF_ENTRIES_FIRST_INPUT = 16
 
-        NUMBER_OF_WORDS_SECOND_INPUT = 4
-        NUMBER_OF_ENTRIES_SECOND_INPUT = 4
+        NUMBER_OF_WORDS_SECOND_INPUT = 12
+        NUMBER_OF_ENTRIES_SECOND_INPUT = 16
+
+        NUMBER_OF_WORDS_THIRD_INPUT = 4
+        NUMBER_OF_ENTRIES_THIRD_INPUT = 4
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
-        call_command('importdata', sample_path, self.LEXICON_NAME)
+        call_command('importdata', sample_path, self.LEXICON_CODE)
+
+        sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
+        call_command('importdata', sample_path, another_lexicon.code)
 
         sample_path = os.path.join(base_path, 'fixtures/abcd.xlsx')
-        call_command('importdata', sample_path, another_lexicon.name)
+        call_command('importdata', sample_path, another_lexicon.code)
 
-        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT + NUMBER_OF_WORDS_SECOND_INPUT, Word.objects.count())
-        self.assertEqual(NUMBER_OF_ENTRIES_FIRST_INPUT + NUMBER_OF_ENTRIES_SECOND_INPUT, Entry.objects.count())
+        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT + NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT, Word.objects.count())
+        self.assertEqual(NUMBER_OF_ENTRIES_FIRST_INPUT + NUMBER_OF_ENTRIES_SECOND_INPUT + NUMBER_OF_ENTRIES_THIRD_INPUT, Entry.objects.count())
 
+        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT, Word.objects.filter(lexicon=(Lexicon.objects.get(src_language=self.LEXICON_CODE[:2], dst_language=self.LEXICON_CODE[3:]))).count())
+        self.assertEqual(NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT, Word.objects.filter(lexicon=another_lexicon).count())
+        self.assertEqual(2,Lexicon.objects.count())
 
 
 class ImportGramCatTestCase(TestCase):
@@ -222,11 +231,11 @@ class ImportVariationTestCase(TestCase):
 
         # initialize words on main language
         sample_path = cls.get_fixture_path('variation-sample-common.xlsx')
-        call_command('importdata', sample_path, lexicon.name)
+        call_command('importdata', sample_path, lexicon.code)
 
     def test_import(self):
         sample_path = self.get_fixture_path('variation-sample-benasques.xlsx')
-        call_command('importvariation', sample_path,
+        call_command('importvariation', sample_path, 'es-ar',
                      variation='benasqués', verbosity=4)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
@@ -236,7 +245,7 @@ class ImportVariationTestCase(TestCase):
     def test_import_invalid_empty_row(self):
         out = StringIO()
         sample_path = self.get_fixture_path('variation-empty-row.xlsx')
-        call_command('importvariation', sample_path,
+        call_command('importvariation', sample_path, 'es-ar',
                      variation='benasqués', verbosity=3, stdout=out)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
@@ -248,7 +257,7 @@ class ImportVariationTestCase(TestCase):
         FIXTURE_NUMBER_OF_ENTRIES = 4
 
         sample_path = self.get_fixture_path('variation-sample-benasques-extra-cols.xlsx')
-        call_command('importvariation', sample_path,
+        call_command('importvariation', sample_path, 'es-ar',
                      variation='benasqués', verbosity=4)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
@@ -257,7 +266,7 @@ class ImportVariationTestCase(TestCase):
 
     def test_import_variation_optional_on_dry_run(self):
         sample_path = self.get_fixture_path('variation-sample-benasques.xlsx')
-        call_command('importvariation', sample_path, dry_run=True, verbosity=4)
+        call_command('importvariation', sample_path, 'es-ar', dry_run=True, verbosity=4)
 
         qs = Entry.objects.filter(variation__isnull=False).values(
             'word__id').order_by('word__id').distinct('word__id')
@@ -266,7 +275,7 @@ class ImportVariationTestCase(TestCase):
     def test_import_invalid_unkown_gramcat(self):
         out = StringIO()
         sample_path = self.get_fixture_path('variation-unkown-gramcat.xlsx')
-        call_command('importvariation', sample_path,
+        call_command('importvariation', sample_path, 'es-ar',
                      dry_run=True, verbosity=3, stdout=out)
 
         self.assertIn('error', out.getvalue())
@@ -275,13 +284,13 @@ class ImportVariationTestCase(TestCase):
         VARIATION_NAME = 'benasqués'
         out = StringIO()
         sample_path = self.get_fixture_path('variation-missing-gramcat.xlsx')
-        call_command('importvariation', sample_path,
+        call_command('importvariation', sample_path, 'es-ar',
                      variation=VARIATION_NAME, verbosity=3, stdout=out)
 
         self.assertNotIn('error', out.getvalue())
 
         # should provide default value --> 'v.' (same as common entry)
-        common_entry = Word.objects.get(term='abarrancar')
+        common_entry = Word.objects.get(term='abarrancar', lexicon=Lexicon.objects.get(src_language='es', dst_language='ar'))
         variation_entry = Entry.objects.get(variation__name=VARIATION_NAME, word__term='abarrancar')
 
         self.assertListEqual(
@@ -292,7 +301,7 @@ class ImportVariationTestCase(TestCase):
     def test_import_invalid_missing_translation(self):
         out = StringIO()
         sample_path = self.get_fixture_path('variation-missing-translation.xlsx')
-        call_command('importvariation', sample_path,
+        call_command('importvariation', sample_path, 'es-ar',
                      dry_run=True, verbosity=3, stdout=out)
 
         self.assertIn('error', out.getvalue())
@@ -301,6 +310,6 @@ class ImportVariationTestCase(TestCase):
         # regression test: call with dry-run & variation parameters
         out = StringIO()
         sample_path = self.get_fixture_path('variation-sample-benasques.xlsx')
-        call_command('importvariation', sample_path,
+        call_command('importvariation', sample_path, 'es-ar',
                      variation='benas', dry_run=True, verbosity=3, stdout=out)
         self.assertNotIn('error', out.getvalue())
