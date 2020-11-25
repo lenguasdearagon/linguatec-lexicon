@@ -6,14 +6,24 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 
 from linguatec_lexicon.models import (DiatopicVariation, Entry,
-                                      GramaticalCategory, Word)
+                                      GramaticalCategory, Word, Lexicon)
 
+
+def get_src_language_from_lexicon_code(lex_code):
+    return lex_code[:2]
+
+def get_dst_language_from_lexicon_code(lex_code):
+    return lex_code[3:]
 
 class Command(BaseCommand):
     help = 'Imports diatopic variation Excel into the database'
 
     def add_arguments(self, parser):
         parser.add_argument('input_file', type=str)
+        parser.add_argument(
+            'lexicon_code', type=str,
+            help="Select the lexicon where data will be imported",
+        )
         parser.add_argument(
             '--variation',
             help='Diatopical variation of the data to be imported'
@@ -38,6 +48,7 @@ class Command(BaseCommand):
         self.input_file = options['input_file']
         self.dry_run = options['dry_run']
         self.verbosity = options['verbosity']
+        self.lexicon_code = options['lexicon_code']
 
         # validate input_file
         _, file_extension = os.path.splitext(self.input_file)
@@ -54,6 +65,16 @@ class Command(BaseCommand):
                 "Gramatical Categories should be initialized before importing "
                 "data for example running manage.py importgramcat."
             )
+
+        # check that a lexicon with that code exist
+        try:
+            src = get_src_language_from_lexicon_code(self.lexicon_code)
+            dst = get_dst_language_from_lexicon_code(self.lexicon_code)
+
+            self.lexicon = Lexicon.objects.get(src_language = src, dst_language = dst)
+        except Lexicon.DoesNotExist:
+            raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
+
 
         self.xlsx = pd.read_excel(self.input_file, sheet_name=None, header=None, usecols="A:C",
                                   names=['term', 'gramcats', 'translations'])
@@ -160,19 +181,19 @@ class Command(BaseCommand):
             })
             return None
         try:
-            return Word.objects.get(term=term)
+            return Word.objects.get(term=term, lexicon=self.lexicon)
         except Word.DoesNotExist:
             pass
 
         # 2) handle cases where only masculine form has been included
         # instead of both. e.g. delicado --> delicado/a
         try:
-            return Word.objects.get(term=term + "/a")
+            return Word.objects.get(term=term + "/a", lexicon=self.lexicon)
         except Word.DoesNotExist:
             # 3) trigam similarity (only as suggestion)
             message = 'Word "{}" not found in the database.'.format(term)
             suggestions = None
-            qs = Word.objects.search(term)[:4]
+            qs = Word.objects.search(term,self.lexicon.code)[:4]
             if qs.exists():
                 suggestions = ', '.join(qs.values_list('term', flat=True))
                 message += ' Did you mean: {}?'.format(suggestions)

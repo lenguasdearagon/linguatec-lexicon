@@ -24,12 +24,28 @@ class Lexicon(models.Model):
     name = models.CharField(unique=True, max_length=32)
     description = models.TextField(blank=True)
     # TODO use ISO 639 codes??? https://www.iso.org/iso-639-language-codes.html
-    src_language = models.CharField(max_length=16)
-    dst_language = models.CharField(max_length=16)
+    src_language = models.CharField(max_length=2)
+    dst_language = models.CharField(max_length=2)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['src_language', 'dst_language'], name='src_language-dst_language')
+        ]
+
+    @property
+    def code(self):
+        return (self.src_language + '-' + self.dst_language)
 
     def __str__(self):
         return self.name
 
+
+
+def get_src_language_from_lexicon_code(lex_code):
+    return lex_code[:2]
+
+def get_dst_language_from_lexicon_code(lex_code):
+    return lex_code[3:]
 
 class WordManager(models.Manager):
     TERM_PUNCTUATION_SIGNS = '¡!¿?'
@@ -54,7 +70,10 @@ class WordManager(models.Manager):
         if lex is None or lex == '':
             qs = self
         else:
-            key_lex = Lexicon.objects.get(name=lex)
+            src = get_src_language_from_lexicon_code(lex)
+            dst = get_dst_language_from_lexicon_code(lex)
+
+            key_lex = Lexicon.objects.get(src_language=src, dst_language=dst)
             qs = self.filter(lexicon=key_lex)
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
@@ -85,7 +104,10 @@ class WordManager(models.Manager):
         if lex is None or lex == '':
             qs = self
         else:
-            key_lex = Lexicon.objects.get(name=lex)
+            src = get_src_language_from_lexicon_code(lex)
+            dst = get_dst_language_from_lexicon_code(lex)
+
+            key_lex = Lexicon.objects.get(src_language=src, dst_language=dst)
             qs = self.filter(lexicon=key_lex)
 
         MIN_SIMILARITY = 0.2
@@ -103,7 +125,12 @@ class Word(models.Model):
 
     """
     lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE, related_name="words")
-    term = models.CharField(unique=True, max_length=64)
+    term = models.CharField(max_length=64)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['lexicon', 'term'], name='lexicon-term')
+        ]
 
     objects = WordManager()
 
@@ -229,7 +256,7 @@ class VerbalConjugation(models.Model):
         if self.model_word is None:
             return None
         try:
-            return Word.objects.get(term=self.model_word).pk
+            return Word.objects.get(term=self.model_word, lexicon=self.entry.word.lexicon).pk
         except Word.DoesNotExist:
             # TODO log this error to detect database inconsistency
             return None
