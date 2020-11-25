@@ -57,6 +57,8 @@ class ExporterDataTestCase(TestCase):
 
 class ExporterVariationTestCase(TestCase):
 
+    LEXICON_CODE = 'es-ar'
+
     @classmethod
     def get_fixture_path(cls, name):
         base_path = os.path.dirname(os.path.abspath(__file__))
@@ -91,10 +93,10 @@ class ExporterVariationTestCase(TestCase):
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/variation-sample-benasques.xlsx')
-        call_command('importvariation', sample_path, variation='benasqués')
+        call_command('importvariation', sample_path, self.LEXICON_CODE, variation='benasqués')
 
         with tempfile.TemporaryDirectory() as tmpdirname:
-            call_command('exportvariation', 'es-ar', 'benasqués',tmpdirname + '/test-output-data-file.csv')
+            call_command('exportvariation', self.LEXICON_CODE, 'benasqués',tmpdirname + '/test-output-data-file.csv')
             sample_path = os.path.join(base_path, 'fixtures/export_test_files/export_variation_expected_result.csv')
 
             result=[]
