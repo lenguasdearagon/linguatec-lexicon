@@ -39,7 +39,7 @@ class EntrySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Entry
-        fields = ('variation', 'gramcats', 'translation',
+        fields = ('id', 'variation', 'gramcats', 'translation',
                   'examples', 'conjugation')
 
 
