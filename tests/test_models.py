@@ -115,10 +115,10 @@ class VerbalConjugationModelTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/verbal-conjugation.xlsx')
-        call_command('importdata', sample_path, self.lexicon.name)
+        call_command('importdata', sample_path, self.lexicon.code)
 
     def test_extract_verbal_conjugation(self):
-        word = Word.objects.get(term="abarcar")
+        word = Word.objects.get(term="abarcar",lexicon=Lexicon.objects.get(src_language='es', dst_language='ar'))
         entry = word.entries.get(translation__contains="adubir")
         self.assertIsNotNone(entry.conjugation)
 
@@ -126,7 +126,7 @@ class VerbalConjugationModelTestCase(TestCase):
         self.assertIn("conjugation", parsed_conjugation)
 
     def test_extract_verbal_model(self):
-        word = Word.objects.get(term="zambullir")
+        word = Word.objects.get(term="zambullir",lexicon=Lexicon.objects.get(src_language='es', dst_language='ar'))
         entry = word.entries.get(translation__contains="capuzar")
         parsed_conjugation = entry.conjugation.parse_raw
         self.assertIn("model", parsed_conjugation)
@@ -162,15 +162,15 @@ class WordManagerTestCase(TestCase):
     fixtures = ['lexicon-sample.json']
 
     def test_search_found(self):
-        result = Word.objects.search("edad","diccionario linguatec")
+        result = Word.objects.search("edad","es-ar")
         self.assertEqual(1, result.count())
 
     def test_search_not_found(self):
-        result = Word.objects.search("no sense word","diccionario linguatec")
+        result = Word.objects.search("no sense word","es-ar")
         self.assertEqual(0, result.count())
 
     def test_search_null_query(self):
-        result = Word.objects.search(None,"diccionario linguatec")
+        result = Word.objects.search(None,"es-ar")
         self.assertEqual(0, result.count())
 
     @unittest.skipUnless(connection.vendor == 'postgresql', "requires PostgreSQL backend")
@@ -180,9 +180,9 @@ class WordManagerTestCase(TestCase):
             Word(lexicon_id=1, term="hacer camino"),
             Word(lexicon_id=1, term="hacer"),
         ])
-        result = Word.objects.search("hacer","diccionario linguatec")
+        result = Word.objects.search("hacer","es-ar")
         self.assertEqual(result[0].term, "hacer")
 
     def test_search_query_unbalanced_parenthesis(self):
-        result = Word.objects.search("largo(a","diccionario linguatec")
+        result = Word.objects.search("largo(a","es-ar")
         self.assertEqual(0, result.count())
