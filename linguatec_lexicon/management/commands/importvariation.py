@@ -12,8 +12,10 @@ from linguatec_lexicon.models import (DiatopicVariation, Entry,
 def get_src_language_from_lexicon_code(lex_code):
     return lex_code[:2]
 
+
 def get_dst_language_from_lexicon_code(lex_code):
     return lex_code[3:]
+
 
 class Command(BaseCommand):
     help = 'Imports diatopic variation Excel into the database'
