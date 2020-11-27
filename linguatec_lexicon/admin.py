@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from . import models
 
+
 @admin.register(models.Lexicon)
 class LexiconAdmin(admin.ModelAdmin):
     list_display = ('name', 'src_language', 'dst_language',)
@@ -24,11 +25,12 @@ class EntryAdmin(admin.ModelAdmin):
     list_display = ('word', 'translation', 'variation')
     search_fields = ('word__term',)
     list_filter = ('word__lexicon', 'word__lexicon__src_language', 'word__lexicon__dst_language',)
-    
+
     # TODO show GramCats
+
 
 @admin.register(models.Example)
 class ExampleAdmin(admin.ModelAdmin):
-    list_display = ('phrase', 'entry', )
+    list_display = ('phrase', 'entry',)
     search_fields = ('entry__word__term',)
     list_filter = ('entry__word__lexicon', 'entry__word__lexicon__src_language', 'entry__word__lexicon__dst_language',)
