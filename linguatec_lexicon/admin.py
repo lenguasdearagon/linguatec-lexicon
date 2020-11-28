@@ -9,10 +9,12 @@ class LexiconAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_filter = ('src_language', 'dst_language',)
 
+
 @admin.register(models.GramaticalCategory)
 class GramaticalCategoryAdmin(admin.ModelAdmin):
     list_display = ('abbreviation', 'title',)
-    
+
+
 @admin.register(models.Word)
 class WordAdmin(admin.ModelAdmin):
     list_display = ('term', 'lexicon',)
@@ -24,7 +26,8 @@ class WordAdmin(admin.ModelAdmin):
 class EntryAdmin(admin.ModelAdmin):
     list_display = ('word', 'translation', 'variation')
     search_fields = ('word__term',)
-    list_filter = ('word__lexicon', 'word__lexicon__src_language', 'word__lexicon__dst_language',)
+    list_filter = ('word__lexicon', 'word__lexicon__src_language',
+                   'word__lexicon__dst_language', 'variation__region__name')
 
     # TODO show GramCats
 
@@ -34,3 +37,13 @@ class ExampleAdmin(admin.ModelAdmin):
     list_display = ('phrase', 'entry',)
     search_fields = ('entry__word__term',)
     list_filter = ('entry__word__lexicon', 'entry__word__lexicon__src_language', 'entry__word__lexicon__dst_language',)
+
+
+@admin.register(models.Region)
+class RegionAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+
+@admin.register(models.DiatopicVariation)
+class DiatopicVariationAdmin(admin.ModelAdmin):
+    list_display = ('name',)
