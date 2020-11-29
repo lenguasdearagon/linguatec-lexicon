@@ -3,6 +3,15 @@ from django.contrib import admin
 from . import models
 
 
+def custom_titled_filter(title):
+    class Wrapper(admin.FieldListFilter):
+        def __new__(cls, *args, **kwargs):
+            instance = admin.FieldListFilter.create(*args, **kwargs)
+            instance.title = title
+            return instance
+    return Wrapper
+
+
 @admin.register(models.Lexicon)
 class LexiconAdmin(admin.ModelAdmin):
     list_display = ('name', 'src_language', 'dst_language',)
@@ -19,15 +28,19 @@ class GramaticalCategoryAdmin(admin.ModelAdmin):
 class WordAdmin(admin.ModelAdmin):
     list_display = ('term', 'lexicon',)
     search_fields = ('term',)
-    list_filter = ('lexicon__name', 'lexicon__src_language', 'lexicon__dst_language',)
+    list_filter = (('lexicon__name', custom_titled_filter('Lexicon name')),
+                   'lexicon__src_language',
+                   'lexicon__dst_language',)
 
 
 @admin.register(models.Entry)
 class EntryAdmin(admin.ModelAdmin):
     list_display = ('word', 'translation', 'variation')
     search_fields = ('word__term',)
-    list_filter = ('word__lexicon', 'word__lexicon__src_language',
-                   'word__lexicon__dst_language', 'variation__region__name')
+    list_filter = ('word__lexicon',
+                   'word__lexicon__src_language',
+                   'word__lexicon__dst_language',
+                   ('variation__region__name', custom_titled_filter('Region')))
 
     # TODO show GramCats
 
@@ -36,7 +49,9 @@ class EntryAdmin(admin.ModelAdmin):
 class ExampleAdmin(admin.ModelAdmin):
     list_display = ('phrase', 'entry',)
     search_fields = ('entry__word__term',)
-    list_filter = ('entry__word__lexicon', 'entry__word__lexicon__src_language', 'entry__word__lexicon__dst_language',)
+    list_filter = (('entry__word__lexicon', custom_titled_filter('Lexicon name')),
+                   'entry__word__lexicon__src_language',
+                   'entry__word__lexicon__dst_language',)
 
 
 @admin.register(models.Region)
