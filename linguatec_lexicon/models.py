@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import connection, models
 from django.db.models import Q
 from django.utils.functional import cached_property
+from django.urls import reverse
 
 from linguatec_lexicon import validators
 
@@ -178,6 +179,11 @@ class Entry(models.Model):
 
     def __str__(self):
         return self.translation
+
+    @property
+    def admin_panel_url(self):
+        return reverse('admin:linguatec_lexicon_entry_change', args=(self.pk,))
+
 
 
 class Example(models.Model):

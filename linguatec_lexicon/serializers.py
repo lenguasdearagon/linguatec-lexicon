@@ -40,7 +40,7 @@ class EntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Entry
         fields = ('id', 'variation', 'gramcats', 'translation',
-                  'examples', 'conjugation')
+                  'examples', 'conjugation', 'admin_panel_url')
 
 
 class WordSerializer(serializers.ModelSerializer):
