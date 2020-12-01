@@ -1,5 +1,5 @@
 from django.contrib import admin
-
+from linguatec_lexicon.models import (Entry, Example, VerbalConjugation)
 from . import models
 
 
@@ -24,6 +24,12 @@ class GramaticalCategoryAdmin(admin.ModelAdmin):
     list_display = ('abbreviation', 'title',)
 
 
+class EntryInline(admin.TabularInline):
+    model = Entry
+    extra = 0
+    show_change_link = True
+
+
 @admin.register(models.Word)
 class WordAdmin(admin.ModelAdmin):
     list_display = ('term', 'lexicon',)
@@ -31,6 +37,19 @@ class WordAdmin(admin.ModelAdmin):
     list_filter = (('lexicon__name', custom_titled_filter('Lexicon name')),
                    'lexicon__src_language',
                    'lexicon__dst_language',)
+    inlines = [
+        EntryInline,
+    ]
+
+
+class ExampleInline(admin.TabularInline):
+    model = Example
+    extra = 0
+
+
+class VerbalConjugationInline(admin.StackedInline):
+    model = VerbalConjugation
+    extra = 0
 
 
 @admin.register(models.Entry)
@@ -41,6 +60,11 @@ class EntryAdmin(admin.ModelAdmin):
                    'word__lexicon__src_language',
                    'word__lexicon__dst_language',
                    ('variation__region__name', custom_titled_filter('Region')))
+
+    inlines = [
+        ExampleInline,
+        VerbalConjugationInline,
+    ]
 
     # TODO show GramCats
 

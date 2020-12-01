@@ -141,6 +141,10 @@ class Word(models.Model):
     def gramcats(self):
         return set(self.entries.values_list('gramcats__abbreviation', flat=True))
 
+    @property
+    def admin_panel_url(self):
+        return reverse('admin:linguatec_lexicon_word_change', args=(self.pk,))
+
 
 class Region(models.Model):
     name = models.CharField(unique=True, max_length=64)
@@ -179,11 +183,6 @@ class Entry(models.Model):
 
     def __str__(self):
         return self.translation
-
-    @property
-    def admin_panel_url(self):
-        return reverse('admin:linguatec_lexicon_entry_change', args=(self.pk,))
-
 
 
 class Example(models.Model):
