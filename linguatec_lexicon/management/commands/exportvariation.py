@@ -1,7 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
+from background_task import background
 
 from linguatec_lexicon.models import (
     Entry, Lexicon, DiatopicVariation, Word)
+
+from linguatec_lexicon.tasks import write_to_csv_file_export_variation
 
 import csv
 import os.path
@@ -54,35 +57,4 @@ class Command(BaseCommand):
         if os.path.isfile(self.output_file):
             raise CommandError('Error: A csv with that name already exists: ' + self.output_file)
 
-        self.write_to_csv_file()
-
-    def write_to_csv_file(self):
-
-        entry_list = Entry.objects.filter(variation=self.variation).values('word__term').distinct().order_by('word__term')
-
-        word_list = []
-        for entry in entry_list:
-            word_list.append(Word.objects.get(term=entry['word__term']))
-
-        with open(self.output_file, 'w') as outfile:
-
-            fieldnames = [
-                'word',
-                'gramcats',
-                'translation',
-            ]
-
-            writer = csv.DictWriter(outfile, fieldnames=fieldnames, delimiter=';')
-
-            for word in word_list:
-
-                to_write = {'word': word.term}
-
-                to_write['gramcats'] = ' // '.join(Entry.objects.filter(word=word, variation=self.variation)
-                                                   .values_list('gramcats__abbreviation', flat=True)
-                                                   .distinct().order_by('gramcats__abbreviation'))
-
-                to_write['translation'] = ' // '.join(Entry.objects.filter(word=word, variation=self.variation)    
-                                                      .values_list('translation', flat=True))
-
-                writer.writerow(to_write)
+        write_to_csv_file_export_variation(self.variation.pk, self.output_file)
