@@ -74,6 +74,9 @@ class DiatopicVariationValidatorView(DataValidatorView):
         call_command('importvariation', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
         return out
 
+class ExportData(TemplateView):
+    pass
+
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
     default_limit = 30

@@ -1,12 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
-from background_task import background
 
 from linguatec_lexicon.models import (
-    Entry, Lexicon, DiatopicVariation, Word)
+    Lexicon, DiatopicVariation)
 
 from linguatec_lexicon.tasks import write_to_csv_file_export_variation
 
-import csv
 import os.path
 
 
@@ -57,4 +55,4 @@ class Command(BaseCommand):
         if os.path.isfile(self.output_file):
             raise CommandError('Error: A csv with that name already exists: ' + self.output_file)
 
-        write_to_csv_file_export_variation(self.variation.pk, self.output_file)
+        write_to_csv_file_export_variation.now(self.variation.pk, self.output_file)
