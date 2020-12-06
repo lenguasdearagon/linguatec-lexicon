@@ -50,6 +50,7 @@ ALWAYS_INSTALLED_APPS = [
     'rest_framework',
     'linguatec_lexicon',
     'tests',
+    'background_task',
 ]
 
 ALWAYS_MIDDLEWARE = [
