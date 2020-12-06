@@ -3,6 +3,8 @@ import os
 import tempfile
 from io import StringIO
 
+from .tasks import write_to_csv_file_export_data, write_to_csv_file_export_variation
+
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404, render
 from django.views.generic.base import TemplateView
@@ -74,8 +76,41 @@ class DiatopicVariationValidatorView(DataValidatorView):
         call_command('importvariation', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
         return out
 
+
 class ExportData(TemplateView):
-    pass
+    template_name = "linguatec_lexicon/exportdata.html"
+    title = "Export Data"
+    title2 = "Export Variation"
+
+    def post(self, request, *args, **kwargs):
+        type_export = str(request.POST.get('type_export'))
+
+        if type_export == 'lexicon':
+            lexicon_code = str(request.POST.get('lexicon'))
+            lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
+
+            return write_to_csv_file_export_data.now(lexicon_id, None)
+
+        elif type_export == 'variation':
+            lexicon_code = str(request.POST.get('lexicon'))
+            lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
+
+            variation = str(request.POST.get('variation'))
+
+            return write_to_csv_file_export_variation.now(variation, None)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'title': self.title,
+            'title2': self.title2,
+        })
+        return context
+
+    def validate(self, xlsx_file):
+        out = StringIO()
+        call_command('importdata', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
+        return out
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
@@ -87,7 +122,7 @@ class LexiconViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows lexicons to be viewed.
     """
-    queryset = Lexicon.objects.all().order_by('src_language','dst_language')
+    queryset = Lexicon.objects.all().order_by('src_language', 'dst_language')
     serializer_class = LexiconSerializer
     pagination_class = DefaultLimitOffsetPagination
 

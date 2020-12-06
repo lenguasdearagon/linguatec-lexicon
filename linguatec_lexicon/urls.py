@@ -14,4 +14,5 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     path('validator/', views.DataValidatorView.as_view(), name='validator'),
     path('validator-diatopic-variation/', views.DiatopicVariationValidatorView.as_view(), name='validator-variation'),
+    path('exportdata/', views.ExportData.as_view(), name='exportdata'),
 ]
