@@ -14,7 +14,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from .forms import ValidatorForm
-from .models import GramaticalCategory, Word, Lexicon
+from .models import GramaticalCategory, DiatopicVariation, Word, Lexicon
 from .serializers import GramaticalCategorySerializer, WordSerializer, WordNearSerializer, LexiconSerializer
 
 
@@ -86,18 +86,19 @@ class ExportData(TemplateView):
         type_export = str(request.POST.get('type_export'))
 
         if type_export == 'lexicon':
-            lexicon_code = str(request.POST.get('lexicon'))
+            lexicon_code = str(request.POST.get('lexicon_code'))
             lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
 
             return write_to_csv_file_export_data.now(lexicon_id, None)
 
         elif type_export == 'variation':
-            lexicon_code = str(request.POST.get('lexicon'))
+            lexicon_code = str(request.POST.get('lexicon_code'))
             lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
 
             variation = str(request.POST.get('variation'))
+            variation_id = DiatopicVariation.objects.get(name=variation).pk
 
-            return write_to_csv_file_export_variation.now(variation, None)
+            return write_to_csv_file_export_variation.now(variation_id, None)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

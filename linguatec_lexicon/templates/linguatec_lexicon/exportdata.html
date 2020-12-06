@@ -18,7 +18,7 @@
             </div></br>
             
             <form method="post">{% csrf_token %}
-                <label for="lexicon">Codigo lexicon</label><input type="text" name="lexicon" /></br>
+                <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" /></br>
                 <input name="type_export" type="hidden" value="lexicon">
 
                 </br><button class="btn btn-primary" type="submit">Download file</button>
@@ -37,7 +37,7 @@
             </div></br>
             
             <form method="post">{% csrf_token %}
-                <label for="lexicon">Codigo lexicon</label><input type="text" name="lexicon_code" />
+                <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" />
                 </br></br><label for="variation">Variación diatópica</label><input type="text" name="variation" />
                 <input name="type_export" type="hidden" value="variation">
 

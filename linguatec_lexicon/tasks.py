@@ -82,35 +82,33 @@ def write_to_csv_file_export_data(lexicon, output_file):
 
 
 @background(schedule=30)
-def write_to_csv_file_export_variation(variation, output_file):
+def write_to_csv_file_export_variation(variation_id, output_file):
 
     def write_to_file(outfile):
-        entry_list = Entry.objects.filter(variation=variation).values('word__term').distinct().order_by('word__term')
+        entry_list = Entry.objects.filter(variation=variation_id).values('word__term').distinct().order_by('word__term')
 
-        word_list = []
-        for entry in entry_list:
-            word_list.append(Word.objects.get(term=entry['word__term']))
-
-            fieldnames = [
+        fieldnames = [
                 'word',
                 'gramcats',
                 'translation',
             ]
 
-            writer = csv.DictWriter(outfile, fieldnames=fieldnames, delimiter=';')
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames, delimiter=';')
 
-            for word in word_list:
+        # word_list = []
+        for entry in entry_list:
+            word = Word.objects.get(term=entry['word__term'])
 
-                to_write = {'word': word.term}
+            to_write = {'word': word.term}
 
-                to_write['gramcats'] = ' // '.join(Entry.objects.filter(word=word, variation=variation)
-                                                .values_list('gramcats__abbreviation', flat=True)
-                                                .distinct().order_by('gramcats__abbreviation'))
+            to_write['gramcats'] = ' // '.join(Entry.objects.filter(word=word, variation=variation_id)
+                                               .values_list('gramcats__abbreviation', flat=True)
+                                               .distinct().order_by('gramcats__abbreviation'))
 
-                to_write['translation'] = ' // '.join(Entry.objects.filter(word=word, variation=variation)
-                                                    .values_list('translation', flat=True))
+            to_write['translation'] = ' // '.join(Entry.objects.filter(word=word, variation=variation_id)
+                                                  .values_list('translation', flat=True))
 
-                writer.writerow(to_write)
+            writer.writerow(to_write)
 
     if output_file:
         with open(output_file, 'w') as outfile:
