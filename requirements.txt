@@ -1,4 +1,4 @@
-django==2.2.13
+django==2.1
 django-extensions
 djangorestframework==3.11
 psycopg2-binary
