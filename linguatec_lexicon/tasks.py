@@ -1,11 +1,34 @@
 from background_task import background
-
+import pandas as pd
 from linguatec_lexicon.models import (
-    Entry, Word, VerbalConjugation, Example)
+    Entry, Word, VerbalConjugation, Example, GramaticalCategory)
 
 import csv
 
 from django.http import HttpResponse
+
+
+@background(schedule=30)
+def loaddatagramcats(csv_files):
+    # Keep a count of the installed objects and files
+    csv_count = 0
+    loaded_object_count = 0
+
+    for csv_file in csv_files:
+        df = pd.read_csv(csv_file, engine='python')
+        gramcats = []
+        for row in df.itertuples(name=None):
+            gramcats.append(
+                GramaticalCategory(
+                    abbreviation=row[1], title=row[2])
+            )
+            loaded_object_count += 1
+
+        GramaticalCategory.objects.bulk_create(gramcats)
+        csv_count += 1
+
+    return loaded_object_count, csv_count
+
 
 @background(schedule=30)
 def write_to_csv_file_export_data(lexicon, output_file):
@@ -82,7 +105,7 @@ def write_to_csv_file_export_data(lexicon, output_file):
 
 
 @background(schedule=30)
-def write_to_csv_file_export_variation(variation_id, output_file):
+def write_to_csv_file_export_variation(lexicon_id, variation_id, output_file):
 
     def write_to_file(outfile):
         entry_list = Entry.objects.filter(variation=variation_id).values('word__term').distinct().order_by('word__term')
@@ -97,7 +120,10 @@ def write_to_csv_file_export_variation(variation_id, output_file):
 
         # word_list = []
         for entry in entry_list:
-            word = Word.objects.get(term=entry['word__term'])
+            try:
+                word = Word.objects.get(term=entry['word__term'], lexicon=lexicon_id)
+            except Word.DoesNotExist:
+                continue
 
             to_write = {'word': word.term}
 

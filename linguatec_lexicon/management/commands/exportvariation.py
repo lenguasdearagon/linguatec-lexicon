@@ -55,4 +55,4 @@ class Command(BaseCommand):
         if os.path.isfile(self.output_file):
             raise CommandError('Error: A csv with that name already exists: ' + self.output_file)
 
-        write_to_csv_file_export_variation.now(self.variation.pk, self.output_file)
+        write_to_csv_file_export_variation.now(self.lexicon.pk, self.variation.pk, self.output_file)

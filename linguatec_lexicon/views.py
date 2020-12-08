@@ -3,7 +3,7 @@ import os
 import tempfile
 from io import StringIO
 
-from .tasks import write_to_csv_file_export_data, write_to_csv_file_export_variation
+from .tasks import write_to_csv_file_export_data, write_to_csv_file_export_variation, loaddatagramcats
 
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404, render
@@ -13,7 +13,7 @@ from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
-from .forms import ValidatorForm
+from .forms import ValidatorForm, CSVValidatorForm
 from .models import GramaticalCategory, DiatopicVariation, Word, Lexicon
 from .serializers import GramaticalCategorySerializer, WordSerializer, WordNearSerializer, LexiconSerializer
 
@@ -77,6 +77,49 @@ class DiatopicVariationValidatorView(DataValidatorView):
         return out
 
 
+class ImportGramcatsView(TemplateView):
+    template_name = "linguatec_lexicon/importgramcats.html"
+    title = "Data validator"
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        form = CSVValidatorForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            csv_file = form.cleaned_data['input_file']
+
+            # store uploaded file as a temporal file
+            tmp_fd, tmp_file = tempfile.mkstemp(suffix='.csv')
+            f = os.fdopen(tmp_fd, 'wb')  # open the tmp file for writing
+            f.write(csv_file.read())  # write the tmp file
+            f.close()
+
+            # validate uploaded file and handle errors (if any)
+            loaddatagramcats.now([tmp_file])
+
+            context.update({
+                'input_file': csv_file,
+                'is_finished': 'Importación realizada',
+            })
+            return self.render_to_response(context)
+
+        context['form'] = form
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'form':  ValidatorForm(),
+            'title': self.title,
+        })
+        return context
+
+    def validate(self, xlsx_file):
+        out = StringIO()
+        call_command('importdata', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
+        return out
+
+
 class ExportData(TemplateView):
     template_name = "linguatec_lexicon/exportdata.html"
     title = "Export Data"
@@ -89,7 +132,7 @@ class ExportData(TemplateView):
             lexicon_code = str(request.POST.get('lexicon_code'))
             lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
 
-            return write_to_csv_file_export_data.now(lexicon_id, None)
+            return write_to_csv_file_export_data(lexicon_id, None)
 
         elif type_export == 'variation':
             lexicon_code = str(request.POST.get('lexicon_code'))
@@ -98,7 +141,7 @@ class ExportData(TemplateView):
             variation = str(request.POST.get('variation'))
             variation_id = DiatopicVariation.objects.get(name=variation).pk
 
-            return write_to_csv_file_export_variation.now(variation_id, None)
+            return write_to_csv_file_export_variation(lexicon_id, variation_id, None)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

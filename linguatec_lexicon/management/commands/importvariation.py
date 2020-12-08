@@ -73,10 +73,9 @@ class Command(BaseCommand):
             src = get_src_language_from_lexicon_code(self.lexicon_code)
             dst = get_dst_language_from_lexicon_code(self.lexicon_code)
 
-            self.lexicon = Lexicon.objects.get(src_language = src, dst_language = dst)
+            self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
-
 
         self.xlsx = pd.read_excel(self.input_file, sheet_name=None, header=None, usecols="A:C",
                                   names=['term', 'gramcats', 'translations'])
@@ -195,7 +194,7 @@ class Command(BaseCommand):
             # 3) trigam similarity (only as suggestion)
             message = 'Word "{}" not found in the database.'.format(term)
             suggestions = None
-            qs = Word.objects.search(term,self.lexicon.code)[:4]
+            qs = Word.objects.search(term, self.lexicon.code)[:4]
             if qs.exists():
                 suggestions = ', '.join(qs.values_list('term', flat=True))
                 message += ' Did you mean: {}?'.format(suggestions)
@@ -206,7 +205,6 @@ class Command(BaseCommand):
                 "message": message,
                 "suggestions": suggestions
             })
-
 
     def write_to_database(self):
         count_entries = 0
