@@ -84,7 +84,7 @@ class LexiconViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows lexicons to be viewed.
     """
-    queryset = Lexicon.objects.all().order_by('src_language','dst_language')
+    queryset = Lexicon.objects.all().order_by('src_language', 'dst_language')
     serializer_class = LexiconSerializer
     pagination_class = DefaultLimitOffsetPagination
 
