@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from linguatec_lexicon.tasks import loaddatagramcats
+from linguatec_lexicon.importers import loadgramcats
 
 from linguatec_lexicon.models import GramaticalCategory
 
@@ -32,7 +32,7 @@ class Command(BaseCommand):
                     "Purged %d object(s) from database" % deleted
                 )
 
-        self.loaded_object_count, self.csv_count = loaddatagramcats(csv_files)
+        self.loaded_object_count, self.csv_count = loadgramcats(csv_files)
 
         if self.verbosity >= 1:
             self.stdout.write(

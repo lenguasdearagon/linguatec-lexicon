@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from linguatec_lexicon.tasks import write_to_csv_file_export_data
+from linguatec_lexicon.exporters import write_to_csv_file_data
 
 from linguatec_lexicon.models import (Lexicon)
 
@@ -42,4 +42,4 @@ class Command(BaseCommand):
         if os.path.isfile(self.output_file):
             raise CommandError('Error: A csv with that name already exists: ' + self.output_file)
 
-        write_to_csv_file_export_data.now(self.lexicon.pk, self.output_file)
+        write_to_csv_file_data(self.lexicon.pk, self.output_file)

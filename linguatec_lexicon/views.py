@@ -3,7 +3,8 @@ import os
 import tempfile
 from io import StringIO
 
-from .tasks import write_to_csv_file_export_data, write_to_csv_file_export_variation, loaddatagramcats
+from .tasks import (write_to_csv_file_export_data, write_to_csv_file_export_variation,
+                    load_data_gramcats, import_variation_entries)
 
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404, render
@@ -77,13 +78,18 @@ class DiatopicVariationValidatorView(DataValidatorView):
         return out
 
 
-class ImportGramcatsView(TemplateView):
-    template_name = "linguatec_lexicon/importgramcats.html"
-    title = "Data validator"
+class ImportData(TemplateView):
+    template_name = "linguatec_lexicon/importdata.html"
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        form = CSVValidatorForm(request.POST, request.FILES)
+
+        type_export = str(request.POST.get('type_export'))
+
+        if type_export == 'variation':
+            form = ValidatorForm(request.POST, request.FILES)
+        if type_export == 'gramcats':
+            form = CSVValidatorForm(request.POST, request.FILES)
 
         if form.is_valid():
             csv_file = form.cleaned_data['input_file']
@@ -94,8 +100,15 @@ class ImportGramcatsView(TemplateView):
             f.write(csv_file.read())  # write the tmp file
             f.close()
 
-            # validate uploaded file and handle errors (if any)
-            loaddatagramcats.now([tmp_file])
+            if type_export == 'variation':
+                lexicon_code = str(request.POST.get('lexicon_code'))
+                lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
+                variation_name = str(request.POST.get('variation_name'))
+                variation_id = DiatopicVariation.objects.get(name=variation_name).pk
+                import_variation_entries(tmp_file, lexicon_id, variation_id)
+
+            if type_export == 'gramcats':
+                load_data_gramcats([tmp_file])
 
             context.update({
                 'input_file': csv_file,
@@ -110,7 +123,8 @@ class ImportGramcatsView(TemplateView):
         context = super().get_context_data(**kwargs)
         context.update({
             'form':  ValidatorForm(),
-            'title': self.title,
+            'title_variation': "Import Diatopic Variations",
+            'title_gramcats': "Import Gramatical categories",
         })
         return context
 
@@ -132,7 +146,7 @@ class ExportData(TemplateView):
             lexicon_code = str(request.POST.get('lexicon_code'))
             lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
 
-            return write_to_csv_file_export_data(lexicon_id, None)
+            return write_to_csv_file_export_data.now(lexicon_id, None)
 
         elif type_export == 'variation':
             lexicon_code = str(request.POST.get('lexicon_code'))
@@ -141,7 +155,7 @@ class ExportData(TemplateView):
             variation = str(request.POST.get('variation'))
             variation_id = DiatopicVariation.objects.get(name=variation).pk
 
-            return write_to_csv_file_export_variation(lexicon_id, variation_id, None)
+            return write_to_csv_file_export_variation.now(lexicon_id, variation_id, None)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
