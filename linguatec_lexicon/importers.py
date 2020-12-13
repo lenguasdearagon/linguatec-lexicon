@@ -436,6 +436,7 @@ def import_data(input_file, lexicon_pk, dry_run, allow_partial, imports_info_id)
         except IntegrityError as e:
             ii.status = ImportsInfo.FAILED
             ii.errors = str(e)
+            ii.save()
             raise CommandError("Error: " + e)
 
     if errors:
