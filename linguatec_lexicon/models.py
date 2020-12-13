@@ -305,7 +305,13 @@ class AbstractImportsInfo(models.Model):
         ordering = ['-created_at']
 
     def list_errors(self):
-        return json.loads(self.errors or "[]")
+        errors_list = self.errors.split("}, ")
+
+        # doesn't work as expected
+        for error in errors_list:
+            error = error.translate({ord(i): None for i in '}{'})
+
+        return errors_list
 
 
 class ImportsInfo(AbstractImportsInfo):

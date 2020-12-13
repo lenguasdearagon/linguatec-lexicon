@@ -32,7 +32,7 @@
                     <td>{{ importation.input_file }}</td>
                     <td>{{ importation.created_at }}</td>
                     <td>{{ importation.num_rows }}</td>
-                    <td>{{ importation.errors|length }}</td>
+                    <td>{{ importation.list_errors|length }}</td>
                     <td>
                         <form action="/api/importationerrors/" method="get">
                         <input name="importation_id" type="hidden" value={{ importation.id }}>

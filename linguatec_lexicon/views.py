@@ -180,10 +180,9 @@ class ImportationErrorsView(TemplateView):
         importsinfo_id = int(request.GET.get('importation_id', None))
         ii = ImportsInfo.objects.get(pk=importsinfo_id)
 
-        error_list = ii.errors.split("}, ")
+        # error_list = ii.errors.split("}, ")
 
-        for error in error_list:
-            error += ('}')
+        error_list = ii.list_errors()
 
         context.update({
                 'status': ii.status,
