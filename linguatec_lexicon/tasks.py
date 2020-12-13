@@ -1,17 +1,33 @@
 from background_task import background
 
-from .importers import import_variation, load_gramcats
+from .importers import import_data, import_variation, load_gramcats
 from .exporters import write_to_csv_file_data, write_to_csv_file_variation
 
-
-@background(schedule=30)
-def import_variation_entries(csv_files, lexicon_id, variation_id):
-    return import_variation(csv_files, lexicon_id, variation_id, False)
+from .models import ImportsInfo
 
 
 @background(schedule=30)
-def load_data_gramcats(csv_files):
-    return load_gramcats(csv_files)
+def import_data_words(csv_files, lexicon_id, imports_info_id):
+    ii = ImportsInfo.objects.get(pk=imports_info_id)
+    ii.status = ImportsInfo.RUNNING
+    ii.save()
+    return import_data(csv_files, lexicon_id, False, False, imports_info_id)
+
+
+@background(schedule=30)
+def import_variation_entries(csv_files, lexicon_id, variation_id, imports_info_id):
+    ii = ImportsInfo.objects.get(pk=imports_info_id)
+    ii.status = ImportsInfo.RUNNING
+    ii.save()
+    return import_variation(csv_files, lexicon_id, variation_id, False, imports_info_id)
+
+
+@background(schedule=30)
+def load_data_gramcats(csv_files, imports_info_id):
+    ii = ImportsInfo.objects.get(pk=imports_info_id)
+    ii.status = ImportsInfo.RUNNING
+    ii.save()
+    return load_gramcats(csv_files, imports_info_id)
 
 
 @background(schedule=30)

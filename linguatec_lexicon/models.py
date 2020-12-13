@@ -4,6 +4,7 @@ from django.db import connection, models
 from django.db.models import Q
 from django.utils.functional import cached_property
 from django.urls import reverse
+import json
 
 from linguatec_lexicon import validators
 
@@ -41,12 +42,13 @@ class Lexicon(models.Model):
         return self.name
 
 
-
 def get_src_language_from_lexicon_code(lex_code):
     return lex_code[:2]
 
+
 def get_dst_language_from_lexicon_code(lex_code):
     return lex_code[3:]
+
 
 class WordManager(models.Manager):
     TERM_PUNCTUATION_SIGNS = '¡!¿?'
@@ -67,7 +69,7 @@ class WordManager(models.Manager):
         MIN_SIMILARITY = 0.3
         query = self._clean_search_query(query)
 
-        #Get and use the key of the Lexicon instead of the name
+        # Get and use the key of the Lexicon instead of the name
         if lex is None or lex == '':
             qs = self
         else:
@@ -79,7 +81,7 @@ class WordManager(models.Manager):
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
-            iregex=r"\b{0}\b"
+            iregex = r"\b{0}\b"
             return qs.filter(term__iregex=iregex.format(query))
         else:
             filter_query = (
@@ -265,3 +267,46 @@ class VerbalConjugation(models.Model):
         except Word.DoesNotExist:
             # TODO log this error to detect database inconsistency
             return None
+
+
+class AbstractImportsInfo(models.Model):
+    CREATED = 'created'
+    RUNNING = 'running'
+    FAILED = 'failed'
+    COMPLETED = 'completed'
+    COMPLETED_WITH_ERRORS = 'completed with errors'
+    STATUS_CHOICES = (
+        (CREATED, 'CREATED'),
+        (RUNNING, 'RUNNING'),
+        (FAILED, 'FAILED'),
+        (COMPLETED, 'COMPLETED'),
+        (COMPLETED_WITH_ERRORS, 'COMPLETED WITH ERRORS')
+    )
+
+    DATA = 'data'
+    VARIATION = 'variation'
+    GRAMCATS = 'gramcats'
+    IMPORT_TYPE = (
+        (DATA, 'DATA'),
+        (VARIATION, 'VARIATION'),
+        (GRAMCATS, 'GRAMCATS'),
+    )
+
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=25, choices=IMPORT_TYPE)
+
+    errors = models.TextField(blank=True)
+    num_rows = models.IntegerField(null=True)
+    input_file = models.CharField(max_length=100)
+
+    class Meta:
+        abstract = True
+        ordering = ['-created_at']
+
+    def list_errors(self):
+        return json.loads(self.errors or "[]")
+
+
+class ImportsInfo(AbstractImportsInfo):
+    pass

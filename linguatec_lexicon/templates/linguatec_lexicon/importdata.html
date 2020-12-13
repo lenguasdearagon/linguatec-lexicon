@@ -8,6 +8,28 @@
 {% endblock %}
 
 {% block content %}
+<h1>{{ title_data }}</h1>
+<div class="row">
+    <div class="col-12">
+        <div>
+            Selecciona el fichero XLSX para importar las variaciones diatopicas.
+        </div>
+        <div class="data-validator-form">
+            <form action="" enctype="multipart/form-data" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" /></br>
+                </br>
+                <input name="type_import" type="hidden" value="data">
+                <input id="Importar" type="submit" value="Importar" />
+            </form>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <h3><strong>{{ is_finished }}</strong></h3>
+</div>
+
 <h1>{{ title_variation }}</h1>
 <div class="row">
     <div class="col-12">
@@ -19,9 +41,10 @@
                 {% csrf_token %}
                 {{ form.as_p }}
                 <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" /></br>
+                </br>
                 <label for="variation_name">Nombre Variación</label><input type="text" name="variation_name" /></br>
-
-                <input name="type_export" type="hidden" value="variation">
+                </br>
+                <input name="type_import" type="hidden" value="variation">
                 <input id="Importar" type="submit" value="Importar" />
             </form>
         </div>
@@ -41,7 +64,7 @@
             <form action="" enctype="multipart/form-data" method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <input name="type_export" type="hidden" value="gramcats">
+                <input name="type_import" type="hidden" value="gramcats">
                 <input id="Importar" type="submit" value="Importar" />
             </form>
         </div>
