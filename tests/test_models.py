@@ -2,11 +2,11 @@ import os
 import unittest
 
 from django.core.management import call_command
-from django.db import connection
+from django.db import connection, IntegrityError
 from django.test import TestCase
 
 from linguatec_lexicon.models import (
-    Entry, GramaticalCategory, Lexicon, VerbalConjugation, Word)
+    Entry, GramaticalCategory, Lexicon, VerbalConjugation, Word, Region, DiatopicVariation)
 
 
 class GramCatTestCase(TestCase):
@@ -118,7 +118,7 @@ class VerbalConjugationModelTestCase(TestCase):
         call_command('importdata', sample_path, self.lexicon.code)
 
     def test_extract_verbal_conjugation(self):
-        word = Word.objects.get(term="abarcar",lexicon=Lexicon.objects.get(src_language='es', dst_language='ar'))
+        word = Word.objects.get(term="abarcar", lexicon=Lexicon.objects.get(src_language='es', dst_language='ar'))
         entry = word.entries.get(translation__contains="adubir")
         self.assertIsNotNone(entry.conjugation)
 
@@ -126,7 +126,7 @@ class VerbalConjugationModelTestCase(TestCase):
         self.assertIn("conjugation", parsed_conjugation)
 
     def test_extract_verbal_model(self):
-        word = Word.objects.get(term="zambullir",lexicon=Lexicon.objects.get(src_language='es', dst_language='ar'))
+        word = Word.objects.get(term="zambullir", lexicon=Lexicon.objects.get(src_language='es', dst_language='ar'))
         entry = word.entries.get(translation__contains="capuzar")
         parsed_conjugation = entry.conjugation.parse_raw
         self.assertIn("model", parsed_conjugation)
@@ -162,15 +162,15 @@ class WordManagerTestCase(TestCase):
     fixtures = ['lexicon-sample.json']
 
     def test_search_found(self):
-        result = Word.objects.search("edad","es-ar")
+        result = Word.objects.search("edad", "es-ar")
         self.assertEqual(1, result.count())
 
     def test_search_not_found(self):
-        result = Word.objects.search("no sense word","es-ar")
+        result = Word.objects.search("no sense word", "es-ar")
         self.assertEqual(0, result.count())
 
     def test_search_null_query(self):
-        result = Word.objects.search(None,"es-ar")
+        result = Word.objects.search(None, "es-ar")
         self.assertEqual(0, result.count())
 
     @unittest.skipUnless(connection.vendor == 'postgresql', "requires PostgreSQL backend")
@@ -180,9 +180,51 @@ class WordManagerTestCase(TestCase):
             Word(lexicon_id=1, term="hacer camino"),
             Word(lexicon_id=1, term="hacer"),
         ])
-        result = Word.objects.search("hacer","es-ar")
+        result = Word.objects.search("hacer", "es-ar")
         self.assertEqual(result[0].term, "hacer")
 
     def test_search_query_unbalanced_parenthesis(self):
-        result = Word.objects.search("largo(a","es-ar")
+        result = Word.objects.search("largo(a", "es-ar")
         self.assertEqual(0, result.count())
+
+
+class EntryModelTestCase(TestCase):
+
+    @classmethod
+    def get_fixture_path(cls, name):
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        return os.path.join(base_path, 'fixtures/{}'.format(name))
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.lexicon = Lexicon.objects.create(
+            name='es-ar', src_language='es', dst_language='ar',
+        )
+
+        cls.ribagorza = Region.objects.create(name="Ribagorza")
+
+        # Create DiatopicVariation
+        cls.variation = DiatopicVariation.objects.create(
+            name="benasqués",
+            abbreviation="Benas.",
+            region=cls.ribagorza,
+        )
+
+    def setUp(cls):
+        # importdata requires that GramaticalCategories are initialized
+        sample_path = cls.get_fixture_path('gramcat-es-ar.csv')
+        call_command('importgramcat', sample_path, verbosity=0)
+
+        # initialize words on main language
+        sample_path = cls.get_fixture_path('variation-sample-common.xlsx')
+        call_command('importdata', sample_path, cls.lexicon.name)
+
+        # import entries of benasqués variation
+        sample_path = cls.get_fixture_path('variation-sample-benasques.xlsx')
+        call_command('importvariation', sample_path, cls.lexicon.code, variation=cls.variation.name)
+
+    def test_deny_importation_duplicated_entries(self):
+
+        with self.assertRaises(IntegrityError):
+            sample_path = self.get_fixture_path('variation-sample-benasques.xlsx')
+            call_command('importvariation', sample_path, self.lexicon.code, variation=self.variation.name)
