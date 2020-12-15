@@ -130,8 +130,6 @@ def setup(verbosity, test_labels, parallel):
     settings.MIGRATION_MODULES = {
         # This lets us skip creating migrations for the test models as many of
         # them depend on one of the following contrib applications.
-        'auth': None,
-        'sessions': None,
     }
     log_config = copy.deepcopy(DEFAULT_LOGGING)
     # Filter out non-error logging so we don't have to capture it in lots of
