@@ -41,6 +41,7 @@ jobs:
           pip install flake8 pytest
           pip install coverage
           pip install django-background-tasks
+          pip install xlrd==1.2.0 boto3
           pip3 install -r requirements.txt
           pip3 install -e .
           
