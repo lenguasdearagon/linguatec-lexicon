@@ -274,13 +274,11 @@ class AbstractImportsInfo(models.Model):
     RUNNING = 'running'
     FAILED = 'failed'
     COMPLETED = 'completed'
-    COMPLETED_WITH_ERRORS = 'completed with errors'
     STATUS_CHOICES = (
         (CREATED, 'CREATED'),
         (RUNNING, 'RUNNING'),
         (FAILED, 'FAILED'),
         (COMPLETED, 'COMPLETED'),
-        (COMPLETED_WITH_ERRORS, 'COMPLETED WITH ERRORS')
     )
 
     DATA = 'data'

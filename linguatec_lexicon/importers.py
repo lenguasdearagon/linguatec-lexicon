@@ -14,7 +14,27 @@ from django.db import IntegrityError
 from linguatec_lexicon.validators import validate_column_verb_conjugation
 
 
-def load_gramcats(csv_files, imports_info_id):
+def get_ImportsInfo_objects(imports_info_id):
+    if imports_info_id is None:
+        return None
+    else:
+        return ImportsInfo.objects.get(pk=imports_info_id)
+
+
+def save_ImportInfo_status(imports_info, status, objects_inserted, errors):
+    if imports_info is None:
+        pass
+    else:
+        imports_info.status = status
+        if objects_inserted is not None:
+            imports_info.num_rows = objects_inserted
+        if errors is not None:
+            imports_info.errors = errors
+        imports_info.save()
+
+
+def load_gramcats(csv_files, imports_info_id=None):
+
     # Keep a count of the installed objects and files
     csv_count = 0
     loaded_object_count = 0
@@ -32,18 +52,16 @@ def load_gramcats(csv_files, imports_info_id):
         GramaticalCategory.objects.bulk_create(gramcats)
         csv_count += 1
 
-    ii = ImportsInfo.objects.get(pk=imports_info_id)
-    ii.status = ImportsInfo.COMPLETED
-    ii.num_rows = loaded_object_count
-    ii.save()
+    ii = get_ImportsInfo_objects(imports_info_id)
+    save_ImportInfo_status(ii, ImportsInfo.COMPLETED, loaded_object_count, None)
 
     return loaded_object_count, csv_count
 
 
-def import_variation(input_file, lexicon, variation, dry_run, imports_info_id):
+def import_variation(input_file, lexicon, variation, dry_run, imports_info_id=None):
 
     errors = []
-    ii = ImportsInfo.objects.get(pk=imports_info_id)
+    ii = get_ImportsInfo_objects(imports_info_id)
 
     def retrieve_word(row_number, term_raw):
         # 1) exact match
@@ -88,9 +106,6 @@ def import_variation(input_file, lexicon, variation, dry_run, imports_info_id):
             clean_gramcats = word.gramcats()
             if len(clean_gramcats) == 0:
                 message = "missing gramatical category"
-                ii.status = ImportsInfo.FAILED
-                ii.errors = message
-                ii.save()
                 raise ValidationError(message, code='B')
             return clean_gramcats
 
@@ -107,9 +122,6 @@ def import_variation(input_file, lexicon, variation, dry_run, imports_info_id):
                     GramaticalCategory.objects.get(abbreviation=abbr))
             except GramaticalCategory.DoesNotExist:
                 message = "unkown gramatical category %(value)s"
-                ii.status = ImportsInfo.FAILED
-                ii.errors = message
-                ii.save()
                 raise ValidationError(message, code='B', params={'value': abbr})
 
         return gramcats
@@ -122,14 +134,11 @@ def import_variation(input_file, lexicon, variation, dry_run, imports_info_id):
         except AttributeError:
             # e.g. empty cell is translated as float(nan)
             message = 'Word %(word)s contains empty or invalid translations.'
-            ii.status = ImportsInfo.FAILED
-            ii.errors = message
-            ii.save()
             raise ValidationError(message, code='C', params={'word': word.term})
 
         for translation in translations_list:
             entry = Entry(word=word, translation=translation.strip(),
-                          variation=DiatopicVariation.objects.get(pk=variation))
+                          variation=variation)
             entry.clean_gramcats = gramcats
             word.clean_entries.append(entry)
 
@@ -170,44 +179,48 @@ def import_variation(input_file, lexicon, variation, dry_run, imports_info_id):
 
         return count_entries
 
+    def clean_variation():
+        if dry_run:
+            return None  # discard value because doesn't affect to data validation
+
+        # validate variation
+        try:
+            return DiatopicVariation.objects.get(name=variation)
+        except DiatopicVariation.DoesNotExist:
+            message = 'Diatopic variation "{}" does not exist'.format(variation)
+            save_ImportInfo_status(ii, ImportsInfo.FAILED, None, message)
+            raise CommandError(message)
+
     # check that GramaticalCategories are initialized
     if not GramaticalCategory.objects.all().exists():
+        message = ("There isn't any GramaticalCategory in the database. " +
+                   "Gramatical Categories should be initialized before importing " +
+                   "data for example running manage.py importgramcat.")
+        save_ImportInfo_status(ii, ImportsInfo.FAILED, None, message)
+        raise CommandError(message)
 
-        ii.status = ImportsInfo.FAILED
-        ii.errors = ("There isn't any GramaticalCategory in the database. " +
-                     "Gramatical Categories should be initialized before importing " +
-                     "data for example running manage.py importgramcat.")
-
-        ii.save()
-        raise CommandError(
-            "There isn't any GramaticalCategory in the database. "
-            "Gramatical Categories should be initialized before importing "
-            "data for example running manage.py importgramcat."
-        )
+    variation = clean_variation()
 
     xlsx = pd.read_excel(input_file, sheet_name=None, header=None, usecols="A:C",
                          names=['term', 'gramcats', 'translations'])
     cleaned_data = populate_models(xlsx)
 
-    if not dry_run:
+    if errors:
+        save_ImportInfo_status(ii, ImportsInfo.FAILED, None, errors)
+
+    elif not dry_run:
         count_entries = write_to_database(cleaned_data)
 
-        ii.status = ImportsInfo.COMPLETED
-        ii.num_rows = count_entries
+        save_ImportInfo_status(ii, ImportsInfo.COMPLETED, count_entries, None)
 
-    if errors:
-        ii.status = ImportsInfo.COMPLETED_WITH_ERRORS
-        ii.errors = errors
-
-    ii.save()
-    return errors, cleaned_data
+    return errors, cleaned_data, xlsx
 
 
-def import_data(input_file, lexicon_pk, dry_run, allow_partial, imports_info_id):
+def import_data(input_file, lexicon_pk, dry_run, allow_partial, imports_info_id=None):
 
     errors = []
     cleaned_data = {}
-    ii = ImportsInfo.objects.get(pk=imports_info_id)
+    ii = get_ImportsInfo_objects(imports_info_id)
 
     def read_input_file():
         df = pd.DataFrame()
@@ -411,38 +424,26 @@ def import_data(input_file, lexicon_pk, dry_run, allow_partial, imports_info_id)
 
     # check that GramaticalCategories are initialized
         if not GramaticalCategory.objects.all().exists():
-            ii.status = ImportsInfo.FAILED
-            ii.errors = ("There isn't any GramaticalCategory in the database. " +
-                         "Gramatical Categories should be initialized before importing " +
-                         "data for example running manage.py importgramcat.")
-            ii.save()
-
-            raise CommandError(
-                "There isn't any GramaticalCategory in the database. "
-                "Gramatical Categories should be initialized before importing "
-                "data for example running manage.py importgramcat."
-            )
+            message = ("There isn't any GramaticalCategory in the database. " +
+                       "Gramatical Categories should be initialized before importing " +
+                       "data for example running manage.py importgramcat.")
+            save_ImportInfo_status(ii, ImportsInfo.FAILED, None, message)
+            raise CommandError(message)
 
     db = read_input_file()
 
     populate_models(db)
 
-    if not dry_run:
+    if errors:
+        save_ImportInfo_status(ii, ImportsInfo.FAILED, None, errors)
+
+    elif not dry_run:
         # Write data into the database
         try:
             count_words = write_to_database()
-            ii.status = ImportsInfo.COMPLETED
-            ii.num_rows = count_words
+            save_ImportInfo_status(ii, ImportsInfo.COMPLETED, count_words, None)
         except IntegrityError as e:
-            ii.status = ImportsInfo.FAILED
-            ii.errors = str(e)
-            ii.save()
+            save_ImportInfo_status(ii, ImportsInfo.FAILED, None, str(e))
             raise CommandError("Error: " + e)
-
-    if errors:
-        ii.status = ImportsInfo.COMPLETED_WITH_ERRORS
-        ii.errors = errors
-
-    ii.save()
 
     return errors

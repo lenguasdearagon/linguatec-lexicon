@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from linguatec_lexicon.models import (DiatopicVariation, Lexicon)
 
-from linguatec_lexicon.importers import importvariation
+from linguatec_lexicon.importers import import_variation
 
 
 def get_src_language_from_lexicon_code(lex_code):
@@ -34,17 +34,6 @@ class Command(BaseCommand):
             help="Just validate input file; don't actually import to database.",
         )
 
-    def clean_variation(self, value):
-        if self.dry_run:
-            return None  # discard value because doesn't affect to data validation
-
-        # validate variation
-        try:
-            return DiatopicVariation.objects.get(name=value)
-        except DiatopicVariation.DoesNotExist:
-            raise CommandError(
-                'Diatopic variation "{}" does not exist'.format(value))
-
     def handle(self, *args, **options):
         self.input_file = options['input_file']
         self.dry_run = options['dry_run']
@@ -57,7 +46,7 @@ class Command(BaseCommand):
             raise CommandError(
                 'Unexpected filetype "{}". Should be an Excel document (XLSX)'.format(file_extension))
 
-        self.variation = self.clean_variation(options['variation'])
+        self.variation = options['variation']
 
         # check that a lexicon with that code exist
         try:
@@ -69,11 +58,11 @@ class Command(BaseCommand):
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 
         if self.dry_run:
-            self.errors, self.cleaned_data = importvariation(self.input_file, self.lexicon.pk,
-                                                             self.variation, self.dry_run)
+            self.errors, self.cleaned_data, self.xlsx = import_variation(self.input_file, self.lexicon.pk,
+                                                                         self.variation, self.dry_run)
         else:
-            self.errors, self.cleaned_data = importvariation(self.input_file, self.lexicon.pk,
-                                                             self.variation.pk, self.dry_run)
+            self.errors, self.cleaned_data, self.xlsx = import_variation(self.input_file, self.lexicon.pk,
+                                                                         self.variation, self.dry_run)
 
         if self.errors:
             self.stdout.write(self.style.ERROR(

@@ -118,8 +118,7 @@ class ImportDataView(TemplateView):
                 lexicon_code = str(request.POST.get('lexicon_code'))
                 lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
                 variation_name = str(request.POST.get('variation_name'))
-                variation_id = DiatopicVariation.objects.get(name=variation_name).pk
-                import_variation_entries(tmp_file, lexicon_id, variation_id, imports_info_id)
+                import_variation_entries(tmp_file, lexicon_id, variation_name, imports_info_id)
 
             if type_import == 'gramcats':
                 load_data_gramcats([tmp_file], imports_info_id)
