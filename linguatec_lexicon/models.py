@@ -306,8 +306,8 @@ class AbstractImportsInfo(models.Model):
         errors_list = self.errors.split("}, ")
 
         # doesn't work as expected
-        for error in errors_list:
-            error = error.translate({ord(i): None for i in '}{'})
+        for i in range(0, len(errors_list)):
+            errors_list[i] = errors_list[i].translate({ord(i): None for i in '}{'})
 
         return errors_list
 

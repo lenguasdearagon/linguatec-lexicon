@@ -209,9 +209,12 @@ def import_variation(input_file, lexicon, variation, dry_run, imports_info_id=No
         save_ImportInfo_status(ii, ImportsInfo.FAILED, None, errors)
 
     elif not dry_run:
-        count_entries = write_to_database(cleaned_data)
-
-        save_ImportInfo_status(ii, ImportsInfo.COMPLETED, count_entries, None)
+        try:
+            count_entries = write_to_database(cleaned_data)
+            save_ImportInfo_status(ii, ImportsInfo.COMPLETED, count_entries, None)
+        except IntegrityError as e:
+            save_ImportInfo_status(ii, ImportsInfo.FAILED, None, str(e))
+            raise CommandError("Error: " + e)
 
     return errors, cleaned_data, xlsx
 
