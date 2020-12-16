@@ -35,24 +35,29 @@ def save_ImportInfo_status(imports_info, status, objects_inserted, errors):
 
 def load_gramcats(csv_files, imports_info_id=None):
 
+    ii = get_ImportsInfo_objects(imports_info_id)
+
     # Keep a count of the installed objects and files
     csv_count = 0
     loaded_object_count = 0
+    try:
+        for csv_file in csv_files:
+            df = pd.read_csv(csv_file, engine='python')
+            gramcats = []
+            for row in df.itertuples(name=None):
+                gramcats.append(
+                    GramaticalCategory(
+                        abbreviation=row[1], title=row[2])
+                )
+                loaded_object_count += 1
 
-    for csv_file in csv_files:
-        df = pd.read_csv(csv_file, engine='python')
-        gramcats = []
-        for row in df.itertuples(name=None):
-            gramcats.append(
-                GramaticalCategory(
-                    abbreviation=row[1], title=row[2])
-            )
-            loaded_object_count += 1
+            GramaticalCategory.objects.bulk_create(gramcats)
+            csv_count += 1
 
-        GramaticalCategory.objects.bulk_create(gramcats)
-        csv_count += 1
+    except IntegrityError as e:
+        save_ImportInfo_status(ii, ImportsInfo.FAILED, None, str(e))
+        raise CommandError("Error: " + e)
 
-    ii = get_ImportsInfo_objects(imports_info_id)
     save_ImportInfo_status(ii, ImportsInfo.COMPLETED, loaded_object_count, None)
 
     return loaded_object_count, csv_count
