@@ -1,16 +1,13 @@
-import pandas as pd
 import sys
 
-from linguatec_lexicon.models import (Entry, GramaticalCategory, Word,
-                                      Lexicon, DiatopicVariation, Example,
-                                      VerbalConjugation, ImportLog)
-
-
+import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.management.base import CommandError
-
 from django.db import IntegrityError
 
+from linguatec_lexicon.models import (DiatopicVariation, Entry, Example,
+                                      GramaticalCategory, ImportLog, Lexicon,
+                                      VerbalConjugation, Word)
 from linguatec_lexicon.validators import validate_column_verb_conjugation
 
 

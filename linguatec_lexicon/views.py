@@ -83,7 +83,7 @@ class ImportDataView(TemplateView):
     template_name = "linguatec_lexicon/importdata.html"
 
     def create_imports_info(self, input_file, type):
-        ii = ImportLog.objects.create(status='created', input_file=input_file, type=type)
+        ii = ImportLog.objects.create(status=ImportLog.CREATED, input_file=input_file, type=type)
         return ii.pk
 
     def post(self, request, *args, **kwargs):
@@ -139,6 +139,8 @@ class ImportDataView(TemplateView):
             'title_data': "Import Lexicon data",
             'title_variation': "Import Diatopic Variations",
             'title_gramcats': "Import Gramatical categories",
+            'lexicon_list': Lexicon.objects.all(),
+            'variation_list': DiatopicVariation.objects.all(),
         })
         return context
 

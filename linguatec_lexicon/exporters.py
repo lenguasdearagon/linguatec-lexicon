@@ -90,7 +90,6 @@ def write_to_csv_file_variation(lexicon_id, variation_id, output_file):
 
         writer = csv.DictWriter(outfile, fieldnames=fieldnames, delimiter=';')
 
-        # word_list = []
         for entry in entry_list:
             try:
                 word = Word.objects.get(term=entry['word__term'], lexicon=lexicon_id)

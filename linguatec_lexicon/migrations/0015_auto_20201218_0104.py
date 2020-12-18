@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name='importlog',
+            model_name='ImportLog',
             name='status',
             field=models.CharField(choices=[('created', 'CREATED'), ('running', 'RUNNING'), ('failed', 'FAILED'), ('completed', 'COMPLETED')], max_length=25),
         ),

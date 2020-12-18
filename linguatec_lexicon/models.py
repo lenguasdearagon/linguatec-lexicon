@@ -297,6 +297,10 @@ class ImportLog(models.Model):
         ordering = ['-created_at']
 
     def list_errors(self):
+
+        if self.errors == '' or self.errors is None:
+            return None
+
         errors_list = self.errors.split("}, ")
 
         # doesn't work as expected

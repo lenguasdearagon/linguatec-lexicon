@@ -18,8 +18,21 @@
             <form action="" enctype="multipart/form-data" method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" /></br>
-                </br>
+                <div class="input-group rg-search">
+                    <label for="lexicon_code">Código lexicon</label>
+                    <select id="selected_lex" name="lexicon_code">
+                        {% for lexicon in lexicon_list %}
+                            <optgroup label="{{ lexicon.src_language }}"> 
+                            {% for lex in lexicon_list %}
+                                {% if lex.src_language == lexicon.src_language %}
+                                    <option value="{{ lex.code }}">{{ lex.code }}</option> 
+                                {% endif %}
+                            {% endfor %}
+                        {% empty %}
+                        <option selected value=''>Empty Value</option>
+                        {% endfor %}
+                    </select></br></br>
+                </div>
                 <input name="type_import" type="hidden" value="data">
                 <input id="Importar" type="submit" value="Importar" />
             </form>
@@ -40,10 +53,31 @@
             <form action="" enctype="multipart/form-data" method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" /></br>
-                </br>
-                <label for="variation_name">Nombre Variación</label><input type="text" name="variation_name" /></br>
-                </br>
+                <div class="input-group rg-search">
+                    <label for="lexicon_code">Código lexicon</label>
+                    <select id="selected_lex" name="lexicon_code">
+                        {% for lexicon in lexicon_list %}
+                            <optgroup label="{{ lexicon.src_language }}"> 
+                            {% for lex in lexicon_list %}
+                                {% if lex.src_language == lexicon.src_language %}
+                                    <option value="{{ lex.code }}">{{ lex.code }}</option> 
+                                {% endif %}
+                            {% endfor %}
+                        {% empty %}
+                        <option selected value=''>Empty Value</option>
+                        {% endfor %}
+                    </select></br></br>
+                </div>
+                <div class="input-group rg-search">
+                    <label for="variation_name">Nombre Variación</label>
+                    <select id="selected_variation" name="variation_name">
+                        {% for variation in variation_list %}
+                            <option value="{{ variation.name }}">{{ variation.name }}</option> 
+                        {% empty %}
+                            <option selected value=''>Empty Value</option>
+                        {% endfor %}
+                    </select></br></br>
+                </div>
                 <input name="type_import" type="hidden" value="variation">
                 <input id="Importar" type="submit" value="Importar" />
             </form>
