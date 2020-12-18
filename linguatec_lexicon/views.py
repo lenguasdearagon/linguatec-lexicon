@@ -212,20 +212,23 @@ class ExportDataView(TemplateView):
     title2 = "Export Variation"
 
     def post(self, request, *args, **kwargs):
+        TYPE_LEXICON = 'lexicon'
+        TYPE_VARIATION = 'variation'
+
         type_export = str(request.POST.get('type_export'))
 
-        if type_export == 'lexicon':
+        if type_export == TYPE_LEXICON:
             lexicon_code = str(request.POST.get('lexicon_code'))
             lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
 
             return write_to_csv_file_export_data.now(lexicon_id, None)
 
-        elif type_export == 'variation':
+        elif type_export == TYPE_VARIATION:
             lexicon_code = str(request.POST.get('lexicon_code'))
             lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
 
-            variation = str(request.POST.get('variation'))
-            variation_id = DiatopicVariation.objects.get(name=variation).pk
+            variation_name = str(request.POST.get('variation_name'))
+            variation_id = DiatopicVariation.objects.get(name=variation_name).pk
 
             return write_to_csv_file_export_variation.now(lexicon_id, variation_id, None)
 
@@ -234,6 +237,8 @@ class ExportDataView(TemplateView):
         context.update({
             'title': self.title,
             'title2': self.title2,
+            'lexicon_list': Lexicon.objects.all(),
+            'variation_list': DiatopicVariation.objects.all(),
         })
         return context
 

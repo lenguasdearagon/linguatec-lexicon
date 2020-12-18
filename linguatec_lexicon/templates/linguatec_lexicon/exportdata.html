@@ -18,7 +18,21 @@
         </div></br>
         
         <form method="post">{% csrf_token %}
-            <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" /></br>
+            <div class="input-group rg-search">
+                <label for="lexicon_code">Código lexicon</label>
+                <select id="selected_lex" name="lexicon_code">
+                    {% for lexicon in lexicon_list %}
+                        <optgroup label="{{ lexicon.src_language }}"> 
+                        {% for lex in lexicon_list %}
+                            {% if lex.src_language == lexicon.src_language %}
+                                <option value="{{ lex.code }}">{{ lex.code }}</option> 
+                            {% endif %}
+                        {% endfor %}
+                    {% empty %}
+                    <option selected value=''>Empty Value</option>
+                    {% endfor %}
+                </select>
+            </div>
             <input name="type_export" type="hidden" value="lexicon">
 
             </br><button class="btn btn-primary" type="submit">Download file</button>
@@ -31,11 +45,34 @@
         </div></br>
         
         <form method="post">{% csrf_token %}
-            <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" />
-            </br></br><label for="variation">Variación diatópica</label><input type="text" name="variation" />
+            <div class="input-group rg-search">
+                <label for="lexicon_code">Código lexicon</label>
+                <select id="selected_lex" name="lexicon_code">
+                    {% for lexicon in lexicon_list %}
+                        <optgroup label="{{ lexicon.src_language }}"> 
+                        {% for lex in lexicon_list %}
+                            {% if lex.src_language == lexicon.src_language %}
+                                <option value="{{ lex.code }}">{{ lex.code }}</option> 
+                            {% endif %}
+                        {% endfor %}
+                    {% empty %}
+                    <option selected value=''>Empty Value</option>
+                    {% endfor %}
+                </select>
+            </div></br>
+            <div class="input-group rg-search">
+                <label for="variation_name">Nombre Variación</label>
+                <select id="selected_variation" name="variation_name">
+                    {% for variation in variation_list %}
+                        <option value="{{ variation.name }}">{{ variation.name }}</option> 
+                    {% empty %}
+                        <option selected value=''>Empty Value</option>
+                    {% endfor %}
+                </select>
+            </div>
             <input name="type_export" type="hidden" value="variation">
 
-            </br></br><button class="btn btn-primary" type="submit">Download file</button>
+            </br><button class="btn btn-primary" type="submit">Download file</button>
         </form>
         </div>
     </div>
