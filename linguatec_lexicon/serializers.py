@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import (DiatopicVariation, Entry, Example, GramaticalCategory,
-                     VerbalConjugation, Word, Lexicon, ImportsInfo)
+                     VerbalConjugation, Word, Lexicon, ImportLog)
 
 
 class ExampleSerializer(serializers.ModelSerializer):
@@ -64,8 +64,8 @@ class LexiconSerializer(serializers.ModelSerializer):
         fields = ('id', 'code', 'src_language', 'dst_language')
 
 
-class ImportsInfoSerializer(serializers.ModelSerializer):
+class ImportLogSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ImportsInfo
+        model = ImportLog
         fields = ('type', 'status', 'input_file', 'created_at',
                   'num_rows', 'errors')

@@ -127,7 +127,7 @@ class ImporterTestCase(TestCase):
                          VerbalConjugation.objects.count())
 
         # check that conjugation is related to proper entry
-        word = Word.objects.get(term="abarcar",lexicon=Lexicon.objects.get(src_language=self.LEXICON_CODE[:2], dst_language=self.LEXICON_CODE[3:]))
+        word = Word.objects.get(term="abarcar",lexicon=Lexicon.objects.get_by_code(self.LEXICON_CODE))
         entry = word.entries.get(translation__contains="adubir")
         self.assertIsNotNone(entry.conjugation)
 
@@ -173,9 +173,9 @@ class ImporterTestCase(TestCase):
         self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT + NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT, Word.objects.count())
         self.assertEqual(NUMBER_OF_ENTRIES_FIRST_INPUT + NUMBER_OF_ENTRIES_SECOND_INPUT + NUMBER_OF_ENTRIES_THIRD_INPUT, Entry.objects.count())
 
-        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT, Word.objects.filter(lexicon=(Lexicon.objects.get(src_language=self.LEXICON_CODE[:2], dst_language=self.LEXICON_CODE[3:]))).count())
+        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT, Word.objects.filter(lexicon=(Lexicon.objects.get_by_code(self.LEXICON_CODE))).count())
         self.assertEqual(NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT, Word.objects.filter(lexicon=another_lexicon).count())
-        self.assertEqual(2,Lexicon.objects.count())
+        self.assertEqual(2, Lexicon.objects.count())
 
 
 class ImportGramCatTestCase(TestCase):

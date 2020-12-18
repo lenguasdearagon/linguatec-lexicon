@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='ImportsInfo',
+            name='ImportLog',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('status', models.CharField(choices=[('created', 'CREATED'), ('running', 'RUNNING'), ('failed', 'FAILED'), ('completed', 'COMPLETED'), ('completed with errors', 'COMPLETED WITH ERRORS')], max_length=25)),

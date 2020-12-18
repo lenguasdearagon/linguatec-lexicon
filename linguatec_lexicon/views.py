@@ -15,9 +15,9 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from .forms import ValidatorForm, CSVValidatorForm
-from .models import GramaticalCategory, DiatopicVariation, Word, Lexicon, ImportsInfo
+from .models import GramaticalCategory, DiatopicVariation, Word, Lexicon, ImportLog
 from .serializers import (GramaticalCategorySerializer, WordSerializer, WordNearSerializer,
-                          LexiconSerializer, ImportsInfoSerializer)
+                          LexiconSerializer, ImportLogSerializer)
 
 
 class DataValidatorView(TemplateView):
@@ -83,7 +83,7 @@ class ImportDataView(TemplateView):
     template_name = "linguatec_lexicon/importdata.html"
 
     def create_imports_info(self, input_file, type):
-        ii = ImportsInfo.objects.create(status='created', input_file=input_file, type=type)
+        ii = ImportLog.objects.create(status='created', input_file=input_file, type=type)
         return ii.pk
 
     def post(self, request, *args, **kwargs):
@@ -91,9 +91,9 @@ class ImportDataView(TemplateView):
 
         type_import = str(request.POST.get('type_import'))
 
-        if type_import == 'data' or type_import == 'variation':
+        if type_import == ImportLog.DATA or type_import == ImportLog.VARIATION:
             form = ValidatorForm(request.POST, request.FILES)
-        if type_import == 'gramcats':
+        if type_import == ImportLog.GRAMCATS:
             form = CSVValidatorForm(request.POST, request.FILES)
 
         if form.is_valid():
@@ -101,26 +101,26 @@ class ImportDataView(TemplateView):
             imports_info_id = self.create_imports_info(file, type_import)
 
             # store uploaded file as a temporal file
-            if type_import == 'data' or type_import == 'variation':
+            if type_import == ImportLog.DATA or type_import == ImportLog.VARIATION:
                 tmp_fd, tmp_file = tempfile.mkstemp(suffix='.xlsx')
-            if type_import == 'gramcats':
+            if type_import == ImportLog.GRAMCATS:
                 tmp_fd, tmp_file = tempfile.mkstemp(suffix='.csv')
             f = os.fdopen(tmp_fd, 'wb')  # open the tmp file for writing
             f.write(file.read())  # write the tmp file
             f.close()
 
-            if type_import == 'data':
+            if type_import == ImportLog.DATA:
                 lexicon_code = str(request.POST.get('lexicon_code'))
-                lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
+                lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
                 import_data_words(tmp_file, lexicon_id, imports_info_id)
 
-            if type_import == 'variation':
+            if type_import == ImportLog.VARIATION:
                 lexicon_code = str(request.POST.get('lexicon_code'))
-                lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
+                lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
                 variation_name = str(request.POST.get('variation_name'))
                 import_variation_entries(tmp_file, lexicon_id, variation_name, imports_info_id)
 
-            if type_import == 'gramcats':
+            if type_import == ImportLog.GRAMCATS:
                 load_data_gramcats([tmp_file], imports_info_id)
 
             context.update({
@@ -153,7 +153,7 @@ class ImportationsView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        ii = ImportsInfo.objects.all()
+        ii = ImportLog.objects.all()
 
         context.update({
                 'importations': ii,
@@ -176,8 +176,8 @@ class ImportationErrorsView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        importsinfo_id = int(request.GET.get('importation_id', None))
-        ii = ImportsInfo.objects.get(pk=importsinfo_id)
+        ImportLog_id = int(request.GET.get('importation_id', None))
+        ii = ImportLog.objects.get(pk=ImportLog_id)
 
         # error_list = ii.errors.split("}, ")
 
@@ -214,13 +214,13 @@ class ExportDataView(TemplateView):
 
         if type_export == 'lexicon':
             lexicon_code = str(request.POST.get('lexicon_code'))
-            lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
+            lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
 
             return write_to_csv_file_export_data.now(lexicon_id, None)
 
         elif type_export == 'variation':
             lexicon_code = str(request.POST.get('lexicon_code'))
-            lexicon_id = Lexicon.objects.get(src_language=lexicon_code[:2], dst_language=lexicon_code[3:]).pk
+            lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
 
             variation = str(request.POST.get('variation'))
             variation_id = DiatopicVariation.objects.get(name=variation).pk
@@ -250,8 +250,8 @@ class ImportErrorsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint that allows importation errors to be viewed.
     """
-    queryset = ImportsInfo.objects.all()
-    serializer_class = ImportsInfoSerializer
+    queryset = ImportLog.objects.all()
+    serializer_class = ImportLogSerializer
     pagination_class = DefaultLimitOffsetPagination
 
 

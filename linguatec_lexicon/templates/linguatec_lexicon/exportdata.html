@@ -9,41 +9,34 @@
 
 {% block content %}
 
-<div style="width: 45%; float:left">
-    <h1>{{ title }}</h1>
+<div class="container">
     <div class="row">
-        <div class="col-12">
-            <div>
-                Escribe el nombre del lexicon a exportar.
-            </div></br>
-            
-            <form method="post">{% csrf_token %}
-                <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" /></br>
-                <input name="type_export" type="hidden" value="lexicon">
+        <div class="col">
+        <h1>{{ title }}</h1>
+        <div>
+            Escribe el nombre del lexicon a exportar.
+        </div></br>
+        
+        <form method="post">{% csrf_token %}
+            <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" /></br>
+            <input name="type_export" type="hidden" value="lexicon">
 
-                </br><button class="btn btn-primary" type="submit">Download file</button>
-            </form>
-
+            </br><button class="btn btn-primary" type="submit">Download file</button>
+        </form>
         </div>
-    </div>
-</div>
- 
- <div style="width: 45%; float:right">
-    <h1>{{ title2 }}</h1>
-    <div class="row">
-        <div class="col-12">
-            <div>
-                Escribe el nombre del lexicon y el nombre de la variacion a exportar.
-            </div></br>
-            
-            <form method="post">{% csrf_token %}
-                <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" />
-                </br></br><label for="variation">Variación diatópica</label><input type="text" name="variation" />
-                <input name="type_export" type="hidden" value="variation">
+        <div class="col">
+        <h1>{{ title2 }}</h1>
+        <div>
+            Escribe el nombre del lexicon y el nombre de la variacion a exportar.
+        </div></br>
+        
+        <form method="post">{% csrf_token %}
+            <label for="lexicon_code">Codigo lexicon</label><input type="text" name="lexicon_code" />
+            </br></br><label for="variation">Variación diatópica</label><input type="text" name="variation" />
+            <input name="type_export" type="hidden" value="variation">
 
-                </br></br><button class="btn btn-primary" type="submit">Download file</button>
-            </form>
-
+            </br></br><button class="btn btn-primary" type="submit">Download file</button>
+        </form>
         </div>
     </div>
  </div>

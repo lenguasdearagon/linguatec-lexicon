@@ -44,14 +44,6 @@ def extract_gramcats(db):
     return gramcats
 
 
-def get_src_language_from_lexicon_code(lex_code):
-    return lex_code[:2]
-
-
-def get_dst_language_from_lexicon_code(lex_code):
-    return lex_code[3:]
-
-
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
@@ -78,10 +70,7 @@ class Command(BaseCommand):
 
         # check that a lexicon with that code exist
         try:
-            src = get_src_language_from_lexicon_code(self.lexicon_code)
-            dst = get_dst_language_from_lexicon_code(self.lexicon_code)
-
-            self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
+            self.lexicon = Lexicon.objects.get_by_code(self.lexicon_code)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 
