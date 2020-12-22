@@ -7,19 +7,21 @@ from .models import ImportLog
 
 
 @background(schedule=0)
-def import_data_words(csv_files, lexicon_id, imports_info_id):
-    ii = ImportLog.objects.get(pk=imports_info_id)
-    ii.status = ImportLog.RUNNING
-    ii.save()
-    return import_data(csv_files, lexicon_id, False, False, imports_info_id)
+def import_data_words(xlsx_file, lexicon_id, imports_info_id, dry_run):
+    if imports_info_id is not None:
+        ii = ImportLog.objects.get(pk=imports_info_id)
+        ii.status = ImportLog.RUNNING
+        ii.save()
+    return import_data(xlsx_file, lexicon_id, dry_run, False, imports_info_id)
 
 
 @background(schedule=0)
-def import_variation_entries(csv_files, lexicon_id, variation_name, imports_info_id):
-    ii = ImportLog.objects.get(pk=imports_info_id)
-    ii.status = ImportLog.RUNNING
-    ii.save()
-    return import_variation(csv_files, lexicon_id, variation_name, False, imports_info_id)
+def import_variation_entries(xlsx_file, lexicon_id, variation_name, imports_info_id, dry_run):
+    if imports_info_id is not None:
+        ii = ImportLog.objects.get(pk=imports_info_id)
+        ii.status = ImportLog.RUNNING
+        ii.save()
+    return import_variation(xlsx_file, lexicon_id, variation_name, dry_run, imports_info_id)
 
 
 @background(schedule=0)

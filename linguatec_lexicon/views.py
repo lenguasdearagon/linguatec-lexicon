@@ -7,7 +7,7 @@ from .tasks import (write_to_csv_file_export_data, write_to_csv_file_export_vari
                     load_data_gramcats, import_variation_entries, import_data_words)
 
 from django.core.management import call_command
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -38,7 +38,7 @@ class DataValidatorView(TemplateView):
             f.close()
 
             # validate uploaded file and handle errors (if any)
-            out = self.validate(tmp_file)
+            out = self.validate(tmp_file, request)
             errors = []
             for line in out.getvalue().split('\n'):
                 try:
@@ -61,21 +61,37 @@ class DataValidatorView(TemplateView):
         context.update({
             'form':  ValidatorForm(),
             'title': self.title,
+            'lexicon_list': Lexicon.objects.all(),
+            'variation_list': None,
         })
         return context
 
-    def validate(self, xlsx_file):
+    def validate(self, xlsx_file, request):
+        lexicon_code = str(request.POST.get('lexicon_code'))
         out = StringIO()
-        call_command('importdata', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
+        call_command('importdata', xlsx_file, lexicon_code, dry_run=True, no_color=True, verbosity=3, stdout=out)
         return out
 
 
 class DiatopicVariationValidatorView(DataValidatorView):
     title = "Diatopic variation validator"
 
-    def validate(self, xlsx_file):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'form':  ValidatorForm(),
+            'title': self.title,
+            'lexicon_list': Lexicon.objects.all(),
+            'variation_list': DiatopicVariation.objects.all(),
+        })
+        return context
+
+    def validate(self, xlsx_file, request):
+        lexicon_code = str(request.POST.get('lexicon_code'))
+        variation_name = str(request.POST.get('variation_name'))
         out = StringIO()
-        call_command('importvariation', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
+        call_command('importvariation', xlsx_file, lexicon_code, variation=variation_name,
+                     dry_run=True, no_color=True, verbosity=3, stdout=out)
         return out
 
 
@@ -112,13 +128,13 @@ class ImportDataView(TemplateView):
             if type_import == ImportLog.DATA:
                 lexicon_code = str(request.POST.get('lexicon_code'))
                 lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
-                import_data_words(tmp_file, lexicon_id, imports_info_id)
+                import_data_words(tmp_file, lexicon_id, imports_info_id, False)
 
             if type_import == ImportLog.VARIATION:
                 lexicon_code = str(request.POST.get('lexicon_code'))
                 lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
                 variation_name = str(request.POST.get('variation_name'))
-                import_variation_entries(tmp_file, lexicon_id, variation_name, imports_info_id)
+                import_variation_entries(tmp_file, lexicon_id, variation_name, imports_info_id, False)
 
             if type_import == ImportLog.GRAMCATS:
                 load_data_gramcats([tmp_file], imports_info_id)
