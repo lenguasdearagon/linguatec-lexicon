@@ -41,12 +41,13 @@ class Lexicon(models.Model):
         return self.name
 
 
-
 def get_src_language_from_lexicon_code(lex_code):
     return lex_code[:2]
 
+
 def get_dst_language_from_lexicon_code(lex_code):
     return lex_code[3:]
+
 
 class WordManager(models.Manager):
     TERM_PUNCTUATION_SIGNS = '¡!¿?'
@@ -67,7 +68,7 @@ class WordManager(models.Manager):
         MIN_SIMILARITY = 0.3
         query = self._clean_search_query(query)
 
-        #Get and use the key of the Lexicon instead of the name
+        # Get and use the key of the Lexicon instead of the name
         if lex is None or lex == '':
             qs = self
         else:
@@ -79,7 +80,7 @@ class WordManager(models.Manager):
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
-            iregex=r"\b{0}\b"
+            iregex = r"\b{0}\b"
             return qs.filter(term__iregex=iregex.format(query))
         else:
             filter_query = (
@@ -93,7 +94,7 @@ class WordManager(models.Manager):
         qs = qs.filter(
                 term__iregex=iregex.format(query)
             ).annotate(similarity=TrigramSimilarity('term', query)
-            ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
+                       ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
         return qs
 
     def search_near(self, query, lex=None):

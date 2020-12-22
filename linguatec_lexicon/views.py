@@ -4,7 +4,7 @@ import tempfile
 from io import StringIO
 
 from django.core.management import call_command
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets
 from rest_framework.decorators import action

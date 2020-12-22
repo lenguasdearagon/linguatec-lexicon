@@ -19,8 +19,7 @@ except django.core.exceptions.ImproperlyConfigured:
     sys.exit(2)
 
 
-from linguatec_lexicon.models import (DiatopicVariation, GramaticalCategory,
-                                      Lexicon, Region)
+from linguatec_lexicon.models import (DiatopicVariation, Lexicon, Region)
 
 
 def init_lexicon():
@@ -74,9 +73,8 @@ def init_diatopic_variations():
     create_variation(ribagorza, "Benasqués", "Benas.")
     create_variation(sobrarbe, "Belsetán", "Belset.")
     create_variation(sobrarbe, "Chistabín", "Chist.")
-    create_variation(sobrarbe, "Habla de Sobrepuerto","Sobrep.")
+    create_variation(sobrarbe, "Habla de Sobrepuerto", "Sobrep.")
     create_variation(somontano, "Somontanos", "Somon.")
-
 
 
 VARIANTS_MAPPING = {
@@ -94,6 +92,7 @@ VARIANTS_MAPPING = {
 
 VARIANTS_PATH = '/home/santiago/trabajo/linguatec-v3/variedades'
 
+
 def validate_variations():
     # for xlsx in os.listdir(VARIANTS_PATH):
     #     if not xlsx.endswith('xlsx'):
@@ -103,6 +102,7 @@ def validate_variations():
         print("-" * 80)
         print(xlsx_fullpath)
         management.call_command('importvariation', xlsx_fullpath, 'es-ar', verbosity=3, dry_run=True)
+
 
 def import_variations():
     for variation, xlsx in VARIANTS_MAPPING.items():
@@ -135,13 +135,14 @@ def main():
             ./manage.py importvariation variation_file.xlsx lex_code --variation variation_name --verbosity 3 --dry-run
     """)
 
+
 def help():
     USAGE = ("""
-    USAGE
-    ---------------
-    {} [--drop]
-    """
-    )
+             USAGE
+             ---------------
+             {} [--drop]
+             """
+             )
     print(USAGE.format(sys.argv[0]))
 
     print("""
@@ -159,6 +160,7 @@ python initialize_staging.py --import-variations
 # to import only a specific file
 # ./manage.py importvariation -v3 --variation "Tensino" "ALTO GÁLLEGO-tensino-2020-01-20.xlsx es-ar"
     """)
+
 
 def drop_all():
     DiatopicVariation.objects.all().delete()

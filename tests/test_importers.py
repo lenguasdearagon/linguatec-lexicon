@@ -1,8 +1,6 @@
 import os
-import unittest
 from io import StringIO
 
-from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase
 
@@ -14,6 +12,7 @@ from linguatec_lexicon.models import (DiatopicVariation, Entry, Example,
 class ImporterTestCase(TestCase):
     LEXICON_NAME = 'es-ar'
     LEXICON_CODE = 'es-ar'
+
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -127,7 +126,9 @@ class ImporterTestCase(TestCase):
                          VerbalConjugation.objects.count())
 
         # check that conjugation is related to proper entry
-        word = Word.objects.get(term="abarcar",lexicon=Lexicon.objects.get(src_language=self.LEXICON_CODE[:2], dst_language=self.LEXICON_CODE[3:]))
+        word = Word.objects.get(term="abarcar",
+                                lexicon=Lexicon.objects.get(src_language=self.LEXICON_CODE[:2],
+                                                            dst_language=self.LEXICON_CODE[3:]))
         entry = word.entries.get(translation__contains="adubir")
         self.assertIsNotNone(entry.conjugation)
 
@@ -170,12 +171,17 @@ class ImporterTestCase(TestCase):
         sample_path = os.path.join(base_path, 'fixtures/abcd.xlsx')
         call_command('importdata', sample_path, another_lexicon.code)
 
-        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT + NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT, Word.objects.count())
-        self.assertEqual(NUMBER_OF_ENTRIES_FIRST_INPUT + NUMBER_OF_ENTRIES_SECOND_INPUT + NUMBER_OF_ENTRIES_THIRD_INPUT, Entry.objects.count())
+        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT + NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT,
+                         Word.objects.count())
+        self.assertEqual(NUMBER_OF_ENTRIES_FIRST_INPUT + NUMBER_OF_ENTRIES_SECOND_INPUT + NUMBER_OF_ENTRIES_THIRD_INPUT,
+                         Entry.objects.count())
 
-        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT, Word.objects.filter(lexicon=(Lexicon.objects.get(src_language=self.LEXICON_CODE[:2], dst_language=self.LEXICON_CODE[3:]))).count())
-        self.assertEqual(NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT, Word.objects.filter(lexicon=another_lexicon).count())
-        self.assertEqual(2,Lexicon.objects.count())
+        self.assertEqual(NUMBER_OF_WORDS_FIRST_INPUT,
+                         Word.objects.filter(lexicon=(Lexicon.objects.get(src_language=self.LEXICON_CODE[:2],
+                                                                          dst_language=self.LEXICON_CODE[3:]))).count())
+        self.assertEqual(NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT,
+                         Word.objects.filter(lexicon=another_lexicon).count())
+        self.assertEqual(2, Lexicon.objects.count())
 
 
 class ImportGramCatTestCase(TestCase):
@@ -290,7 +296,9 @@ class ImportVariationTestCase(TestCase):
         self.assertNotIn('error', out.getvalue())
 
         # should provide default value --> 'v.' (same as common entry)
-        common_entry = Word.objects.get(term='abarrancar', lexicon=Lexicon.objects.get(src_language='es', dst_language='ar'))
+        common_entry = Word.objects.get(term='abarrancar',
+                                        lexicon=Lexicon.objects.get(src_language='es', dst_language='ar'))
+
         variation_entry = Entry.objects.get(variation__name=VARIATION_NAME, word__term='abarrancar')
 
         self.assertListEqual(

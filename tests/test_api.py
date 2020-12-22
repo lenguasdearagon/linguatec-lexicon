@@ -29,6 +29,7 @@ class ApiTestCase(TestCase):
         resp_json = resp.json()
         self.assertEqual(0, resp_json["count"])
 
+
 class LexiconAPITestCase(TestCase):
     fixtures = ['lexicon-sample.json']
 
@@ -142,7 +143,7 @@ class SearchTestCase(TestCase):
         # word in query is contained but should be excluded
         query = "casa"
         expected_results = ["casa"]
-        #should_be_excluded_in_terms = ["casar", "escasamente"]
+        # should_be_excluded_in_terms = ["casar", "escasamente"]
         self.do_and_check_query(query, expected_results)
 
 

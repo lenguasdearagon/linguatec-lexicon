@@ -27,4 +27,3 @@ def get_version():
         sub = mapping[VERSION[3]] + str(VERSION[4])
 
     return str(main + sub)
-

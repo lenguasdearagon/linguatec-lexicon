@@ -15,6 +15,7 @@ def read(fname):
     with open(os.path.join(os.path.dirname(__file__), fname)) as f:
         return f.read()
 
+
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
@@ -22,16 +23,16 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name="linguatec-lexicon",
     version=version,
-    url = 'https://gitlab.com/linguatec/linguatec-lexicon/',
-    author = 'Santiago Lamora',
+    url='https://gitlab.com/linguatec/linguatec-lexicon/',
+    author='Santiago Lamora',
     author_email='santiago@ribaguifi.com',
-    description = ('An online bilingual dictionary based on Django.'),
+    description=('An online bilingual dictionary based on Django.'),
     long_description=read('README.md'),
-    license = 'AGPLv3 License',
+    license='AGPLv3 License',
     packages=find_packages(),
-    include_package_data = True,
+    include_package_data=True,
     zip_safe=False,
-    classifiers = [
+    classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Environment :: Web Environment',
         'Framework :: Django',

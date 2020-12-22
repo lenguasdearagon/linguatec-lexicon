@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## master
 
+## [0.4] - 2020-12-22
+- [added] Multiple lexicons can be save and stored (source and destination languages are unique together)
+- [changed] Now there can not be a duplicated word in a lexicon. (unique together lexicon and term)
+- [changed] Avoid repeated entries. (unique together word, translation and variation) 
+- [changed] Importation require to be passed a lexicon_code of an already existing lexicon.
+- [changed] API: View WordViewSet requires a parameter l (lexicon_code) to perform search and near methods.
+- [added] Admin panel and an url_admin_panel in Word model to access it directly.
+- [added] API: Added Lexicon api view and Lexicon serializer
+- [added] Exportdata and Exportvariation commands and views to use them.
+- [added] Application background-tasks, importations are executed asynchronously.
+- [added] ImportLog which saves in the database the importations made.
+
 ## [0.3.2] - 2020-01-27
 - [fixed] `importvariation` handle properly variation param on dry-run.
 - [fixed] Issue #83 searchs that starts with signs of punctuation.

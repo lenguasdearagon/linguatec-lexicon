@@ -4,20 +4,16 @@ import atexit
 import copy
 import os
 import shutil
-import subprocess
 import sys
 import tempfile
-import warnings
 
 import django
 from django.apps import apps
 from django.conf import settings
-from django.db import connection, connections
+from django.db import connections
 from django.test import TestCase, TransactionTestCase
 from django.test.runner import default_test_processes
-from django.test.selenium import SeleniumTestCaseBase
 from django.test.utils import get_runner
-from django.utils.deprecation import RemovedInDjango30Warning
 from django.utils.log import DEFAULT_LOGGING
 
 
@@ -72,6 +68,7 @@ def get_test_modules():
                     os.path.exists(os.path.join(dirpath, f, '__init__.py'))):
                 modules.append((modpath, f))
     return modules
+
 
 def setup(verbosity, test_labels, parallel):
     # Reduce the given test labels to just the app module path.
@@ -142,11 +139,11 @@ def setup(verbosity, test_labels, parallel):
         'fields.W342',  # ForeignKey(unique=True) -> OneToOneField
     ]
 
-     # Load all the ALWAYS_INSTALLED_APPS.
+    # Load all the ALWAYS_INSTALLED_APPS.
     django.setup()
 
     # Load all the test model apps.
-    test_modules = get_test_modules()
+    # test_modules = get_test_modules()
 
     apps.set_installed_apps(settings.INSTALLED_APPS)
 
