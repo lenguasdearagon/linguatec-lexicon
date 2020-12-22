@@ -2,7 +2,6 @@ django==2.2.13
 django-extensions
 djangorestframework==3.11
 psycopg2-binary
-django-background-tasks
 
 # importdata
 pandas
