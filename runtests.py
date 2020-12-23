@@ -143,8 +143,6 @@ def setup(verbosity, test_labels, parallel):
     django.setup()
 
     # Load all the test model apps.
-    # test_modules = get_test_modules()
-
     apps.set_installed_apps(settings.INSTALLED_APPS)
 
     return state
