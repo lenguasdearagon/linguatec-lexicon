@@ -21,10 +21,10 @@
                 <div class="input-group rg-search">
                     <label for="lexicon_code">Código lexicon</label>
                     <select id="selected_lex" name="lexicon_code">
-                        {% for lexicon in lexicon_list %}
-                            <optgroup label="{{ lexicon.src_language }}"> 
+                        {% for src_language in src_languages %}
+                            <optgroup label="{{ src_language.src_language }}"> 
                             {% for lex in lexicon_list %}
-                                {% if lex.src_language == lexicon.src_language %}
+                                {% if lex.src_language == src_language.src_language %}
                                     <option value="{{ lex.code }}">{{ lex.code }}</option> 
                                 {% endif %}
                             {% endfor %}

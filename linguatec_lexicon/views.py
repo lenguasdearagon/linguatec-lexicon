@@ -62,6 +62,7 @@ class DataValidatorView(TemplateView):
             'form':  ValidatorForm(),
             'title': self.title,
             'lexicon_list': Lexicon.objects.all(),
+            'src_languages': Lexicon.objects.all().values('src_language').distinct(),
             'variation_list': None,
         })
         return context
@@ -82,6 +83,7 @@ class DiatopicVariationValidatorView(DataValidatorView):
             'form':  ValidatorForm(),
             'title': self.title,
             'lexicon_list': Lexicon.objects.all(),
+            'src_languages': Lexicon.objects.all().values('src_language').distinct(),
             'variation_list': DiatopicVariation.objects.all(),
         })
         return context
