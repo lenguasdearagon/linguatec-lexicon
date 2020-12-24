@@ -86,3 +86,8 @@ class RegionAdmin(admin.ModelAdmin):
 @admin.register(models.DiatopicVariation)
 class DiatopicVariationAdmin(admin.ModelAdmin):
     list_display = ('name',)
+
+
+@admin.register(models.ImportLog)
+class ImportLogAdmin(admin.ModelAdmin):
+    list_display = ('type', 'status', 'input_file',)

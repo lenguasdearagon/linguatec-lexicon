@@ -1,18 +1,10 @@
 from django.core.management.base import BaseCommand, CommandError
 
-from linguatec_lexicon.models import (
-    Entry, Example, Lexicon, VerbalConjugation, Word)
+from linguatec_lexicon.exporters import write_to_csv_file_data
 
-import csv
+from linguatec_lexicon.models import (Lexicon)
+
 import os.path
-
-
-def get_src_language_from_lexicon_code(lex_code):
-    return lex_code[:2]
-
-
-def get_dst_language_from_lexicon_code(lex_code):
-    return lex_code[3:]
 
 
 class Command(BaseCommand):
@@ -31,10 +23,7 @@ class Command(BaseCommand):
         self.output_file = options['output_file']
         # check that a lexicon with that code exist
         try:
-            src = get_src_language_from_lexicon_code(self.lexicon_code)
-            dst = get_dst_language_from_lexicon_code(self.lexicon_code)
-
-            self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
+            self.lexicon = Lexicon.objects.get_by_code(self.lexicon_code)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 
@@ -42,67 +31,4 @@ class Command(BaseCommand):
         if os.path.isfile(self.output_file):
             raise CommandError('Error: A csv with that name already exists: ' + self.output_file)
 
-        self.write_to_csv_file()
-
-    def write_to_csv_file(self):
-
-        word_list = list(Word.objects.filter(lexicon=self.lexicon).order_by('term'))
-
-        with open(self.output_file, 'w') as outfile:
-
-            fieldnames = [
-                'word',
-                'gramcats',
-                'translation',
-                '(empty)',
-                'example',
-                'verbal conjugation',
-            ]
-
-            writer = csv.DictWriter(outfile, fieldnames=fieldnames, delimiter=';')
-
-            for word in word_list:
-
-                to_write = {'word': word.term}
-
-                entry_list = Entry.objects.filter(word=word, variation=None)
-
-                to_write['translation'] = ' // '.join(entry_list.values_list('translation', flat=True))
-
-                to_write['gramcats'] = ' // '.join(entry_list.values_list('gramcats__abbreviation', flat=True)
-                                                   .distinct().order_by('gramcats__abbreviation'))
-
-                to_write['example'] = ''
-                to_write['verbal conjugation'] = ''
-                number_of_examples = 0
-                number_of_verbal_conjugation = 0
-
-                for entry in entry_list:
-                    examples = ' ; '.join(Example.objects.filter(entry=entry)
-                                          .values_list('phrase', flat=True))
-                    if examples != '':
-                        number_of_examples += 1
-
-                    to_write['example'] += examples + '// '
-
-                    verbal_conjugations = ' ; '.join(VerbalConjugation.objects.filter(entry=entry)
-                                                     .values_list('raw', flat=True))
-
-                    if verbal_conjugations != '':
-                        number_of_verbal_conjugation += 1
-
-                    to_write['verbal conjugation'] += verbal_conjugations + '// '
-
-                if number_of_examples == 0:
-                    to_write['example'] = ''
-                else:
-                    while to_write['example'][-3:] == '// ':
-                        to_write['example'] = to_write['example'][:-3]
-
-                if number_of_verbal_conjugation == 0:
-                    to_write['verbal conjugation'] = ''
-                else:
-                    while to_write['verbal conjugation'][-3:] == '// ':
-                        to_write['verbal conjugation'] = to_write['verbal conjugation'][:-3]
-
-                writer.writerow(to_write)
+        write_to_csv_file_data(self.lexicon.pk, self.output_file)

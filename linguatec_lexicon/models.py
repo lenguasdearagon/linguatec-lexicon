@@ -4,8 +4,16 @@ from django.db import connection, models
 from django.db.models import Q
 from django.utils.functional import cached_property
 from django.urls import reverse
+import json
 
 from linguatec_lexicon import validators
+
+
+class LexiconManager(models.Manager):
+    def get_by_code(self, code):
+        src_lang = code[:2]
+        dst_lang = code[3:]
+        return self.get(src_language=src_lang, dst_language=dst_lang)
 
 
 class Lexicon(models.Model):
@@ -33,6 +41,8 @@ class Lexicon(models.Model):
             models.UniqueConstraint(fields=['src_language', 'dst_language'], name='src_language-dst_language')
         ]
 
+    objects = LexiconManager()
+
     @property
     def code(self):
         return (self.src_language + '-' + self.dst_language)
@@ -40,13 +50,6 @@ class Lexicon(models.Model):
     def __str__(self):
         return self.name
 
-
-
-def get_src_language_from_lexicon_code(lex_code):
-    return lex_code[:2]
-
-def get_dst_language_from_lexicon_code(lex_code):
-    return lex_code[3:]
 
 class WordManager(models.Manager):
     TERM_PUNCTUATION_SIGNS = '¡!¿?'
@@ -67,19 +70,16 @@ class WordManager(models.Manager):
         MIN_SIMILARITY = 0.3
         query = self._clean_search_query(query)
 
-        #Get and use the key of the Lexicon instead of the name
+        # Get and use the key of the Lexicon instead of the name
         if lex is None or lex == '':
             qs = self
         else:
-            src = get_src_language_from_lexicon_code(lex)
-            dst = get_dst_language_from_lexicon_code(lex)
-
-            key_lex = Lexicon.objects.get(src_language=src, dst_language=dst)
+            key_lex = Lexicon.objects.get_by_code(lex)
             qs = self.filter(lexicon=key_lex)
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
-            iregex=r"\b{0}\b"
+            iregex = r"\b{0}\b"
             return qs.filter(term__iregex=iregex.format(query))
         else:
             filter_query = (
@@ -105,10 +105,7 @@ class WordManager(models.Manager):
         if lex is None or lex == '':
             qs = self
         else:
-            src = get_src_language_from_lexicon_code(lex)
-            dst = get_dst_language_from_lexicon_code(lex)
-
-            key_lex = Lexicon.objects.get(src_language=src, dst_language=dst)
+            key_lex = Lexicon.objects.get_by_code(lex)
             qs = self.filter(lexicon=key_lex)
 
         MIN_SIMILARITY = 0.2
@@ -265,3 +262,49 @@ class VerbalConjugation(models.Model):
         except Word.DoesNotExist:
             # TODO log this error to detect database inconsistency
             return None
+
+
+class ImportLog(models.Model):
+    CREATED = 'created'
+    RUNNING = 'running'
+    FAILED = 'failed'
+    COMPLETED = 'completed'
+    STATUS_CHOICES = (
+        (CREATED, 'CREATED'),
+        (RUNNING, 'RUNNING'),
+        (FAILED, 'FAILED'),
+        (COMPLETED, 'COMPLETED'),
+    )
+
+    DATA = 'data'
+    VARIATION = 'variation'
+    GRAMCATS = 'gramcats'
+    IMPORT_TYPE = (
+        (DATA, 'DATA'),
+        (VARIATION, 'VARIATION'),
+        (GRAMCATS, 'GRAMCATS'),
+    )
+
+    status = models.CharField(max_length=25, choices=STATUS_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=25, choices=IMPORT_TYPE)
+
+    errors = models.TextField(blank=True)
+    num_rows = models.IntegerField(null=True)
+    input_file = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def list_errors(self):
+
+        if self.errors == '' or self.errors is None:
+            return None
+
+        errors_list = self.errors.split("}, ")
+
+        # doesn't work as expected
+        for i in range(0, len(errors_list)):
+            errors_list[i] = errors_list[i].translate({ord(i): None for i in '}{'})
+
+        return errors_list

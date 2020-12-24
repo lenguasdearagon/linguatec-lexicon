@@ -3,17 +3,21 @@ import os
 import tempfile
 from io import StringIO
 
+from .tasks import (write_to_csv_file_export_data, write_to_csv_file_export_variation,
+                    load_data_gramcats, import_variation_entries, import_data_words)
+
 from django.core.management import call_command
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
-from .forms import ValidatorForm
-from .models import GramaticalCategory, Word, Lexicon
-from .serializers import GramaticalCategorySerializer, WordSerializer, WordNearSerializer, LexiconSerializer
+from .forms import ValidatorForm, CSVValidatorForm
+from .models import GramaticalCategory, DiatopicVariation, Word, Lexicon, ImportLog
+from .serializers import (GramaticalCategorySerializer, WordSerializer, WordNearSerializer,
+                          LexiconSerializer, ImportLogSerializer)
 
 
 class DataValidatorView(TemplateView):
@@ -34,7 +38,7 @@ class DataValidatorView(TemplateView):
             f.close()
 
             # validate uploaded file and handle errors (if any)
-            out = self.validate(tmp_file)
+            out = self.validate(tmp_file, request)
             errors = []
             for line in out.getvalue().split('\n'):
                 try:
@@ -57,22 +61,187 @@ class DataValidatorView(TemplateView):
         context.update({
             'form':  ValidatorForm(),
             'title': self.title,
+            'lexicon_list': Lexicon.objects.all(),
+            'src_languages': Lexicon.objects.all().values('src_language').distinct(),
+            'variation_list': None,
         })
         return context
 
-    def validate(self, xlsx_file):
+    def validate(self, xlsx_file, request):
+        lexicon_code = str(request.POST.get('lexicon_code'))
         out = StringIO()
-        call_command('importdata', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
+        call_command('importdata', xlsx_file, lexicon_code, dry_run=True, no_color=True, verbosity=3, stdout=out)
         return out
 
 
 class DiatopicVariationValidatorView(DataValidatorView):
     title = "Diatopic variation validator"
 
-    def validate(self, xlsx_file):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'form':  ValidatorForm(),
+            'title': self.title,
+            'lexicon_list': Lexicon.objects.all(),
+            'src_languages': Lexicon.objects.all().values('src_language').distinct(),
+            'variation_list': DiatopicVariation.objects.all(),
+        })
+        return context
+
+    def validate(self, xlsx_file, request):
+        lexicon_code = str(request.POST.get('lexicon_code'))
+        variation_name = str(request.POST.get('variation_name'))
         out = StringIO()
-        call_command('importvariation', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
+        call_command('importvariation', xlsx_file, lexicon_code, variation=variation_name,
+                     dry_run=True, no_color=True, verbosity=3, stdout=out)
         return out
+
+
+class ImportDataView(TemplateView):
+    template_name = "linguatec_lexicon/importdata.html"
+
+    def create_imports_info(self, input_file, type):
+        ii = ImportLog.objects.create(status=ImportLog.CREATED, input_file=input_file, type=type)
+        return ii.pk
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+
+        type_import = str(request.POST.get('type_import'))
+
+        if type_import == ImportLog.DATA or type_import == ImportLog.VARIATION:
+            form = ValidatorForm(request.POST, request.FILES)
+        if type_import == ImportLog.GRAMCATS:
+            form = CSVValidatorForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            file = form.cleaned_data['input_file']
+            imports_info_id = self.create_imports_info(file, type_import)
+
+            # store uploaded file as a temporal file
+            if type_import == ImportLog.DATA or type_import == ImportLog.VARIATION:
+                tmp_fd, tmp_file = tempfile.mkstemp(suffix='.xlsx')
+            if type_import == ImportLog.GRAMCATS:
+                tmp_fd, tmp_file = tempfile.mkstemp(suffix='.csv')
+            f = os.fdopen(tmp_fd, 'wb')  # open the tmp file for writing
+            f.write(file.read())  # write the tmp file
+            f.close()
+
+            if type_import == ImportLog.DATA:
+                lexicon_code = str(request.POST.get('lexicon_code'))
+                lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
+                import_data_words(tmp_file, lexicon_id, imports_info_id, False)
+
+            if type_import == ImportLog.VARIATION:
+                lexicon_code = str(request.POST.get('lexicon_code'))
+                lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
+                variation_name = str(request.POST.get('variation_name'))
+                import_variation_entries(tmp_file, lexicon_id, variation_name, imports_info_id, False)
+
+            if type_import == ImportLog.GRAMCATS:
+                load_data_gramcats([tmp_file], imports_info_id)
+
+            context.update({
+                'input_file': file,
+                'is_finished': 'Importación realizada',
+            })
+            return self.render_to_response(context)
+
+        context['form'] = form
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'form':  ValidatorForm(),
+            'title_data': "Import Lexicon data",
+            'title_variation': "Import Diatopic Variations",
+            'title_gramcats': "Import Gramatical categories",
+            'lexicon_list': Lexicon.objects.all(),
+            'variation_list': DiatopicVariation.objects.all(),
+        })
+        return context
+
+
+class ImportationsView(TemplateView):
+    template_name = "linguatec_lexicon/importations.html"
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        ii = ImportLog.objects.all()
+
+        context.update({
+                'importations': ii,
+            })
+
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class ImportationErrorsView(TemplateView):
+    template_name = "linguatec_lexicon/importationerrors.html"
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        ImportLog_id = int(request.GET.get('importation_id', None))
+        ii = ImportLog.objects.get(pk=ImportLog_id)
+
+        error_list = ii.list_errors()
+
+        context.update({
+                'status': ii.status,
+                'type': ii.type,
+                'created_at': ii.created_at,
+                'num_rows': ii.num_rows,
+                'input_file': ii.input_file,
+                'errors': error_list,
+            })
+
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+
+class ExportDataView(TemplateView):
+    template_name = "linguatec_lexicon/exportdata.html"
+    title = "Export Data"
+    title2 = "Export Variation"
+
+    def post(self, request, *args, **kwargs):
+        TYPE_LEXICON = 'lexicon'
+        TYPE_VARIATION = 'variation'
+
+        type_export = str(request.POST.get('type_export'))
+
+        if type_export == TYPE_LEXICON:
+            lexicon_code = str(request.POST.get('lexicon_code'))
+            lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
+
+            return write_to_csv_file_export_data.now(lexicon_id, None)
+
+        elif type_export == TYPE_VARIATION:
+            lexicon_code = str(request.POST.get('lexicon_code'))
+            lexicon_id = Lexicon.objects.get_by_code(lexicon_code).pk
+
+            variation_name = str(request.POST.get('variation_name'))
+            variation_id = DiatopicVariation.objects.get(name=variation_name).pk
+
+            return write_to_csv_file_export_variation.now(lexicon_id, variation_id, None)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'title': self.title,
+            'title2': self.title2,
+            'lexicon_list': Lexicon.objects.all(),
+            'variation_list': DiatopicVariation.objects.all(),
+        })
+        return context
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):

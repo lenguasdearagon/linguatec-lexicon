@@ -1,18 +1,11 @@
 from django.core.management.base import BaseCommand, CommandError
 
 from linguatec_lexicon.models import (
-    Entry, Lexicon, DiatopicVariation, Word)
+    Lexicon, DiatopicVariation)
 
-import csv
+from linguatec_lexicon.exporters import write_to_csv_file_variation
+
 import os.path
-
-
-def get_src_language_from_lexicon_code(lex_code):
-    return lex_code[:2]
-
-
-def get_dst_language_from_lexicon_code(lex_code):
-    return lex_code[3:]
 
 
 class Command(BaseCommand):
@@ -38,10 +31,7 @@ class Command(BaseCommand):
         self.output_file = options['output_file']
         # check that a lexicon with that code exist
         try:
-            src = get_src_language_from_lexicon_code(self.lexicon_code)
-            dst = get_dst_language_from_lexicon_code(self.lexicon_code)
-
-            self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
+            self.lexicon = Lexicon.objects.get_by_code(self.lexicon_code)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 
@@ -54,35 +44,4 @@ class Command(BaseCommand):
         if os.path.isfile(self.output_file):
             raise CommandError('Error: A csv with that name already exists: ' + self.output_file)
 
-        self.write_to_csv_file()
-
-    def write_to_csv_file(self):
-
-        entry_list = Entry.objects.filter(variation=self.variation).values('word__term').distinct().order_by('word__term')
-
-        word_list = []
-        for entry in entry_list:
-            word_list.append(Word.objects.get(term=entry['word__term']))
-
-        with open(self.output_file, 'w') as outfile:
-
-            fieldnames = [
-                'word',
-                'gramcats',
-                'translation',
-            ]
-
-            writer = csv.DictWriter(outfile, fieldnames=fieldnames, delimiter=';')
-
-            for word in word_list:
-
-                to_write = {'word': word.term}
-
-                to_write['gramcats'] = ' // '.join(Entry.objects.filter(word=word, variation=self.variation)
-                                                   .values_list('gramcats__abbreviation', flat=True)
-                                                   .distinct().order_by('gramcats__abbreviation'))
-
-                to_write['translation'] = ' // '.join(Entry.objects.filter(word=word, variation=self.variation)    
-                                                      .values_list('translation', flat=True))
-
-                writer.writerow(to_write)
+        write_to_csv_file_variation(self.lexicon.pk, self.variation.pk, self.output_file)

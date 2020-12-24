@@ -1,0 +1,110 @@
+{% extends 'rest_framework/base.html' %}
+{% load i18n static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block branding %}
+<a class="navbar-brand" rel="nofollow" href="/">{{ title }}</a>
+{% endblock %}
+
+{% block content %}
+<h1>{{ title_data }}</h1>
+<div class="row">
+    <div class="col-12">
+        <div>
+            Selecciona el fichero XLSX para importar los datos.
+        </div>
+        <div class="data-validator-form">
+            <form action="" enctype="multipart/form-data" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="input-group rg-search">
+                    <label for="lexicon_code">Código lexicon</label>
+                    <select id="selected_lex" name="lexicon_code">
+                        {% for lexicon in lexicon_list %}
+                            <optgroup label="{{ lexicon.src_language }}"> 
+                            {% for lex in lexicon_list %}
+                                {% if lex.src_language == lexicon.src_language %}
+                                    <option value="{{ lex.code }}">{{ lex.code }}</option> 
+                                {% endif %}
+                            {% endfor %}
+                        {% empty %}
+                        <option selected value=''>Empty Value</option>
+                        {% endfor %}
+                    </select></br></br>
+                </div>
+                <input name="type_import" type="hidden" value="data">
+                <input id="Importar" type="submit" value="Importar" />
+            </form>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <h3><strong>{{ is_finished }}</strong></h3>
+</div>
+
+<h1>{{ title_variation }}</h1>
+<div class="row">
+    <div class="col-12">
+        <div>
+            Selecciona el fichero XLSX para importar las variaciones diatópicas.
+        </div>
+        <div class="data-validator-form">
+            <form action="" enctype="multipart/form-data" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="input-group rg-search">
+                    <label for="lexicon_code">Código lexicon</label>
+                    <select id="selected_lex" name="lexicon_code">
+                        {% for lexicon in lexicon_list %}
+                            <optgroup label="{{ lexicon.src_language }}"> 
+                            {% for lex in lexicon_list %}
+                                {% if lex.src_language == lexicon.src_language %}
+                                    <option value="{{ lex.code }}">{{ lex.code }}</option> 
+                                {% endif %}
+                            {% endfor %}
+                        {% empty %}
+                        <option selected value=''>Empty Value</option>
+                        {% endfor %}
+                    </select></br></br>
+                </div>
+                <div class="input-group rg-search">
+                    <label for="variation_name">Nombre Variación</label>
+                    <select id="selected_variation" name="variation_name">
+                        {% for variation in variation_list %}
+                            <option value="{{ variation.name }}">{{ variation.name }}</option> 
+                        {% empty %}
+                            <option selected value=''>Empty Value</option>
+                        {% endfor %}
+                    </select></br></br>
+                </div>
+                <input name="type_import" type="hidden" value="variation">
+                <input id="Importar" type="submit" value="Importar" />
+            </form>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <h3><strong>{{ is_finished }}</strong></h3>
+</div>
+
+<h1>{{ title_gramcats }}</h1>
+<div class="row">
+    <div class="col-12">
+        <div>
+            Selecciona el fichero CSV para importar las categorías gramaticales.
+        </div>
+        <div class="data-validator-form">
+            <form action="" enctype="multipart/form-data" method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input name="type_import" type="hidden" value="gramcats">
+                <input id="Importar" type="submit" value="Importar" />
+            </form>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <h3><strong>{{ is_finished }}</strong></h3>
+</div>
+{% endblock %}

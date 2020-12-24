@@ -1,5 +1,6 @@
-import pandas as pd
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
+
+from linguatec_lexicon.importers import load_gramcats
 
 from linguatec_lexicon.models import GramaticalCategory
 
@@ -20,7 +21,6 @@ class Command(BaseCommand):
                  'the import.'
         )
 
-
     def handle(self, *csv_files, **options):
         self.verbosity = options['verbosity']
         self.purge_gramcat = options['purge']
@@ -32,28 +32,10 @@ class Command(BaseCommand):
                     "Purged %d object(s) from database" % deleted
                 )
 
-        self.loaddata(csv_files)
+        self.loaded_object_count, self.csv_count = load_gramcats(csv_files)
 
         if self.verbosity >= 1:
             self.stdout.write(
                 "Imported %d object(s) from %d file(s)"
                 % (self.loaded_object_count, self.csv_count)
             )
-
-    def loaddata(self, csv_files):
-        # Keep a count of the installed objects and files
-        self.csv_count = 0
-        self.loaded_object_count = 0
-
-        for csv_file in csv_files:
-            df = pd.read_csv(csv_file)
-            gramcats = []
-            for row in df.itertuples(name=None):
-                gramcats.append(
-                    GramaticalCategory(
-                        abbreviation=row[1], title=row[2])
-                )
-                self.loaded_object_count += 1
-
-            GramaticalCategory.objects.bulk_create(gramcats)
-            self.csv_count += 1
