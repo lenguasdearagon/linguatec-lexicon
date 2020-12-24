@@ -1,11 +1,9 @@
 import json
 import pandas as pd
 
-from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 
-from linguatec_lexicon.models import (
-    Entry, Example, Lexicon, GramaticalCategory, VerbalConjugation, Word)
+from linguatec_lexicon.models import Lexicon
 
 from linguatec_lexicon.importers import import_data
 

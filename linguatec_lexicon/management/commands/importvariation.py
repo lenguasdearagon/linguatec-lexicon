@@ -3,7 +3,7 @@ import os
 
 from django.core.management.base import BaseCommand, CommandError
 
-from linguatec_lexicon.models import (DiatopicVariation, Lexicon)
+from linguatec_lexicon.models import Lexicon
 
 from linguatec_lexicon.importers import import_variation
 
@@ -61,7 +61,8 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.ERROR(json.dumps(error)))
         else:
             self.stdout.write(self.style.SUCCESS(
-                'Successfully imported file "{}" of diatopic variation "{}"'.format(self.input_file, options['variation'])))
+                'Successfully imported file "{}" of diatopic variation "{}"'.format(self.input_file,
+                                                                                    options['variation'])))
 
         if self.verbosity > 1:
             self.stdout.write(
