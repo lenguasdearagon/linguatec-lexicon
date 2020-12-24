@@ -162,11 +162,6 @@ class ImportDataView(TemplateView):
         })
         return context
 
-    def validate(self, xlsx_file):
-        out = StringIO()
-        call_command('importdata', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
-        return out
-
 
 class ImportationsView(TemplateView):
     template_name = "linguatec_lexicon/importations.html"
@@ -185,11 +180,6 @@ class ImportationsView(TemplateView):
         context = super().get_context_data(**kwargs)
         return context
 
-    def validate(self, xlsx_file):
-        out = StringIO()
-        call_command('importdata', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
-        return out
-
 
 class ImportationErrorsView(TemplateView):
     template_name = "linguatec_lexicon/importationerrors.html"
@@ -198,8 +188,6 @@ class ImportationErrorsView(TemplateView):
         context = self.get_context_data(**kwargs)
         ImportLog_id = int(request.GET.get('importation_id', None))
         ii = ImportLog.objects.get(pk=ImportLog_id)
-
-        # error_list = ii.errors.split("}, ")
 
         error_list = ii.list_errors()
 
@@ -217,11 +205,6 @@ class ImportationErrorsView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
-
-    def validate(self, xlsx_file):
-        out = StringIO()
-        call_command('importdata', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
-        return out
 
 
 class ExportDataView(TemplateView):
@@ -260,24 +243,10 @@ class ExportDataView(TemplateView):
         })
         return context
 
-    def validate(self, xlsx_file):
-        out = StringIO()
-        call_command('importdata', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
-        return out
-
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
     default_limit = 30
     max_limit = 100
-
-
-class ImportErrorsViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API endpoint that allows importation errors to be viewed.
-    """
-    queryset = ImportLog.objects.all()
-    serializer_class = ImportLogSerializer
-    pagination_class = DefaultLimitOffsetPagination
 
 
 class LexiconViewSet(viewsets.ReadOnlyModelViewSet):

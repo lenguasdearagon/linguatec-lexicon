@@ -8,7 +8,6 @@ router = routers.DefaultRouter()
 router.register(r'lexicons', views.LexiconViewSet)
 router.register(r'words', views.WordViewSet)
 router.register(r'gramcats', views.GramaticalCategoryViewSet)
-router.register(r'importserrors', views.ImportErrorsViewSet)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
