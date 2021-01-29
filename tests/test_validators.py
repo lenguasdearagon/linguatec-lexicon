@@ -46,7 +46,8 @@ class ColumnFValidatorTestCase(TestCase):
                 'IND.': {
                     'pres.': ['tiengo', 'tiens/tienes', 'tiene/tien', 'tenemos', 'tenez', 'tienen'],
                     'pret. imp.': ['teneba', 'tenebas', 'teneba', 'tenébanos', 'tenébaz', 'teneban'],
-                    'pret. indef.': ['tenié/tuve', 'teniés/tuves', 'tenió/tuvo', 'teniemos /túvenos', 'teniez/túvez', 'tenioron/tuvon'],
+                    'pret. indef.': ['tenié/tuve', 'teniés/tuves', 'tenió/tuvo',
+                                     'teniemos /túvenos', 'teniez/túvez', 'tenioron/tuvon'],
                     'fut.': ['tendré', 'tendrás', 'tendrá', 'tendremos', 'tendrez', 'tendrán'],
                     'cond.': ['tenerba', 'tenerbas', 'tenerba', 'tenérbanos', 'tenérbaz', 'tenerban']
                 },

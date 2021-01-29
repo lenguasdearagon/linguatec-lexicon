@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## master
+- [added] Multiple lexicons can be save and stored (source and destination languages are unique together)
+- [changed] Now there can not be a duplicated word in a lexicon. (unique together lexicon and term)
+- [changed] Avoid repeated entries. (unique together word, translation and variation) 
+- [changed] Importation requires to be passed a lexicon_code of an already existing lexicon.
+- [changed] API: View WordViewSet requires a parameter l (lexicon_code) to perform search and near methods.
+- [added] Django admin panel enabled and property url_admin_panel created in Word model to access it directly.
+- [added] API: Added Lexicon api view and Lexicon serializer
+- [added] Exportdata and Exportvariation commands and views to use them.
+- [added] Application background-tasks, importations are executed asynchronously.
+- [added] ImportLog which saves in the database the importations made.
 
 ## [0.3.2] - 2020-01-27
 - [fixed] `importvariation` handle properly variation param on dry-run.

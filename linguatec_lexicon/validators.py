@@ -146,7 +146,9 @@ class VerbalConjugationValidator:
         conjugation = self.extract_conjugation(value)
         if len(conjugation) != count:
             raise ValidationError(
-                _('Invalid number of conjugations for %s - %s. Should be %d. %s found' % (mood, tense, count, len(conjugation))))
+                _('Invalid number of conjugations for %s - %s. Should be %d. %s found'
+                  % (mood, tense, count, len(conjugation))))
+
         logger.debug("%s %s: %s" % (mood, tense, conjugation))
 
         return conjugation

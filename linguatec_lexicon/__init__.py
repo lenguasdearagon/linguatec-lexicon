@@ -2,7 +2,7 @@
 Package metadata definition.
 """
 
-VERSION = (0, 3, 2, 'final', 0)
+VERSION = (0, 4, 0, 'alpha', 0)
 
 
 def get_version():
@@ -27,4 +27,3 @@ def get_version():
         sub = mapping[VERSION[3]] + str(VERSION[4])
 
     return str(main + sub)
-
