@@ -5,8 +5,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## master
-
-## [0.4] - 2020-12-22
 - [added] Multiple lexicons can be save and stored (source and destination languages are unique together)
 - [changed] Now there can not be a duplicated word in a lexicon. (unique together lexicon and term)
 - [changed] Avoid repeated entries. (unique together word, translation and variation) 
