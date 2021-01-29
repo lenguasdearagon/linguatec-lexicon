@@ -181,6 +181,9 @@ class Entry(models.Model):
         # order in the imported Excel.
         ordering = ['variation', 'pk']
         verbose_name_plural = "entries"
+        constraints = [
+            models.UniqueConstraint(fields=['word', 'variation', 'translation'], name='unique-entry')
+        ]
 
     def __str__(self):
         return self.translation
