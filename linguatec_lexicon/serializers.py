@@ -51,6 +51,12 @@ class WordSerializer(serializers.ModelSerializer):
         model = Word
         fields = ('url', 'lexicon', 'term', 'gramcats', 'entries', 'admin_panel_url')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user = self.context['request'].user
+        if not (user.is_authenticated and user.is_staff):
+            self.fields.pop('admin_panel_url')
+
 
 class WordNearSerializer(serializers.ModelSerializer):
     class Meta:
