@@ -1,12 +1,11 @@
-import json
 import os
 
 import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
-
+from django.db import transaction
 from linguatec_lexicon.models import (DiatopicVariation, Entry,
-                                      GramaticalCategory, Word, Lexicon)
+                                      GramaticalCategory, Lexicon, Word)
 
 
 def get_src_language_from_lexicon_code(lex_code):
@@ -21,11 +20,11 @@ class Command(BaseCommand):
     help = 'Imports diatopic variation Excel into the database'
 
     def add_arguments(self, parser):
-        parser.add_argument('input_file', type=str)
         parser.add_argument(
             'lexicon_code', type=str,
             help="Select the lexicon where data will be imported",
         )
+        parser.add_argument('input_file', type=str)
         parser.add_argument(
             '--variation',
             help='Diatopical variation of the data to be imported'
@@ -73,7 +72,7 @@ class Command(BaseCommand):
             src = get_src_language_from_lexicon_code(self.lexicon_code)
             dst = get_dst_language_from_lexicon_code(self.lexicon_code)
 
-            self.lexicon = Lexicon.objects.get(src_language = src, dst_language = dst)
+            self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 
@@ -87,7 +86,8 @@ class Command(BaseCommand):
                 "Detected {} errors!".format(len(self.errors))))
             if self.verbosity > 2:
                 for error in self.errors:
-                    self.stdout.write(self.style.ERROR(json.dumps(error)))
+                    values = [value or '' for _, value in error.items()]
+                    self.stdout.write(self.style.ERROR('    '.join(values)))
         else:
             if not self.dry_run:
                 # Write data into the database
@@ -195,7 +195,7 @@ class Command(BaseCommand):
             # 3) trigam similarity (only as suggestion)
             message = 'Word "{}" not found in the database.'.format(term)
             suggestions = None
-            qs = Word.objects.search(term,self.lexicon.code)[:4]
+            qs = Word.objects.search(term, self.lexicon.code)[:4]
             if qs.exists():
                 suggestions = ', '.join(qs.values_list('term', flat=True))
                 message += ' Did you mean: {}?'.format(suggestions)
@@ -207,7 +207,7 @@ class Command(BaseCommand):
                 "suggestions": suggestions
             })
 
-
+    @transaction.atomic
     def write_to_database(self):
         count_entries = 0
         for word in self.cleaned_data:

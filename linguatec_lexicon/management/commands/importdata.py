@@ -61,11 +61,11 @@ def get_dst_language_from_lexicon_code(lex_code):
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('input_file', type=str)
         parser.add_argument(
             'lexicon_code', type=str,
             help="Select the lexicon where data will be imported",
         )
+        parser.add_argument('input_file', type=str)
         parser.add_argument(
             '--dry-run', action='store_true', dest='dry_run',
             help="Just validate input file; don't actually import to database.",
