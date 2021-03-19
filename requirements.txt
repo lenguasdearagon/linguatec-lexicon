@@ -1,6 +1,6 @@
 django==2.2.13
 django-extensions
-djangorestframework==3.11
+djangorestframework==3.11.2
 psycopg2-binary
 
 # importdata
