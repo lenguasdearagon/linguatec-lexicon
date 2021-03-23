@@ -7,6 +7,7 @@ import sys
 
 import django
 from django.core import management
+from django.utils import timezone
 
 try:
     django.setup()
@@ -24,10 +25,16 @@ from linguatec_lexicon.models import (DiatopicVariation, Lexicon, Region)
 
 def init_lexicon():
     Lexicon.objects.create(
-        name="diccionario linguatec",
+        name="castellano-aragonés",
         description="",
         src_language="es",
         dst_language="ar"
+    )
+    Lexicon.objects.create(
+        name="aragonés-castellano",
+        description="",
+        src_language="ar",
+        dst_language="es"
     )
 
 
@@ -78,19 +85,19 @@ def init_diatopic_variations():
 
 
 VARIANTS_MAPPING = {
-    "Tensino": "ALTO GÁLLEGO-tensino-2020-01-20.xlsx",
-    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2020-01-20.xlsx",
-    "Ansotano": "JACETANIA-ansotano-2020-01-20.xlsx",
-    "Cheso": "JACETANIA-cheso-2020-01-20.xlsx",
-    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2020-01-20.xlsx",
-    "Benasqués": "RIBAGORZA-benasques-2020-01-20.xlsx",
-    "Belsetán": "SOBRARBE-belsetán-2020-01-20.xlsx",
-    "Chistabín": "SOBRARBE-chistabín-2020-01-20.xlsx",
-    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2020-01-20.xlsx",
-    "Somontanos": "SOMONTANOS-2020-01-20.xlsx",
+    "Tensino": "ALTO GÁLLEGO-tensino-2021-03-12.xlsx",
+    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2021-03-12.xlsx",
+    "Ansotano": "JACETANIA-ansotano-2021-03-12.xlsx",
+    "Cheso": "JACETANIA-cheso-2021-03-12.xlsx",
+    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2021-03-12.xlsx",
+    "Benasqués": "RIBAGORZA-benasques-2021-03-12.xlsx",
+    "Belsetán": "SOBRARBE-belsetán-2021-03-12.xlsx",
+    "Chistabín": "SOBRARBE-chistabín-2021-03-12.xlsx",
+    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2021-03-12.xlsx",
+    "Somontanos": "SOMONTANO-2021-03-12.xlsx",
 }
 
-VARIANTS_PATH = '/home/santiago/trabajo/linguatec-v3/variedades'
+VARIANTS_PATH = '/home/santiago/trabajo/dgpl/linguatec-v4/variedades'
 
 
 def validate_variations():
@@ -101,7 +108,7 @@ def validate_variations():
         xlsx_fullpath = os.path.join(VARIANTS_PATH, xlsx)
         print("-" * 80)
         print(xlsx_fullpath)
-        management.call_command('importvariation', xlsx_fullpath, 'es-ar', verbosity=3, dry_run=True)
+        management.call_command('importvariation', 'es-ar', xlsx_fullpath, verbosity=3, dry_run=True)
 
 
 def import_variations():
@@ -109,7 +116,7 @@ def import_variations():
         print("-" * 80)
         print(variation, xlsx)
         xlsx_fullpath = os.path.join(VARIANTS_PATH, xlsx)
-        management.call_command('importvariation', xlsx_fullpath, 'es-ar', verbosity=3, variation=variation)
+        management.call_command('importvariation', 'es-ar', xlsx_fullpath, verbosity=3, variation=variation)
 
 
 def main():
@@ -152,14 +159,31 @@ DJANGO_SETTINGS_MODULE="lenguasaragon.settings_postgres"
 export DJANGO_SETTINGS_MODULE
 python initialize_staging.py --drop
 python initialize_staging.py
-time ./manage.py importdata -v3 ~/trabajo/linguatec-v3/vocabulario-castellano-aragones-2020-01-27-az.xlsx
+time ./manage.py importdata -v3 es-ar ~/trabajo/dgpl/linguatec-v4/vocabulario-castellano-aragones-2021-03-16bis.xlsx
+time python initialize_staging.py --import-aragonese
 
-python initialize_staging.py --validate-variations
+# python initialize_staging.py --validate-variations
 python initialize_staging.py --import-variations
 
+# to validate only a spececific variation
+./manage.py importvariation -v3 --dry-run es-ar ~/trabajo/dgpl/linguatec-v4/variedades/SOMONTANO-2021-03-12.xlsx
+
 # to import only a specific file
-# ./manage.py importvariation -v3 --variation "Tensino" "ALTO GÁLLEGO-tensino-2020-01-20.xlsx es-ar"
+# ./manage.py importvariation -v3 --variation "Ansotano" es-ar ~/trabajo/dgpl/linguatec-v4/variedades/JACETANIA-ansotano-2021-03-12.xlsx
     """)
+
+
+def import_aragonese_spanish_data():
+    AR_ES_PATH = '/home/santiago/trabajo/dgpl/linguatec-v4/ar-es/'
+
+    ls_files = sorted(os.listdir(AR_ES_PATH))
+
+    for filename in ls_files:
+        filepath = os.path.join(AR_ES_PATH, filename)
+        start = timezone.now()
+        management.call_command('importdata', 'ar-es', filepath, verbosity=3)  # , dry_run=True)
+        end = timezone.now()
+        print(end - start)
 
 
 def drop_all():
@@ -171,7 +195,7 @@ def drop_all():
 if __name__ == '__main__':
     argv = sys.argv[1:]
     try:
-        opts, args = getopt.getopt(argv, "h", ["help", "drop", "validate-variations", "import-variations"])
+        opts, args = getopt.getopt(argv, "h", ["help", "drop", "validate-variations", "import-variations", "import-aragonese"])
     except getopt.GetoptError:
         help()
         sys.exit(2)
@@ -188,6 +212,9 @@ if __name__ == '__main__':
             sys.exit()
         elif opt == "--import-variations":
             import_variations()
+            sys.exit()
+        elif opt == "--import-aragonese":
+            import_aragonese_spanish_data()
             sys.exit()
 
     main()
