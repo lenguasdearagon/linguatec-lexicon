@@ -90,6 +90,6 @@ if __name__ == '__main__':
     6792 entries as verbs with a translation more long than one word
     87 lost
        43 without correspondence in the other language
-       44 than it's not a verb or it's a composse word
+       44 than it's not a verb or it's a composes word
     """
     main()
