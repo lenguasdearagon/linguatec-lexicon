@@ -187,7 +187,7 @@ class Entry(models.Model):
         ]
 
     def words_conjugation(self):
-        alph = string.ascii_lowercase + 'ñáéíóú'
+        alph = string.ascii_lowercase + 'ñáéíóú!'
         translation = ''
         for c in self.translation.lower():
             if c in alph:
@@ -198,7 +198,7 @@ class Entry(models.Model):
         return [x.term for x in Word.objects.filter(
             lexicon__src_language=self.word.lexicon.dst_language).filter(
             lexicon__dst_language=self.word.lexicon.src_language
-        ).filter(term__in=words) if x.gramcats() == {'v. intr.', 'v. tr.'}]
+        ).filter(term__in=words) if x.gramcats().issubset({'v. intr.', 'v. tr.'})]
 
     def __str__(self):
         return self.translation
