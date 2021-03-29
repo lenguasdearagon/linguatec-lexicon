@@ -187,7 +187,8 @@ class Entry(models.Model):
         ]
 
     def words_conjugation(self):
-        alph = string.ascii_lowercase + 'ñáéíóú!'
+        # find the words in translation text
+        alph = string.ascii_lowercase + 'ñáéíóú!-'
         translation = ''
         for c in self.translation.lower():
             if c in alph:
@@ -195,27 +196,27 @@ class Entry(models.Model):
             else:
                 translation += ' '
         words = set(translation.split(' '))
-        kind_of_verbs = {'v.',
-                         'v. cop.',
-                         'v. ger.',
-                         'v. imp.',
-                         'v. impers.',
-                         'v. ind.',
-                         'v. intr.',
-                         'v. irreg.',
-                         'v. part.',
-                         'v. pres.',
-                         'v. pret. imperf.',
-                         'v. pret. indef.',
-                         'v. prnl.',
-                         'v. reciproc.',
-                         'v. reg.',
-                         'v. subj.',
-                         'v. tr.'}
-        return [x.term for x in Word.objects.filter(
-            lexicon__src_language=self.word.lexicon.dst_language).filter(
+
+        # all kind of verbs in gramcats__abbreviation
+        gram_abb = GramaticalCategory.objects.filter(
+            abbreviation__startswith='v.').values_list('abbreviation')
+        kind_of_verbs = {x[0] for x in gram_abb}
+
+        # find objects of this words
+        word_obj = Word.objects.filter(
+            lexicon__src_language=self.word.lexicon.dst_language
+        ).filter(
             lexicon__dst_language=self.word.lexicon.src_language
-        ).filter(term__in=words) if x.gramcats().issubset(kind_of_verbs)]
+        ).filter(term__in=words)
+
+        # filter only the verbs
+        new_words = []
+        for x in word_obj:
+            for g in x.gramcats():
+                if g in kind_of_verbs:
+                    new_words.append(x)
+
+        return new_words
 
     def __str__(self):
         return self.translation
