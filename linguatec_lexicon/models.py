@@ -195,10 +195,27 @@ class Entry(models.Model):
             else:
                 translation += ' '
         words = set(translation.split(' '))
+        kind_of_verbs = {'v.',
+                         'v. cop.',
+                         'v. ger.',
+                         'v. imp.',
+                         'v. impers.',
+                         'v. ind.',
+                         'v. intr.',
+                         'v. irreg.',
+                         'v. part.',
+                         'v. pres.',
+                         'v. pret. imperf.',
+                         'v. pret. indef.',
+                         'v. prnl.',
+                         'v. reciproc.',
+                         'v. reg.',
+                         'v. subj.',
+                         'v. tr.'}
         return [x.term for x in Word.objects.filter(
             lexicon__src_language=self.word.lexicon.dst_language).filter(
             lexicon__dst_language=self.word.lexicon.src_language
-        ).filter(term__in=words) if x.gramcats().issubset({'v. intr.', 'v. tr.'})]
+        ).filter(term__in=words) if x.gramcats().issubset(kind_of_verbs)]
 
     def __str__(self):
         return self.translation
