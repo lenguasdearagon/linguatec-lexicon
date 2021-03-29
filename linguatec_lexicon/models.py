@@ -1,3 +1,4 @@
+import string
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.db import connection, models
@@ -184,6 +185,20 @@ class Entry(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['word', 'variation', 'translation'], name='unique-entry')
         ]
+
+    def words_conjugation(self):
+        alph = string.ascii_lowercase + 'ñáéíóú'
+        translation = ''
+        for c in self.translation.lower():
+            if c in alph:
+                translation += c
+            else:
+                translation += ' '
+        words = set(translation.split(' '))
+        return [x.term for x in Word.objects.filter(
+            lexicon__src_language=self.word.lexicon.dst_language).filter(
+            lexicon__dst_language=self.word.lexicon.src_language
+        ).filter(term__in=words) if x.gramcats() == {'v. intr.', 'v. tr.'}]
 
     def __str__(self):
         return self.translation
