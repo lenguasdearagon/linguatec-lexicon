@@ -209,7 +209,7 @@ class Entry(models.Model):
 
     @classmethod
     def words_conjugation(cls):
-        csv_list = ["castilian verb;aragon verbs\n"]
+        result = {}
         kind_of_verbs = GramaticalCategory.get_abbr_verbs()
         castellano = Lexicon.objects.get(src_language='es')
 
@@ -230,10 +230,12 @@ class Entry(models.Model):
 
             new_verbs = ", ".join(set(new_words))
             castilian_verb = entry.word.term
-            csv_line = f"{castilian_verb};{new_verbs}\n"
-            csv_list.append(csv_line)
+            if castilian_verb in result and new_verbs:
+                result[castilian_verb] += ", " + new_verbs
+            else:
+                result[castilian_verb] = new_verbs
 
-        return "".join(csv_list)
+        return result
 
     def __str__(self):
         return self.translation
