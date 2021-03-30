@@ -126,5 +126,29 @@
         "word": 13,
         "translation": "chugar"
     }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 17,
+    "fields": {
+        "word": 14,
+        "translation": "estrañar, estraniar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 18,
+    "fields": {
+        "word": 15,
+        "translation": "extrañar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 19,
+    "fields": {
+        "word": 16,
+        "translation": "extrañar"
+    }
 }
 ]

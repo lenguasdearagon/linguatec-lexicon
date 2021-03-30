@@ -102,5 +102,29 @@
         "lexicon": 1,
         "term": "jugar"
     }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 14,
+    "fields": {
+        "lexicon": 1,
+        "term": "extrañar"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 15,
+    "fields": {
+        "lexicon": 2,
+        "term": "estrañar"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 16,
+    "fields": {
+        "lexicon": 2,
+        "term": "estraniar"
+    }
 }
 ]
