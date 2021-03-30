@@ -1,0 +1,130 @@
+[
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 1,
+    "fields": {
+        "word": 1,
+        "translation": "capino/a, pop. zorro/a, calamocano/a, chorrupato/a, pifolo/a, rusio/a, zafumato/a"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 2,
+    "fields": {
+        "word": 2,
+        "translation": "chitar (var. fon\u00e9tica itar)"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 3,
+    "fields": {
+        "word": 2,
+        "translation": "arrullar, volar, aventar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 4,
+    "fields": {
+        "word": 2,
+        "translation": "esfurriar, uxar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 5,
+    "fields": {
+        "word": 2,
+        "translation": "despedir, chitar, dar palleta, portiar, espachar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 6,
+    "fields": {
+        "word": 3,
+        "translation": "clisar (var, fon\u00e9tica clixar), aclisar, fer un clis"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 7,
+    "fields": {
+        "word": 4,
+        "translation": "ed\u00e1"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 8,
+    "fields": {
+        "word": 4,
+        "translation": "tiempo"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 9,
+    "fields": {
+        "word": 5,
+        "translation": "terizia"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 10,
+    "fields": {
+        "word": 6,
+        "translation": "idea"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 11,
+    "fields": {
+        "word": 7,
+        "translation": "ideyal"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 12,
+    "fields": {
+        "word": 8,
+        "translation": "idioma, luenga, fabla (f.)"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 13,
+    "fields": {
+        "word": 9,
+        "translation": "idiota"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 14,
+    "fields": {
+        "word": 10,
+        "translation": "ilesia"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 15,
+    "fields": {
+        "word": 11,
+        "translation": "ignominia"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 16,
+    "fields": {
+        "word": 13,
+        "translation": "chugar"
+    }
+}
+]

@@ -1,0 +1,106 @@
+[
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 1,
+    "fields": {
+        "lexicon": 1,
+        "term": "ebrio"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 2,
+    "fields": {
+        "lexicon": 1,
+        "term": "echar"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 3,
+    "fields": {
+        "lexicon": 1,
+        "term": "eclipsar"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 4,
+    "fields": {
+        "lexicon": 1,
+        "term": "edad"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 5,
+    "fields": {
+        "lexicon": 1,
+        "term": "ictericia"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 6,
+    "fields": {
+        "lexicon": 1,
+        "term": "idea"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 7,
+    "fields": {
+        "lexicon": 1,
+        "term": "ideal"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 8,
+    "fields": {
+        "lexicon": 1,
+        "term": "idioma"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 9,
+    "fields": {
+        "lexicon": 1,
+        "term": "idiota"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 10,
+    "fields": {
+        "lexicon": 1,
+        "term": "iglesia"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 11,
+    "fields": {
+        "lexicon": 1,
+        "term": "ignominia"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 12,
+    "fields": {
+        "lexicon": 1,
+        "term": "ignorar"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 13,
+    "fields": {
+        "lexicon": 1,
+        "term": "jugar"
+    }
+}
+]

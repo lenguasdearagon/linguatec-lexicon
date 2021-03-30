@@ -1,0 +1,130 @@
+[
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 1,
+    "fields": {
+        "entry": 1,
+        "gramaticalcategory": 1
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 2,
+    "fields": {
+        "entry": 2,
+        "gramaticalcategory": 6
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 3,
+    "fields": {
+        "entry": 3,
+        "gramaticalcategory": 6
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 4,
+    "fields": {
+        "entry": 4,
+        "gramaticalcategory": 6
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 5,
+    "fields": {
+        "entry": 5,
+        "gramaticalcategory": 6
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 6,
+    "fields": {
+        "entry": 6,
+        "gramaticalcategory": 6
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 7,
+    "fields": {
+        "entry": 7,
+        "gramaticalcategory": 3
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 8,
+    "fields": {
+        "entry": 8,
+        "gramaticalcategory": 3
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 9,
+    "fields": {
+        "entry": 9,
+        "gramaticalcategory": 4
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 10,
+    "fields": {
+        "entry": 10,
+        "gramaticalcategory": 4
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 11,
+    "fields": {
+        "entry": 11,
+        "gramaticalcategory": 2
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 12,
+    "fields": {
+        "entry": 12,
+        "gramaticalcategory": 5
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 13,
+    "fields": {
+        "entry": 13,
+        "gramaticalcategory": 1
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 14,
+    "fields": {
+        "entry": 14,
+        "gramaticalcategory": 4
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 15,
+    "fields": {
+        "entry": 15,
+        "gramaticalcategory": 4
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 16,
+    "fields": {
+        "entry": 16,
+        "gramaticalcategory": 7
+    }
+}
+]

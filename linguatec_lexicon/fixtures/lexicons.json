@@ -1,0 +1,22 @@
+[
+{
+    "model": "linguatec_lexicon.lexicon",
+    "pk": 1,
+    "fields": {
+        "name": "castellano - aragonés",
+        "description": "",
+        "src_language": "es",
+        "dst_language": "ar"
+    }
+},
+{
+    "model": "linguatec_lexicon.lexicon",
+    "pk": 2,
+    "fields": {
+        "name": "aragonés - castellano",
+        "description": "",
+        "src_language": "ar",
+        "dst_language": "es"
+    }
+}
+]
