@@ -164,6 +164,27 @@ class DiatopicVariation(models.Model):
         return "{} ({})".format(self.name, self.region)
 
 
+def split_words(xs):
+    # find the words in translation text
+    alph = string.ascii_lowercase + 'ñáéíóú!-'
+    translation = ''
+    for c in xs.lower():
+        if c in alph:
+            translation += c
+        else:
+            translation += ' '
+    return list(set(translation.split(' ')))
+
+
+def get_words(entry):
+    # find the objects words in translation text
+    words = split_words(entry.translation)
+    return Word.objects.filter(
+        lexicon__src_language=entry.word.lexicon.dst_language).filter(
+            lexicon__dst_language=entry.word.lexicon.src_language).filter(
+                term__in=words).distinct()
+
+
 class Entry(models.Model):
     """
     The Entry class represents each translation (written in the
@@ -186,37 +207,33 @@ class Entry(models.Model):
             models.UniqueConstraint(fields=['word', 'variation', 'translation'], name='unique-entry')
         ]
 
-    def words_conjugation(self):
-        # find the words in translation text
-        alph = string.ascii_lowercase + 'ñáéíóú!-'
-        translation = ''
-        for c in self.translation.lower():
-            if c in alph:
-                translation += c
-            else:
-                translation += ' '
-        words = set(translation.split(' '))
+    @classmethod
+    def words_conjugation(cls):
+        csv_list = ["castilian verb;aragon verbs\n"]
+        kind_of_verbs = GramaticalCategory.get_abbr_verbs()
+        castellano = Lexicon.objects.get(src_language='es')
 
-        # all kind of verbs in gramcats__abbreviation
-        gram_abb = GramaticalCategory.objects.filter(
-            abbreviation__startswith='v.').values_list('abbreviation')
-        kind_of_verbs = {x[0] for x in gram_abb}
+        # get all entries that they are castilan verbs and
+        # have more than one word in the translate text
+        entries = Entry.objects.filter(
+            word__lexicon=castellano).filter(
+                gramcats__abbreviation__in=kind_of_verbs).filter(
+                    translation__contains=' ').distinct()
 
-        # find objects of this words
-        word_obj = Word.objects.filter(
-            lexicon__src_language=self.word.lexicon.dst_language
-        ).filter(
-            lexicon__dst_language=self.word.lexicon.src_language
-        ).filter(term__in=words)
+        for entry in entries:
+            # find objects of this words
+            new_words = []
+            for x in get_words(entry):
+                for g in x.gramcats():
+                    if g in kind_of_verbs:
+                        new_words.append(x.term)
 
-        # filter only the verbs
-        new_words = []
-        for x in word_obj:
-            for g in x.gramcats():
-                if g in kind_of_verbs:
-                    new_words.append(x)
+            new_verbs = ", ".join(set(new_words))
+            castilian_verb = entry.word.term
+            csv_line = f"{castilian_verb};{new_verbs}\n"
+            csv_list.append(csv_line)
 
-        return new_words
+        return "".join(csv_list)
 
     def __str__(self):
         return self.translation
@@ -240,6 +257,15 @@ class GramaticalCategory(models.Model):
 
     class Meta:
         verbose_name_plural = "gramatical categories"
+
+    @classmethod
+    def get_abbr_verbs(cls):
+        # all kind of verbs in gramcats__abbreviation
+        excluded = ['v. imp.']
+        gram_abb = cls.objects.filter(
+            abbreviation__startswith='v.').exclude(
+            abbreviation__in=excluded).values_list('abbreviation')
+        return list({x[0] for x in gram_abb})
 
     def __str__(self):
         return self.abbreviation
