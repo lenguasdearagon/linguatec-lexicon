@@ -150,5 +150,29 @@
         "word": 16,
         "translation": "extrañar"
     }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 20,
+    "fields": {
+        "word": 17,
+        "translation": "acochar-se, reclochar-se, acochar, acorchofar-se, fer, acachar-se, agazapiar-se, aplafar-se, replanar-se, acurcullar-se, aclocar-se, arrupir-se, acachar, abaxar-se, acocholar-se, acorrucar-se, achocar-se, acurrupir-se"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 21,
+    "fields": {
+        "word": 18,
+        "translation": "agacharse"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 22,
+    "fields": {
+        "word": 19,
+        "translation": "reclochar-se"
+    }
 }
 ]

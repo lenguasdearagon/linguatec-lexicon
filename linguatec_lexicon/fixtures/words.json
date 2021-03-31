@@ -126,5 +126,29 @@
         "lexicon": 2,
         "term": "estraniar"
     }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 17,
+    "fields": {
+        "lexicon": 1,
+        "term": "agacharse"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 18,
+    "fields": {
+        "lexicon": 2,
+        "term": "acochar-se"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 19,
+    "fields": {
+        "lexicon": 2,
+        "term": "reclochar"
+    }
 }
 ]

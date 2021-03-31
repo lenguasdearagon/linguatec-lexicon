@@ -150,5 +150,29 @@
         "entry": 19,
         "gramaticalcategory": 7
     }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 20,
+    "fields": {
+        "entry": 20,
+        "gramaticalcategory": 7
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 21,
+    "fields": {
+        "entry": 21,
+        "gramaticalcategory": 7
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 22,
+    "fields": {
+        "entry": 22,
+        "gramaticalcategory": 7
+    }
 }
 ]
