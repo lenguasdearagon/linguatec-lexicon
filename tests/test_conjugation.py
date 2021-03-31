@@ -3,7 +3,7 @@ import unittest
 
 from django.test import TestCase
 
-from linguatec_lexicon.models import Entry
+from linguatec_lexicon.models import Entry, Lexicon, GramaticalCategory
 
 
 class ConjugationTestCase(TestCase):
@@ -25,3 +25,22 @@ class ConjugationTestCase(TestCase):
     def test_without_representation_case(self):
         # One entry without translation verb in the system
         self.assertTrue(self.result['eclipsar'] == '')
+        
+    def test_with_one_unique_word_case(self):
+        # One entry without translation verb in the system
+        self.assertTrue(not 'jugar' in self.result)
+
+    def test_check_results(self):
+        # checking that exist all possible results
+        castellano = Lexicon.objects.get(src_language='es')
+        kind_of_verbs = GramaticalCategory.get_abbr_verbs()
+        entries = Entry.objects.filter(
+            word__lexicon=castellano).filter(
+                gramcats__abbreviation__in=kind_of_verbs).filter(
+                    translation__contains=' ').distinct()
+
+        bad_results = []
+        for e in entries:
+            if e.word.term not in self.result:
+                bad_results.append(e.word.term)
+        self.assertTrue(bad_results == [])
