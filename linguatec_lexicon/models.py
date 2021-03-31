@@ -228,12 +228,16 @@ class Entry(models.Model):
                     if g in kind_of_verbs:
                         new_words.append(x.term)
 
-            new_verbs = ", ".join(set(new_words))
             castilian_verb = entry.word.term
-            if castilian_verb in result and new_verbs:
-                result[castilian_verb] += ", " + new_verbs
+            if castilian_verb in result:
+                result[castilian_verb].extend(new_words)
             else:
-                result[castilian_verb] = new_verbs
+                result[castilian_verb] = new_words
+
+        # filter duplicates and convert to a string
+        for cast, arag in result.items():
+            str_arag = ", ".join(set(arag))
+            result[cast] = str_arag
 
         return result
 
