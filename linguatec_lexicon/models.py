@@ -243,8 +243,7 @@ class Entry(models.Model):
 
         # filter duplicates and convert to a string
         for cast, arag in result.items():
-            str_arag = ", ".join(set(arag))
-            result[cast] = str_arag
+            result[cast] = list(set(arag))
 
         return result
 
@@ -290,6 +289,7 @@ class VerbalConjugation(models.Model):
 
     entry = models.OneToOneField('Entry', on_delete=models.CASCADE, related_name="conjugation")
     raw = models.TextField('Raw imported content.')
+    raw_verbs = models.JSONField(default=list)
 
     @cached_property
     def parse_raw(self):

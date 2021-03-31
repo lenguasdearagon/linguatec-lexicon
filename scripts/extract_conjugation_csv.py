@@ -11,9 +11,10 @@ from linguatec_lexicon.models import Entry
 def main():
     entries = Entry.words_conjugation()
 
-    with open("congigation.csv", 'w') as infile:
+    with open("conjugation.csv", 'w') as infile:
         infile.write("Verbo en castellano; Verbos en Aragones\n")
-        for castilian, aragonese in entries.items():
+        for castilian, arag in entries.items():
+            aragonese = ", ".join(arag)
             infile.write(f"{castilian}; {aragonese}\n")
 
 
