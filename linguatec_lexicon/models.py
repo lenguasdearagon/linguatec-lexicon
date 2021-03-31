@@ -173,7 +173,14 @@ def split_words(xs):
             translation += c
         else:
             translation += ' '
-    return list(set(translation.split(' ')))
+    result = list(set(translation.split(' ')))
+    result_without_se = []
+    for w in result:
+        if '-se' in w:
+            result_without_se.append(w.split('-')[0]) 
+
+    result.extend(result_without_se)
+    return list(set(result))
 
 
 def get_words(entry):
