@@ -30,11 +30,11 @@ class ConjugationTestCase(TestCase):
         # One entry without translation verb in the system
         self.assertTrue(not 'jugar' in self.result)
 
-    def test_with_screenplay_in_aragonese_word(self):
+    def test_with_dash_in_aragonese_word(self):
         # One entry without translation verb in the system
         self.assertTrue('acochar-se' in self.result['agacharse'])
 
-    def test_without_screenplay_in_aragonese_word(self):
+    def test_without_dash_in_aragonese_word(self):
         # One entry without translation verb in the system
         self.assertTrue(not 'reclochar-se' in self.result['agacharse'])
         self.assertTrue('reclochar' in self.result['agacharse'])
