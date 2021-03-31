@@ -24,7 +24,7 @@ class ConjugationTestCase(TestCase):
 
     def test_without_representation_case(self):
         # One entry without translation verb in the system
-        self.assertTrue(self.result['eclipsar'] == '')
+        self.assertTrue(self.result['eclipsar'] == [])
         
     def test_with_one_unique_word_case(self):
         # One entry without translation verb in the system
