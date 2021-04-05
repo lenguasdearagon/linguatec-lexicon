@@ -341,3 +341,7 @@ class VerbalConjugation(models.Model):
         except Word.DoesNotExist:
             # TODO log this error to detect database inconsistency
             return None
+
+    @property
+    def verbalraw(self):
+        return self.raw_verbs
