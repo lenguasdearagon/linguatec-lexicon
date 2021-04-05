@@ -1,7 +1,7 @@
 from django.core.management import call_command
 from django.test import TestCase
 
-from linguatec_lexicon.models import Entry, Lexicon, GramaticalCategory
+from linguatec_lexicon.models import Entry, Lexicon, GramaticalCategory, VerbalConjugation
 
 
 class ConjugationTestCase(TestCase):
@@ -62,3 +62,12 @@ class ConjugationTestCase(TestCase):
         verbs = result['results'][0]['entries'][0]['conjugation']['raw_verbs']
         self.assertTrue('estraniar' in verbs)
         self.assertTrue('estrañar' in verbs)
+
+    def test_with_exclusive_words_of_translation(self):
+        # check if the verbalconjugation have only words than appear in translation
+        verbs = VerbalConjugation.objects.filter(entry__word__term='proveer')
+        for v in verbs:
+            self.assertTrue(v.raw_verbs != self.result['proveer'])
+            for w in v.raw_verbs:
+                self.assertTrue(w in v.entry.translation)
+
