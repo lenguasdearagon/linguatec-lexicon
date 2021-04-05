@@ -1,0 +1,144 @@
+[
+    {
+        "model": "linguatec_lexicon.lexicon",
+        "pk": 1,
+        "fields": {
+            "name": "diccionario linguatec",
+            "description": "",
+            "src_language": "es",
+            "dst_language": "ar"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 8,
+        "fields": {
+            "lexicon": 1,
+            "term": "abarcar"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 8546,
+        "fields": {
+            "lexicon": 1,
+            "term": "zambullir"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 4434,
+        "fields": {
+            "lexicon": 1,
+            "term": "hallar"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.entry",
+        "pk": 10,
+        "fields": {
+            "word": 8,
+            "translation": "abarcar",
+            "gramcats": [
+                31
+            ]
+        }
+    },
+    {
+        "model": "linguatec_lexicon.entry",
+        "pk": 11,
+        "fields": {
+            "word": 4434,
+            "translation": "trobar, alcontrar",
+            "gramcats": [
+                31
+            ]
+        }
+    },
+    {
+        "model": "linguatec_lexicon.gramaticalcategory",
+        "pk": 31,
+        "fields": {
+            "abbreviation": "v.",
+            "title": "verbo"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.gramaticalcategory",
+        "pk": 43,
+        "fields": {
+            "abbreviation": "v. prnl.",
+            "title": "verbo pronominal"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.gramaticalcategory",
+        "pk": 46,
+        "fields": {
+            "abbreviation": "v. tr.",
+            "title": "verbo transitivo"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.entry",
+        "pk": 11,
+        "fields": {
+            "word": 8,
+            "translation": "(acaparar) abracar",
+            "gramcats": [
+                31
+            ]
+        }
+    },
+    {
+        "model": "linguatec_lexicon.entry",
+        "pk": 12,
+        "fields": {
+            "word": 8,
+            "translation": "(llegar a hacer) adubir, abastar, dar abasto, abenir-se-ne",
+            "gramcats": [
+                31
+            ]
+        }
+    },
+    {
+        "model": "linguatec_lexicon.entry",
+        "pk": 11822,
+        "fields": {
+            "word": 8546,
+            "translation": "capuzar, capuzar-se",
+            "gramcats": [
+                43,
+                46
+            ]
+        }
+    },
+    {
+        "model": "linguatec_lexicon.entry",
+        "pk": 11823,
+        "fields": {
+            "word": 8546,
+            "translation": "(echar con fuerza al agua o al suelo) zabucar",
+            "gramcats": [
+                43,
+                46
+            ]
+        }
+    },
+    {
+        "model": "linguatec_lexicon.verbalconjugation",
+        "pk": 1,
+        "fields": {
+            "entry": 12,
+            "raw": "Adubir es modelo para la conjugaci\u00f3n regular de los verbos regulares terminados en -ir. conjug. IND. pres. adubo, adubes, adube, adubimos, adubiz, aduben; pret. imp. adubiba, adubibas, adubiba, adub\u00edbanos, adub\u00edbaz, adubiban; pret. indef. adubi\u00e9, adubi\u00e9s, adubi\u00f3, adubiemos, adubiez, adubioron/adubi\u00f3n; fut. adubir\u00e9, adubir\u00e1s, adubir\u00e1, adubiremos, adubirez, adubir\u00e1n; cond. adubirba, adubirbas, adubirba, adub\u00edrbanos, adub\u00edrbaz, adubirban; SUBJ. pres. aduba, adubas, aduba, adubamos, adubaz, aduban; pret. imp. adubise, adubises, adubise, adub\u00edsenos, adub\u00edsez, adubisen; IMP. adube, adubiz; INF. adubir; GER. adubindo; PART. adubito/a."
+        }
+    },
+    {
+        "model": "linguatec_lexicon.verbalconjugation",
+        "pk": 90,
+        "fields": {
+            "entry": 11822,
+            "raw": "Los verbos capuzar y zabucar son regulares de la 1\u00aa conjugaci\u00f3n. modelo. conjug. trobar (hallar)"
+        }
+    }
+]

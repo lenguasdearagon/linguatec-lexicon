@@ -1,0 +1,154 @@
+[
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 1,
+        "fields": {
+            "lexicon": 1,
+            "term": "atención"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 2,
+        "fields": {
+            "lexicon": 1,
+            "term": "añico"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 3,
+        "fields": {
+            "lexicon": 1,
+            "term": "bastar"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 4,
+        "fields": {
+            "lexicon": 1,
+            "term": "bastarse para andar"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 5,
+        "fields": {
+            "lexicon": 1,
+            "term": "bastarse por uno mismo"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 6,
+        "fields": {
+            "lexicon": 1,
+            "term": "casa"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 7,
+        "fields": {
+            "lexicon": 1,
+            "term": "casar"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 8,
+        "fields": {
+            "lexicon": 1,
+            "term": "echar"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 9,
+        "fields": {
+            "lexicon": 1,
+            "term": "echar a"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 10,
+        "fields": {
+            "lexicon": 1,
+            "term": "echar a perder"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 11,
+        "fields": {
+            "lexicon": 1,
+            "term": "echar a voleo"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 12,
+        "fields": {
+            "lexicon": 1,
+            "term": "echar de menos"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 13,
+        "fields": {
+            "lexicon": 1,
+            "term": "echar hojas"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 14,
+        "fields": {
+            "lexicon": 1,
+            "term": "escasamente"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 15,
+        "fields": {
+            "lexicon": 1,
+            "term": "espino"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 16,
+        "fields": {
+            "lexicon": 1,
+            "term": "espino blanco"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 17,
+        "fields": {
+            "lexicon": 1,
+            "term": "garza"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 18,
+        "fields": {
+            "lexicon": 1,
+            "term": "hacerse añicos"
+        }
+    },
+    {
+        "model": "linguatec_lexicon.word",
+        "pk": 19,
+        "fields": {
+            "lexicon": 1,
+            "term": "prestar atención"
+        }
+    }
+]

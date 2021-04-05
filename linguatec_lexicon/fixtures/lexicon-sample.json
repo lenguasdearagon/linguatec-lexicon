@@ -1,0 +1,172 @@
+[
+{
+    "model": "linguatec_lexicon.lexicon",
+    "pk": 1,
+    "fields": {
+        "name": "diccionario linguatec",
+        "description": "",
+        "src_language": "es",
+        "dst_language": "ar"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 1,
+    "fields": {
+        "abbreviation": "adj.",
+        "title": "adjective"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 2,
+    "fields": {
+        "abbreviation": "adv.",
+        "title": "adverb"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 3,
+    "fields": {
+        "abbreviation": "conj.",
+        "title": "conjunction"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 4,
+    "fields": {
+        "abbreviation": "n.",
+        "title": "noun"
+    }
+},
+{
+    "model": "linguatec_lexicon.gramaticalcategory",
+    "pk": 5,
+    "fields": {
+        "abbreviation": "v.",
+        "title": "verb"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 1,
+    "fields": {
+        "lexicon": 1,
+        "term": "ebrio"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 2,
+    "fields": {
+        "lexicon": 1,
+        "term": "echar"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 3,
+    "fields": {
+        "lexicon": 1,
+        "term": "eclipsar"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 4,
+    "fields": {
+        "lexicon": 1,
+        "term": "edad"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 1,
+    "fields": {
+        "word": 1,
+        "gramcats": [1],
+        "translation": "capino/a, pop. zorro/a, calamocano/a, chorrupato/a, pifolo/a, rusio/a, zafumato/a"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 2,
+    "fields": {
+        "word": 2,
+        "gramcats": [5],
+        "translation": "chitar (var. fon\u00e9tica itar)"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 3,
+    "fields": {
+        "word": 2,
+        "gramcats": [5],
+        "translation": "arrullar, volar, aventar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 4,
+    "fields": {
+        "word": 2,
+        "gramcats": [5],
+        "translation": "esfurriar, uxar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 5,
+    "fields": {
+        "word": 2,
+        "gramcats": [5],
+        "translation": "despedir, chitar, dar palleta, portiar, espachar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 6,
+    "fields": {
+        "word": 3,
+        "gramcats": [5],
+        "translation": "clisar (var, fon\u00e9tica clixar), aclisar, fer un clis"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 7,
+    "fields": {
+        "word": 4,
+        "gramcats": [4],
+        "translation": "ed\u00e1"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 8,
+    "fields": {
+        "word": 4,
+        "gramcats": [4],
+        "translation": "tiempo"
+    }
+},
+{
+    "model": "linguatec_lexicon.example",
+    "pk": 1,
+    "fields": {
+        "entry": 6,
+        "phrase": "Ej. Diz que ista nuei fer\u00e1 un clis de luna."
+    }
+},
+{
+    "model": "linguatec_lexicon.example",
+    "pk": 2,
+    "fields": {
+        "entry": 8,
+        "phrase": "Ej. \u00bfQu\u00e9 tiempo tiene ixa ninona?"
+    }
+}
+]
