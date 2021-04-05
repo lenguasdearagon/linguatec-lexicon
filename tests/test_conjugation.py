@@ -71,3 +71,14 @@ class ConjugationTestCase(TestCase):
             for w in v.raw_verbs:
                 self.assertTrue(w in v.entry.translation)
 
+    def test_check_verbals_without_aragonese_lexicode(self):
+        # check if the verbalconjugation have only words than appear in translation
+        ar_verbs = VerbalConjugation.objects.filter(
+            entry__word__lexicon__src_language='ar',
+        )
+        es_verbs = VerbalConjugation.objects.filter(entry__word__term='abancalar')
+        self.assertTrue(es_verbs.count() == 1)
+        self.assertTrue(ar_verbs.count() == 0)
+        # import pdb; pdb.set_trace()
+        verb = es_verbs.first()
+        self.assertTrue(verb.raw_verbs == self.result['abancalar'])

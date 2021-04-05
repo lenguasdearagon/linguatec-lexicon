@@ -174,5 +174,61 @@
         "word": 19,
         "translation": "reclochar-se"
     }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 23,
+    "fields": {
+        "word": 20,
+        "translation": "fornir, proveyer"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 24,
+    "fields": {
+        "word": 20,
+        "translation": "furnir, amanir, somenistrar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 25,
+    "fields": {
+        "word": 23,
+        "translation": "proveer"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 26,
+    "fields": {
+        "word": 21,
+        "translation": "proveer"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 27,
+    "fields": {
+        "word": 22,
+        "translation": "proveer"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 28,
+    "fields": {
+        "word": 24,
+        "translation": "abancalar"
+    }
+},
+{
+    "model": "linguatec_lexicon.entry",
+    "pk": 29,
+    "fields": {
+        "word": 25,
+        "translation": "abancalar, atabalar"
+    }
 }
 ]

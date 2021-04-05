@@ -174,5 +174,61 @@
         "entry": 22,
         "gramaticalcategory": 7
     }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 23,
+    "fields": {
+        "entry": 23,
+        "gramaticalcategory": 7
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 24,
+    "fields": {
+        "entry": 24,
+        "gramaticalcategory": 7
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 25,
+    "fields": {
+        "entry": 25,
+        "gramaticalcategory": 7
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 26,
+    "fields": {
+        "entry": 26,
+        "gramaticalcategory": 7
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 27,
+    "fields": {
+        "entry": 27,
+        "gramaticalcategory": 7
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 28,
+    "fields": {
+        "entry": 28,
+        "gramaticalcategory": 7
+    }
+},
+{
+    "model": "linguatec_lexicon.entry_gramcats",
+    "pk": 29,
+    "fields": {
+        "entry": 29,
+        "gramaticalcategory": 7
+    }
 }
 ]

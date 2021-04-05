@@ -150,5 +150,53 @@
         "lexicon": 2,
         "term": "reclochar"
     }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 20,
+    "fields": {
+        "lexicon": 1,
+        "term": "proveer"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 21,
+    "fields": {
+        "lexicon": 2,
+        "term": "amanir"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 22,
+    "fields": {
+        "lexicon": 2,
+        "term": "somenistrar"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 23,
+    "fields": {
+        "lexicon": 2,
+        "term": "proveyer"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 24,
+    "fields": {
+        "lexicon": 2,
+        "term": "abancalar"
+    }
+},
+{
+    "model": "linguatec_lexicon.word",
+    "pk": 25,
+    "fields": {
+        "lexicon": 1,
+        "term": "abancalar"
+    }
 }
 ]
