@@ -217,7 +217,6 @@ class EntryModelTestCase(TestCase):
 
         # initialize words on main language
         sample_path = cls.get_fixture_path('variation-sample-common.xlsx')
-        # import pdb; pdb.set_trace()
         call_command('importdata', cls.lexicon.name, sample_path)
 
         # import entries of benasqués variation
