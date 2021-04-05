@@ -115,7 +115,7 @@ class VerbalConjugationModelTestCase(TestCase):
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(
             base_path, 'fixtures/verbal-conjugation.xlsx')
-        call_command('importdata', sample_path, self.lexicon.code)
+        call_command('importdata', self.lexicon.code, sample_path)
 
     def test_extract_verbal_conjugation(self):
         word = Word.objects.get(term="abarcar", lexicon=Lexicon.objects.get(src_language='es', dst_language='ar'))
@@ -217,14 +217,15 @@ class EntryModelTestCase(TestCase):
 
         # initialize words on main language
         sample_path = cls.get_fixture_path('variation-sample-common.xlsx')
-        call_command('importdata', sample_path, cls.lexicon.name)
+        # import pdb; pdb.set_trace()
+        call_command('importdata', cls.lexicon.name, sample_path)
 
         # import entries of benasqués variation
         sample_path = cls.get_fixture_path('variation-sample-benasques.xlsx')
-        call_command('importvariation', sample_path, cls.lexicon.code, variation=cls.variation.name)
+        call_command('importvariation', cls.lexicon.code, sample_path, variation=cls.variation.name)
 
     def test_deny_importation_duplicated_entries(self):
 
         with self.assertRaises(IntegrityError):
             sample_path = self.get_fixture_path('variation-sample-benasques.xlsx')
-            call_command('importvariation', sample_path, self.lexicon.code, variation=self.variation.name)
+            call_command('importvariation', self.lexicon.code, sample_path, variation=self.variation.name)
