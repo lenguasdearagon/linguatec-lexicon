@@ -14,7 +14,7 @@ class VerbalConjugationSerializer(serializers.ModelSerializer):
     class Meta:
         model = VerbalConjugation
         fields = ('intro', 'model', 'model_word',
-                  'model_word_id', 'conjugation')
+                  'model_word_id', 'conjugation', 'raw_verbs')
 
 
 class GramaticalCategorySerializer(serializers.ModelSerializer):
