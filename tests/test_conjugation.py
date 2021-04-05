@@ -73,6 +73,6 @@ class ConjugationTestCase(TestCase):
         self.assertEqual(200, resp.status_code)
 
         result = resp.json()
-        verbs = result['results'][0]['entries'][0]['conjugation']['verbalraw']
+        verbs = result['results'][0]['entries'][0]['conjugation']['raw_verbs']
         self.assertTrue('estraniar' in verbs)
         self.assertTrue('estrañar' in verbs)
