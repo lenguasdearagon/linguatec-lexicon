@@ -3,7 +3,7 @@ import unittest
 
 from django.test import TestCase
 
-from linguatec_lexicon.models import Entry, Lexicon, GramaticalCategory
+from linguatec_lexicon.models import Entry, Lexicon, GramaticalCategory, VerbalConjugation
 
 
 class ConjugationTestCase(TestCase):
@@ -17,6 +17,19 @@ class ConjugationTestCase(TestCase):
     def setUp(cls):
         cls.result = Entry.words_conjugation()
 
+        for k_entry, v_raw in cls.result.items():
+            for entry in Entry.objects.filter(word__term=k_entry):
+                verbs = VerbalConjugation.objects.filter(entry=entry)
+                if verbs:
+                    verb = verbs.first()
+                    verb.raw_verbs = v_raw
+                    verb.save()
+                else:
+                    VerbalConjugation.objects.create(
+                        entry=entry,
+                        raw_verbs=v_raw
+                    )
+
     def test_ideal_case(self):
         # unique word in the correspondence translation
         self.assertTrue('estraniar' in self.result['extrañar'])
@@ -27,15 +40,15 @@ class ConjugationTestCase(TestCase):
         self.assertTrue(self.result['eclipsar'] == [])
         
     def test_with_one_unique_word_case(self):
-        # One entry without translation verb in the system
+        # One entry with only one word in translation
         self.assertTrue(not 'jugar' in self.result)
 
     def test_with_dash_in_aragonese_word(self):
-        # One entry without translation verb in the system
+        # One entry with dash in translation
         self.assertTrue('acochar-se' in self.result['agacharse'])
 
     def test_without_dash_in_aragonese_word(self):
-        # One entry without translation verb in the system
+        # One entry without dash in the verb than it is registred but with dash in translation
         self.assertTrue(not 'reclochar-se' in self.result['agacharse'])
         self.assertTrue('reclochar' in self.result['agacharse'])
 
@@ -53,3 +66,13 @@ class ConjugationTestCase(TestCase):
             if e.word.term not in self.result:
                 bad_results.append(e.word.term)
         self.assertTrue(bad_results == [])
+
+    def test_query_api(self):
+        # check the result of query to api
+        resp = self.client.get('/api/words/search/?q={}&l=es-ar'.format('extrañar'))
+        self.assertEqual(200, resp.status_code)
+
+        result = resp.json()
+        verbs = result['results'][0]['entries'][0]['conjugation']['verbalraw']
+        self.assertTrue('estraniar' in verbs)
+        self.assertTrue('estrañar' in verbs)
