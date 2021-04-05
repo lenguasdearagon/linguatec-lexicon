@@ -79,6 +79,5 @@ class ConjugationTestCase(TestCase):
         es_verbs = VerbalConjugation.objects.filter(entry__word__term='abancalar')
         self.assertTrue(es_verbs.count() == 1)
         self.assertTrue(ar_verbs.count() == 0)
-        # import pdb; pdb.set_trace()
         verb = es_verbs.first()
         self.assertTrue(verb.raw_verbs == self.result['abancalar'])
