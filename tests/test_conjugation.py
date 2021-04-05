@@ -1,9 +1,7 @@
-import os
-import unittest
-
+from django.core.management import call_command
 from django.test import TestCase
 
-from linguatec_lexicon.models import Entry, Lexicon, GramaticalCategory, VerbalConjugation
+from linguatec_lexicon.models import Entry, Lexicon, GramaticalCategory
 
 
 class ConjugationTestCase(TestCase):
@@ -16,19 +14,7 @@ class ConjugationTestCase(TestCase):
 
     def setUp(cls):
         cls.result = Entry.words_conjugation()
-
-        for k_entry, v_raw in cls.result.items():
-            for entry in Entry.objects.filter(word__term=k_entry):
-                verbs = VerbalConjugation.objects.filter(entry=entry)
-                if verbs:
-                    verb = verbs.first()
-                    verb.raw_verbs = v_raw
-                    verb.save()
-                else:
-                    VerbalConjugation.objects.create(
-                        entry=entry,
-                        raw_verbs=v_raw
-                    )
+        call_command('verbalconjugation')
 
     def test_ideal_case(self):
         # unique word in the correspondence translation
@@ -38,7 +24,7 @@ class ConjugationTestCase(TestCase):
     def test_without_representation_case(self):
         # One entry without translation verb in the system
         self.assertTrue(self.result['eclipsar'] == [])
-        
+
     def test_with_one_unique_word_case(self):
         # One entry with only one word in translation
         self.assertTrue(not 'jugar' in self.result)
