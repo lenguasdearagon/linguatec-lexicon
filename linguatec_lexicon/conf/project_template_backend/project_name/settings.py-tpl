@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'linguatec_lexicon',
 
     # third-party apps for backend
+    'background_task',
     'django_extensions',
     'rest_framework',
 ]

@@ -44,18 +44,23 @@ class EntrySerializer(serializers.ModelSerializer):
 
 
 class WordSerializer(serializers.ModelSerializer):
+    lexicon = serializers.SlugRelatedField(slug_field='code', read_only=True)
     entries = EntrySerializer(many=True, read_only=True)
     gramcats = serializers.ListField(read_only=True)
+    is_verb = serializers.SerializerMethodField()
 
     class Meta:
         model = Word
-        fields = ('url', 'lexicon', 'term', 'gramcats', 'entries', 'admin_panel_url')
+        fields = ('url', 'lexicon', 'term', 'gramcats', 'entries', 'admin_panel_url', 'is_verb')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         user = self.context['request'].user
         if not (user.is_authenticated and user.is_staff):
             self.fields.pop('admin_panel_url')
+
+    def get_is_verb(self, obj):
+        return True #False
 
 
 class WordNearSerializer(serializers.ModelSerializer):
