@@ -28,7 +28,7 @@ class ExporterDataTestCase(TestCase):
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
-        call_command('importdata', sample_path, self.LEXICON_NAME)
+        call_command('importdata', self.LEXICON_NAME, sample_path)
 
         with tempfile.TemporaryDirectory() as tmpdirname:
             call_command('exportdata', self.LEXICON_CODE, tmpdirname + '/test-output-data-file.csv')
@@ -70,13 +70,13 @@ class ExporterVariationTestCase(TestCase):
 
         # initialize words on main language
         sample_path = cls.get_fixture_path('variation-sample-common.xlsx')
-        call_command('importdata', sample_path, lexicon.name)
+        call_command('importdata', lexicon.name, sample_path)
 
     def test_export_variation(self):
 
         base_path = os.path.dirname(os.path.abspath(__file__))
         sample_path = os.path.join(base_path, 'fixtures/variation-sample-benasques.xlsx')
-        call_command('importvariation', sample_path, self.LEXICON_CODE, variation='benasqués')
+        call_command('importvariation', self.LEXICON_CODE, sample_path, variation='benasqués')
 
         with tempfile.TemporaryDirectory() as tmpdirname:
             call_command('exportvariation', self.LEXICON_CODE, 'benasqués', tmpdirname + '/test-output-data-file.csv')
