@@ -4,7 +4,7 @@ An online bilingual dictionary developed inside the LINGUATEC project
 with the purpose of host a Spanish to Aragonese dictionary.
 
 ## API REST reference
-You can check the linguatec-lexicon API reference on [Swagger Hub](https://app.swaggerhub.com/apis/ribaguifi/linguatec-lexicon/). If you find any issue or you want to use another service to see the schema, you can find a local copy on [docs/api-schema.yml](docs/api-schema.yml)
+You can check the linguatec-lexicon API reference on [Swagger Hub](https://app.swaggerhub.com/apis-docs/ribaguifi/linguatec-lexicon). If you find any issue or you want to use another service to see the schema, you can find a local copy on [docs/api-schema.yml](docs/api-schema.yml)
 
 ## Development installation
 
