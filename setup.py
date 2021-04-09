@@ -23,7 +23,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name="linguatec-lexicon",
     version=version,
-    url='https://gitlab.com/linguatec/linguatec-lexicon/',
+    url='https://github.com/lenguasdearagon/linguatec-lexicon/',
     author='Santiago Lamora',
     author_email='santiago@ribaguifi.com',
     description=('An online bilingual dictionary based on Django.'),
@@ -33,10 +33,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 2.1',
+        'Framework :: Django :: 2.2',
         'Intended Audience :: Education',
         'License :: OSI Approved :: GNU Affero General Public License v3',
         'Operating System :: OS Independent',
