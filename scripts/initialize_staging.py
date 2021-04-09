@@ -14,13 +14,16 @@ try:
 except django.core.exceptions.ImproperlyConfigured:
     print("""
         You must define the environment variable DJANGO_SETTINGS_MODULE. Run:
-            DJANGO_SETTINGS_MODULE="linguatec.settings"
-            export DJANGO_SETTINGS_MODULE
+            export DJANGO_SETTINGS_MODULE=aragonario.settings
     """)
     sys.exit(2)
 
 
 from linguatec_lexicon.models import (DiatopicVariation, Lexicon, Region)
+
+
+AR_ES_PATH = os.getenv('LINGUATEC_AR_ES_PATH', '~/data/ar-es/')
+VARIANTS_PATH = os.getenv('LINGUATEC_VARIANTS_PATH', '~/data/variedades')
 
 
 def init_lexicon():
@@ -97,13 +100,8 @@ VARIANTS_MAPPING = {
     "Somontanos": "SOMONTANO-2021-03-12.xlsx",
 }
 
-VARIANTS_PATH = '/home/santiago/trabajo/dgpl/linguatec-v4/variedades'
-
 
 def validate_variations():
-    # for xlsx in os.listdir(VARIANTS_PATH):
-    #     if not xlsx.endswith('xlsx'):
-    #         continue
     for _, xlsx in VARIANTS_MAPPING.items():
         xlsx_fullpath = os.path.join(VARIANTS_PATH, xlsx)
         print("-" * 80)
@@ -174,8 +172,6 @@ python initialize_staging.py --import-variations
 
 
 def import_aragonese_spanish_data():
-    AR_ES_PATH = '/home/santiago/trabajo/dgpl/linguatec-v4/ar-es/'
-
     ls_files = sorted(os.listdir(AR_ES_PATH))
 
     for filename in ls_files:
