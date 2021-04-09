@@ -1,0 +1,368 @@
+openapi: 3.0.0
+info:
+  version: "0.4"
+  title: linguarec_lexicon_API
+  description: >
+    An application for a dictionary, that allows add multiple language-languge
+    and store words, entries, translations, varitations of those entries and
+    import or export entries, variations and gramcats.
+paths:
+  /lexicons:
+    get:
+      tags:
+        - lexicons
+      summary: Returns a page with all the lexicons in json format
+      operationId: getLexicon
+      responses:
+        '200':
+          description: Return json lexicons page
+  '/lexicons/{LexiconId}':
+    parameters:
+      - name: LexiconId
+        in: path
+        description: ID of Lexicon to return
+        required: true
+        schema:
+          type: integer
+          allOf:
+            - $ref: '#/components/schemas/Lexicon'
+    get:
+      tags:
+        - lexicons
+      summary: Returns a page with the specific lexicon in json format
+      operationId: getLexiconById
+      responses:
+        '200':
+          description: Return json lexicon page
+  /words:
+    get:
+      tags:
+        - words
+      summary: Returns a page with all the words in json format
+      operationId: getWords
+      responses:
+        '200':
+          description: Return json words page
+  '/words/{WordId}':
+    parameters:
+      - name: WordId
+        in: path
+        description: ID of Word to return
+        required: true
+        schema:
+          type: integer
+          allOf:
+            - $ref: '#/components/schemas/Word'
+    get:
+      tags:
+        - words
+      summary: Returns a page with the specific Word in json format
+      operationId: getWordById
+      responses:
+        '200':
+          description: Return json word page
+  /words/search:
+    get:
+      tags:
+        - words
+      summary: >-
+        Returns an empty page with json format because default values of search
+        parameters are used so returns nothing
+      operationId: search
+      responses:
+        '200':
+          description: Return empty json page
+  '/words/search/{q = word_term}, {l = lexicon_code}':
+    parameters:
+      - name: q = word_term
+        in: path
+        description: Word term of word to be search
+        required: true
+        schema:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/Word'
+      - name: l = lexicon_code
+        in: path
+        description: Lexicon code where the word term will be search
+        required: true
+        schema:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/Lexicon'
+    get:
+      tags:
+        - words
+      summary: >-
+        Search in the database a word with the lexicon and term passed as
+        parameters
+      operationId: searchWord
+      responses:
+        '200':
+          description: Return a json format page with the word found
+  /words/near:
+    get:
+      tags:
+        - words
+      summary: >-
+        Returns an empty page with json format because default values of near
+        parameters are used so returns nothing
+      operationId: searchNear
+      responses:
+        '200':
+          description: Return empty json page
+  '/words/near/{q = word_term}, {l = lexicon_code}':
+    parameters:
+      - name: q = word_term
+        in: path
+        description: Word term of word to be used to search similar words
+        required: true
+        schema:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/Word'
+      - name: l = lexicon_code
+        in: path
+        description: Lexicon code where the word term will be used to search similar words
+        required: true
+        schema:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/Lexicon'
+    get:
+      tags:
+        - words
+      summary: >-
+        Search in the database a word with the lexicon and term passed as
+        parameters
+      operationId: searchNearWords
+      responses:
+        '200':
+          description: Return a json format page with the similar words found
+  /gramcats:
+    get:
+      tags:
+        - gramcats
+      summary: Returns a page with all the gramcats in json format
+      operationId: getGramcats
+      responses:
+        '200':
+          description: Return json gramcats page
+  '/gramcats/{gramcatID}':
+    parameters:
+      - name: gramcatID
+        in: path
+        description: ID of gramcat to return
+        required: true
+        schema:
+          type: integer
+          allOf:
+            - $ref: '#/components/schemas/GramaticalCategory'
+    get:
+      tags:
+        - gramcats
+      summary: Returns a page with the specific Gramcat in json format
+      operationId: getGramcatById
+      responses:
+        '200':
+          description: Return json gramcat page
+  /gramcats/show:
+    get:
+      tags:
+        - gramcats
+      summary: >-
+        Returns an empty page with json format because default values of show
+        parameters are used, so returns nothing
+      operationId: show
+      responses:
+        '200':
+          description: Return empty json page
+  '/gramcats/show/{abbr = gramcat_abbreviation}':
+    parameters:
+      - name: abbr = gramcat_abbreviation
+        in: path
+        description: Gramcat abbreviation of gramcat to be show
+        required: true
+        schema:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/GramaticalCategory'
+    get:
+      tags:
+        - gramcats
+      summary: >-
+        Search in the database a gramcat with the same abbreviation as the one
+        passed as parameter
+      operationId: showGramcatByAbbreviation
+      responses:
+        '200':
+          description: Return a json format page with the gramcat found
+components:
+  schemas:
+    Lexicon:
+      type: object
+      required:
+        - name
+        - src_language
+        - dst_language
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          uniqueItems: true
+          maxLength: 32
+        description:
+          type: string
+          nullable: true
+        src_language:
+          type: string
+          maxLength: 2
+          example: es
+        dst_language:
+          type: string
+          maxLength: 2
+          example: ar
+        code:
+          type: string
+          pattern: src_language + dst_language
+          uniqueItems: true
+          example: es-ar
+      xml:
+        name: Lexicon
+    Word:
+      type: object
+      required:
+        - lexicon
+        - term
+      properties:
+        id:
+          type: integer
+          format: int64
+        lexicon:
+          $ref: '#/components/schemas/Lexicon'
+        term:
+          type: string
+          maxLength: 64
+        gramcats:
+          description: Returns all gramcats that are related with its entries
+        admin_panel_url:
+          type: string
+          description: Returns an url which directs to the admin panel entry of that word
+      xml:
+        name: Word
+    Entry:
+      type: object
+      required:
+        - word
+        - gramcats
+        - translation
+      properties:
+        id:
+          type: integer
+          format: int64
+        word:
+          $ref: '#/components/schemas/Word'
+        gramcats:
+          $ref: '#/components/schemas/GramaticalCategory'
+        variation:
+          $ref: '#/components/schemas/DiatopicVariation'
+        translation:
+          type: string
+      xml:
+        name: Entry
+    GramaticalCategory:
+      type: object
+      required:
+        - abbreviation
+        - title
+      properties:
+        id:
+          type: integer
+          format: int64
+        abbreviation:
+          type: string
+          uniqueItems: true
+          maxLength: 64
+        title:
+          type: string
+          maxLength: 128
+      xml:
+        name: GramaticalCategory
+    DiatopicVariation:
+      type: object
+      required:
+        - name
+        - abbreviation
+        - region
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          uniqueItems: true
+          maxLength: 64
+        abbreviation:
+          type: string
+          uniqueItems: true
+          maxLength: 64
+        region:
+          $ref: '#/components/schemas/Region'
+      xml:
+        name: DiatopicVariation
+    Region:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          uniqueItems: true
+          maxLength: 64
+      xml:
+        name: Region
+    Example:
+      type: object
+      required:
+        - phrase
+        - entry
+      properties:
+        id:
+          type: integer
+          format: int64
+        phrase:
+          type: string
+        entry:
+          $ref: '#/components/schemas/Entry'
+      xml:
+        name: Example
+    VerbalConjugation:
+      type: object
+      required:
+        - entry
+        - raw
+      properties:
+        id:
+          type: integer
+          format: int64
+        entry:
+          $ref: '#/components/schemas/Entry'
+        raw:
+          type: string
+        intro:
+          description: Get intro of the verb (using raw)
+        conjugation:
+          description: Get conjugation of the verb (using raw)
+        model:
+          description: Get model verb used as conjugation model (using raw)
+        model_word:
+          description: Get the word of that model verb (using raw)
+        model_word_id:
+          description: Get the word id of that model verb (using raw)
+      xml:
+        name: VerbalConjugation
