@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - [added] Application background-tasks, importations are executed asynchronously.
 - [added] ImportLog which saves in the database the importations made.
 
+## [0.4.1] - 2020-04-12
+- [fixed] API: include lexicon code on `word` payload.
+
 ## [0.4] - 2020-04-07
 - [added] Support multiple lexicons.
 - [added] API: Added Lexicon api view and Lexicon serializer
