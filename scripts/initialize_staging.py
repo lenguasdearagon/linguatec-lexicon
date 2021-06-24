@@ -88,16 +88,16 @@ def init_diatopic_variations():
 
 
 VARIANTS_MAPPING = {
-    "Tensino": "ALTO GÁLLEGO-tensino-2021-03-12.xlsx",
-    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2021-03-12.xlsx",
-    "Ansotano": "JACETANIA-ansotano-2021-03-12.xlsx",
-    "Cheso": "JACETANIA-cheso-2021-03-12.xlsx",
-    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2021-03-12.xlsx",
-    "Benasqués": "RIBAGORZA-benasques-2021-03-12.xlsx",
-    "Belsetán": "SOBRARBE-belsetán-2021-03-12.xlsx",
-    "Chistabín": "SOBRARBE-chistabín-2021-03-12.xlsx",
-    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2021-03-12.xlsx",
-    "Somontanos": "SOMONTANO-2021-03-12.xlsx",
+    "Tensino": "ALTO GÁLLEGO-tensino-2021-06-08.xlsx",
+    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2021-06-08.xlsx",
+    "Ansotano": "JACETANIA-ansotano-2021-06-22.xlsx",
+    "Cheso": "JACETANIA-cheso-2021-06-08.xlsx",
+    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2021-06-08.xlsx",
+    "Benasqués": "RIBAGORZA-benasques-2021-06-08.xlsx",
+    "Belsetán": "SOBRARBE-belsetán-2021-06-08.xlsx",
+    "Chistabín": "SOBRARBE-chistabín-2021-06-22.xlsx",
+    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2021-06-22.xlsx",
+    "Somontanos": "SOMONTANO-2021-06-23.xlsx",
 }
 
 
@@ -153,21 +153,24 @@ def help():
     print("""
 QUICK START
 -------------------
-DJANGO_SETTINGS_MODULE="lenguasaragon.settings_postgres"
-export DJANGO_SETTINGS_MODULE
+export DJANGO_SETTINGS_MODULE="lenguasaragon.settings_postgres"
+export LINGUATEC_AR_ES_PATH="/home/santiago/trabajo/dgpl/linguatec-v5/ar-es/"
+export LINGUATEC_VARIANTS_PATH="/home/santiago/trabajo/dgpl/linguatec-v5/variedades/"
+
 python initialize_staging.py --drop
 python initialize_staging.py
-time ./manage.py importdata -v3 es-ar ~/trabajo/dgpl/linguatec-v4/vocabulario-castellano-aragones-2021-03-16bis.xlsx
+time ./manage.py importdata -v3 es-ar ~/trabajo/dgpl/linguatec-v5/vocabulario-castellano-aragones-2021-06-08.xlsx
 time python initialize_staging.py --import-aragonese
 
-# python initialize_staging.py --validate-variations
+python initialize_staging.py --validate-variations
+
 python initialize_staging.py --import-variations
 
-# to validate only a spececific variation
-./manage.py importvariation -v3 --dry-run es-ar ~/trabajo/dgpl/linguatec-v4/variedades/SOMONTANO-2021-03-12.xlsx
+# to validate a single variation
+./manage.py importvariation -v3 --dry-run es-ar ~/trabajo/dgpl/linguatec-v4/variedades/SOMONTANO-2021-06-22.xlsx
 
-# to import only a specific file
-# ./manage.py importvariation -v3 --variation "Ansotano" es-ar ~/trabajo/dgpl/linguatec-v4/variedades/JACETANIA-ansotano-2021-03-12.xlsx
+# to import a single variation file
+# ./manage.py importvariation -v3 --variation "Ansotano" es-ar ~/trabajo/dgpl/linguatec-v4/variedades/JACETANIA-ansotano-2021-06-08.xlsx
     """)
 
 
