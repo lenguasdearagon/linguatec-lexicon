@@ -1,8 +1,10 @@
 import json
 import pandas as pd
+import sys
 
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
+from django.db import IntegrityError, transaction
 
 from linguatec_lexicon.models import (
     Entry, Example, Lexicon, GramaticalCategory, VerbalConjugation, Word)
@@ -53,6 +55,7 @@ def is_verb(gramcats):
 
 def get_src_language_from_lexicon_code(lex_code):
     return lex_code[:2]
+
 
 def get_dst_language_from_lexicon_code(lex_code):
     return lex_code[3:]
@@ -283,13 +286,21 @@ class Command(BaseCommand):
                 continue
             self.populate_verbal_conjugation(word, gramcats, conjugation_str)
 
+    @transaction.atomic
     def write_to_database(self):
         count_words = 0
         count_entries = 0
         count_examples = 0
         for _, word in self.cleaned_data.items():
             word.lexicon_id = self.lexicon.pk
-            word.save()
+            try:
+                word.save()
+            except IntegrityError:
+                self.stdout.write(self.style.ERROR(
+                    "Error: Already exists term '{}' on lexicon '{}'".format(word.term, self.lexicon_code)
+                ))
+                sys.exit(1)
+
             count_words += 1
 
             for entry in word.clean_entries:
