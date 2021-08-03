@@ -173,6 +173,7 @@ class Entry(models.Model):
     gramcats = models.ManyToManyField('GramaticalCategory', related_name="entries")
     variation = models.ForeignKey('DiatopicVariation', null=True, on_delete=models.CASCADE, related_name="entries")
     translation = models.TextField()
+    marked_translation = models.TextField(default=None, blank=True, null=True)
 
     class Meta:
         # TODO instead of depend on 'pk' find another method to
