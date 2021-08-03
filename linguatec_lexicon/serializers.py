@@ -50,7 +50,7 @@ class WordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Word
-        fields = ('url', 'lexicon', 'term', 'gramcats', 'entries', 'admin_panel_url')
+        fields = ('id', 'url', 'lexicon', 'term', 'gramcats', 'entries', 'admin_panel_url')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
