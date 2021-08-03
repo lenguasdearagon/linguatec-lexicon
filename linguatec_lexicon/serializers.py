@@ -46,7 +46,7 @@ class EntrySerializer(serializers.ModelSerializer):
 
     def get_translation(self, obj):
         self.obj = obj
-        translation = re.sub(r'(\w+)', self.mark_word, obj.translation)
+        translation = re.sub(r'(\b\S+\b)', self.mark_word, obj.translation)
 
         return translation
 
