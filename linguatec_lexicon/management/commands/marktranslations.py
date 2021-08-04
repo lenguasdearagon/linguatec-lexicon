@@ -18,7 +18,8 @@ class Command(BaseCommand):
             self.lex = entry.word.lexicon
             marked_translation = re.sub(r'(\b\S+\b)', self.mark_word, entry.translation)
             entry.marked_translation = marked_translation if "</trans>" in marked_translation else None
-            entries.append(entry)
+            if entry:
+                entries.append(entry)
 
         Entry.objects.bulk_update(entries, ['marked_translation'])
 
