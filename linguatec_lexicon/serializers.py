@@ -1,4 +1,3 @@
-import re
 from rest_framework import serializers
 
 from .models import (DiatopicVariation, Entry, Example, GramaticalCategory,
@@ -37,27 +36,11 @@ class EntrySerializer(serializers.ModelSerializer):
     examples = ExampleSerializer(many=True, read_only=True)
     conjugation = VerbalConjugationSerializer()
     variation = DiatopicVariationSerializer()
-    translation = serializers.SerializerMethodField()
 
     class Meta:
         model = Entry
-        fields = ('id', 'variation', 'gramcats', 'translation',
+        fields = ('id', 'variation', 'gramcats', 'translation', 'marked_translation',
                   'examples', 'conjugation')
-
-    def get_translation(self, obj):
-        self.obj = obj
-        translation = re.sub(r'(\b\S+\b)', self.mark_word, obj.translation)
-
-        return translation
-
-    def mark_word(self, matchobj):
-        lex = self.obj.word.lexicon
-        translation_exists = Word.objects.filter(term=matchobj.group(1)).exclude(lexicon=lex).exists()
-        if translation_exists:
-            lex_code = lex.dst_language + '-' + lex.src_language
-            return "<trans lex=" + lex_code + ">" + matchobj.group(1) + "</trans>"
-        else:
-            return matchobj.group(1)
 
 
 class WordSerializer(serializers.ModelSerializer):
