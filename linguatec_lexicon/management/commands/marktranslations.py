@@ -29,4 +29,4 @@ class Command(BaseCommand):
             lex_code = self.lex.dst_language + '-' + self.lex.src_language
             return "<trans lex=" + lex_code + ">" + matchobj.group(1) + "</trans>"
         else:
-            return None
+            return matchobj.group(1)
