@@ -2,13 +2,23 @@ import re
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from linguatec_lexicon.models import Entry, Lexicon, Word
+from linguatec_lexicon.models import Entry, Lexicon
 
 
 class Command(BaseCommand):
     help = 'Fill marked_translation field to link words'
+    default_batch_size = 100
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--batch-size', type=int,
+            help=("Controls how many entries are updated in a single query "
+                  "Directly passed to bulk_update. By default: {}").format(self.default_batch_size),
+        )
 
     def handle(self, *args, **options):
+        self.batch_size = options['batch_size'] or self.default_batch_size
+
         for lexicon in Lexicon.objects.all():
             updated, total = self.fill_marked_translation(lexicon)
             self.stdout.write("Lexicon {} marked {} of {} entries".format(lexicon.code, updated, total))
@@ -29,7 +39,7 @@ class Command(BaseCommand):
                 entry.marked_translation = marked_translation
                 entries.append(entry)
 
-        Entry.objects.bulk_update(entries, ['marked_translation'])
+        Entry.objects.bulk_update(entries, ['marked_translation'], batch_size=self.batch_size)
 
         return len(entries), qs.count()
 
