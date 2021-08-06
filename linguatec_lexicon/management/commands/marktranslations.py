@@ -15,11 +15,13 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def fill_marked_translation(self, lexicon):
-        self.lex = lexicon
         # TODO(@slamora): handle if there is not reverse pair
         self.lex_reverse = lexicon.get_reverse_pair()
-        entries = []
 
+        # cache lexicon words on a set (hash lookup has better performance)
+        self.lex_words = set(self.lex_reverse.words.values_list('term', flat=True))
+
+        entries = []
         qs = Entry.objects.filter(word__lexicon=lexicon)
         for entry in qs:
             marked_translation = re.sub(r'(\b\S+\b)', self.mark_word, entry.translation)
@@ -33,7 +35,7 @@ class Command(BaseCommand):
 
     def mark_word(self, matchobj):
         match_chunk = matchobj.group(1)
-        translation_exists = Word.objects.filter(lexicon=self.lex_reverse, term=match_chunk).exists()
+        translation_exists = match_chunk in self.lex_words
         if translation_exists:
             return "<trans lex=" + self.lex_reverse.code + ">" + match_chunk + "</trans>"
         return match_chunk
