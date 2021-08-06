@@ -10,7 +10,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for lexicon in Lexicon.objects.all():
-            self.fill_marked_translation(lexicon)
+            updated, total = self.fill_marked_translation(lexicon)
+            self.stdout.write("Lexicon {} marked {} of {} entries".format(lexicon.code, updated, total))
 
     @transaction.atomic
     def fill_marked_translation(self, lexicon):
@@ -22,13 +23,13 @@ class Command(BaseCommand):
         qs = Entry.objects.filter(word__lexicon=lexicon)
         for entry in qs:
             marked_translation = re.sub(r'(\b\S+\b)', self.mark_word, entry.translation)
-            entry.marked_translation = marked_translation if "</trans>" in marked_translation else None
-
-            # TODO(@slamora) handle in a different way entries without marked words
-            #   e.g. just copy translation to marked_translation
-            entries.append(entry)
+            if "</trans>" in marked_translation:
+                entry.marked_translation = marked_translation
+                entries.append(entry)
 
         Entry.objects.bulk_update(entries, ['marked_translation'])
+
+        return len(entries), qs.count()
 
     def mark_word(self, matchobj):
         match_chunk = matchobj.group(1)
