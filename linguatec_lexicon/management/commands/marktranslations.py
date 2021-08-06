@@ -34,7 +34,9 @@ class Command(BaseCommand):
         entries = []
         qs = Entry.objects.filter(word__lexicon=lexicon)
         for entry in qs:
-            marked_translation = re.sub(r'(\b\S+\b)', self.mark_word, entry.translation)
+            marked_translation = re.sub(
+                r'((?<!\()\b\S+\b(?![\w\s]*[\)]))',
+                self.mark_word, entry.translation)
             if "</trans>" in marked_translation:
                 entry.marked_translation = marked_translation
                 entries.append(entry)
