@@ -40,6 +40,13 @@ class Lexicon(models.Model):
     def __str__(self):
         return self.name
 
+    def get_reverse_pair(self):
+        """
+        Retrieve reverse lexicon of language pair
+        e.g. if current lexicon was Spanish-Aragonese returns Aragonese-Spanish
+        """
+        return Lexicon.objects.get(dst_language=self.src_language, src_language=self.dst_language)
+
 
 def get_src_language_from_lexicon_code(lex_code):
     return lex_code[:2]
