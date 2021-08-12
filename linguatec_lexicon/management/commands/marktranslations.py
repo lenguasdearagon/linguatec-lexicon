@@ -8,6 +8,8 @@ from linguatec_lexicon.models import Entry, Lexicon
 class Command(BaseCommand):
     help = 'Fill marked_translation field to link words'
     default_batch_size = 100
+    # words including dash '-' and slash '/' not surrounded by parenthesis '()'
+    regex = r'((?<!\()\b\S+\b(?![\w\s]*[\)]))'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -35,7 +37,7 @@ class Command(BaseCommand):
         qs = Entry.objects.filter(word__lexicon=lexicon)
         for entry in qs:
             marked_translation = re.sub(
-                r'((?<!\()\b\S+\b(?![\w\s]*[\)]))',
+                self.regex,
                 self.mark_word, entry.translation)
             if "</trans>" in marked_translation:
                 entry.marked_translation = marked_translation
