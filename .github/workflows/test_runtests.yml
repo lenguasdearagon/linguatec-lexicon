@@ -38,10 +38,7 @@ jobs:
         run: |
           sudo apt-get install --no-install-recommends python3-pip
           python -m pip install --upgrade pip
-          pip install flake8 pytest
-          pip install coverage
-          pip install xlrd==1.2.0 boto3
-          pip3 install -r requirements.txt
+          pip3 install -r tests/requirements.txt
           pip3 install -e .
 
       - name: Lint with flake8
