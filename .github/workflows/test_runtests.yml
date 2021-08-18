@@ -25,13 +25,13 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        
+
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.6
+      - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
-          python-version: '3.6'
+          python-version: '3.8'
       - name: psycopg2 prerequisites
         run: sudo apt-get install python-dev libpq-dev
       - name: Install dependencies
@@ -43,9 +43,7 @@ jobs:
           pip install xlrd==1.2.0 boto3
           pip3 install -r requirements.txt
           pip3 install -e .
-          
-          
-          
+
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
@@ -59,7 +57,7 @@ jobs:
         run: |
           coverage run --source linguatec_lexicon runtests.py --settings tests.settings_postgres_github --parallel 1
           coverage html
-        
+
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_lexicon
           POSTGRES_HOST: postgres
