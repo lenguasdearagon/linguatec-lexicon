@@ -136,7 +136,7 @@ class Command(BaseCommand):
         try:
             return (False, self.cleaned_data[term])
         except KeyError:
-            new_word = Word(term=term)
+            new_word = Word(term=term, lexicon_id=self.lexicon.pk)
             new_word.clean_entries = []
             return (True, new_word)
 
@@ -291,20 +291,23 @@ class Command(BaseCommand):
         count_words = 0
         count_entries = 0
         count_examples = 0
-        for _, word in self.cleaned_data.items():
-            word.lexicon_id = self.lexicon.pk
-            try:
-                word.save()
-            except IntegrityError:
-                self.stdout.write(self.style.ERROR(
-                    "Error: Already exists term '{}' on lexicon '{}'".format(word.term, self.lexicon_code)
-                ))
-                sys.exit(1)
 
+        try:
+            Word.objects.bulk_create(self.cleaned_data.values(), batch_size=100)
+        except IntegrityError as e:
+            self.stdout.write(self.style.ERROR(
+                "Error: Already exists term '{}' on lexicon '{}'".format(e, self.lexicon_code)
+            ))
+            sys.exit(1)
+
+        # retrieve words to get its PK
+        words = {w[0]: w[1] for w in Word.objects.filter(lexicon=self.lexicon).values_list('term', 'id')}
+        for word in self.cleaned_data.values():
+            word_pk = words[word.term]
             count_words += 1
 
             for entry in word.clean_entries:
-                entry.word_id = word.pk
+                entry.word_id = word_pk
                 entry.save()
                 entry.gramcats.set(entry.clean_gramcats)
                 count_entries += 1
