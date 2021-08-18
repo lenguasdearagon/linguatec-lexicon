@@ -160,8 +160,7 @@ class Command(BaseCommand):
             for abbr in g_str.split("//"):
                 abbr = abbr.strip()
                 try:
-                    gramcats.append(
-                        GramaticalCategory.objects.get(abbreviation=abbr))
+                    gramcats.append(self.retrieve_gramcat(abbr))
                 except GramaticalCategory.DoesNotExist:
                     self.errors.append({
                         "word": word.term,
@@ -170,6 +169,12 @@ class Command(BaseCommand):
                     })
         word.is_verb = is_verb(gramcats)
         return gramcats
+
+    def retrieve_gramcat(self, abbr):
+        try:
+            return self._gramcats[abbr]
+        except KeyError:
+            raise GramaticalCategory.DoesNotExist()
 
     def populate_entries(self, word, gramcats, entries_str):
         for translation in entries_str.split('//'):
@@ -244,6 +249,10 @@ class Command(BaseCommand):
                         raw=raw_conjugation)
 
     def populate_models(self, db):
+        # cache gramcats: one big query vs N queries where N is the
+        # number of entries
+        self._gramcats = {g.abbreviation: g for g in GramaticalCategory.objects.all()}
+
         self.errors = []
         self.cleaned_data = {}
         for row in db.itertuples(name=None):
