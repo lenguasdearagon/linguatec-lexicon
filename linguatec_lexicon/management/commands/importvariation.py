@@ -4,16 +4,10 @@ import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+
+from linguatec_lexicon import utils
 from linguatec_lexicon.models import (DiatopicVariation, Entry,
                                       GramaticalCategory, Lexicon, Word)
-
-
-def get_src_language_from_lexicon_code(lex_code):
-    return lex_code[:2]
-
-
-def get_dst_language_from_lexicon_code(lex_code):
-    return lex_code[3:]
 
 
 class Command(BaseCommand):
@@ -69,13 +63,10 @@ class Command(BaseCommand):
 
         # check that a lexicon with that code exist
         try:
-            src = get_src_language_from_lexicon_code(self.lexicon_code)
-            dst = get_dst_language_from_lexicon_code(self.lexicon_code)
-
+            src, dst = utils.get_lexicon_languages_from_code(self.lexicon_code)
             self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
-
 
         self.xlsx = pd.read_excel(self.input_file, sheet_name=None, header=None, usecols="A:C",
                                   names=['term', 'gramcats', 'translations'])
