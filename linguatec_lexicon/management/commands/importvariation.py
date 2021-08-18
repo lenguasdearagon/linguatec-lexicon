@@ -63,8 +63,7 @@ class Command(BaseCommand):
 
         # check that a lexicon with that code exist
         try:
-            src, dst = utils.get_lexicon_languages_from_code((self.lexicon_code)
-            dst = utils.get_dst_language_from_lexicon_code(self.lexicon_code)
+            src, dst = utils.get_lexicon_languages_from_code(self.lexicon_code)
             self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
