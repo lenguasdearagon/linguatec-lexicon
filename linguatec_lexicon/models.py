@@ -2,10 +2,10 @@ from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.db import connection, models
 from django.db.models import Q
-from django.utils.functional import cached_property
 from django.urls import reverse
+from django.utils.functional import cached_property
 
-from linguatec_lexicon import validators
+from linguatec_lexicon import utils, validators
 
 
 class Lexicon(models.Model):
@@ -39,14 +39,6 @@ class Lexicon(models.Model):
 
     def __str__(self):
         return self.name
-
-
-def get_src_language_from_lexicon_code(lex_code):
-    return lex_code[:2]
-
-
-def get_dst_language_from_lexicon_code(lex_code):
-    return lex_code[3:]
 
 
 class WordManager(models.Manager):
@@ -107,8 +99,7 @@ class WordManager(models.Manager):
         if lex is None or lex == '':
             qs = self
         else:
-            src = get_src_language_from_lexicon_code(lex)
-            dst = get_dst_language_from_lexicon_code(lex)
+            src, dst = utils.get_lexicon_languages_from_code(lex)
             qs = self.filter(lexicon__src_language=src, lexicon__dst_language=dst)
 
         return qs
