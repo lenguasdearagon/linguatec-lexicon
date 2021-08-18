@@ -178,10 +178,12 @@ class Command(BaseCommand):
 
     def populate_entries(self, word, gramcats, entries_str):
         for translation in entries_str.split('//'):
-            entry = Entry(word=word, translation=translation.strip())
+            entry = Entry(translation=translation.strip())
             entry.clean_gramcats = gramcats
             entry.clean_examples = []
+            entry.word_term = word.term  # term is unique for a lexicon
             word.clean_entries.append(entry)
+            self.cleaned_entries.append(entry)
 
     def populate_examples(self, word, ex_str):
         if pd.isnull(ex_str) or ex_str == '':
@@ -255,6 +257,7 @@ class Command(BaseCommand):
 
         self.errors = []
         self.cleaned_data = {}
+        self.cleaned_entries = []
         for row in db.itertuples(name=None):
             # itertuples by default return the index as the first element of the tuple.
 
@@ -302,26 +305,33 @@ class Command(BaseCommand):
 
         # retrieve words to get its PK
         words = {w[0]: w[1] for w in Word.objects.filter(lexicon=self.lexicon).values_list('term', 'id')}
-        for word in self.cleaned_data.values():
-            word_pk = words[word.term]
-            count_words += 1
+        count_words = len(self.cleaned_data)
 
-            for entry in word.clean_entries:
-                entry.word_id = word_pk
-                entry.save()
-                entry.gramcats.set(entry.clean_gramcats)
-                count_entries += 1
+        for entry in self.cleaned_entries:
+            word_pk = words[entry.word_term]
+            entry.word_id = word_pk
+        Entry.objects.bulk_create(self.cleaned_entries, batch_size=100)
 
-                for example in entry.clean_examples:
-                    example.entry_id = entry.pk
-                    example.save()
-                    count_examples += 1
+        entries = {
+            (e[0], e[1]): e[2] for e in
+            Entry.objects.filter(word__lexicon=self.lexicon, variation__isnull=True).values_list('word_id', 'translation', 'id')
+        }
 
-                try:
-                    entry.clean_conjugation.entry_id = entry.pk
-                    entry.clean_conjugation.save()
-                except AttributeError:
-                    pass
+        for entry in self.cleaned_entries:
+            entry.pk = entries[(entry.word_id, entry.translation)]
+            entry.gramcats.set(entry.clean_gramcats)
+            count_entries += 1
+
+            for example in entry.clean_examples:
+                example.entry_id = entry.pk
+                example.save()
+                count_examples += 1
+
+            try:
+                entry.clean_conjugation.entry_id = entry.pk
+                entry.clean_conjugation.save()
+            except AttributeError:
+                pass
 
         self.stdout.write("Imported: %s words, %s entries, %s examples" %
                           (count_words, count_entries, count_examples))
