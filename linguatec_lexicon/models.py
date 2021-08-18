@@ -67,16 +67,8 @@ class WordManager(models.Manager):
     def search(self, query, lex=None):
         MIN_SIMILARITY = 0.3
         query = self._clean_search_query(query)
+        qs = self._filter_by_lexicon(lex)
 
-        # Get and use the key of the Lexicon instead of the name
-        if lex is None or lex == '':
-            qs = self
-        else:
-            src = get_src_language_from_lexicon_code(lex)
-            dst = get_dst_language_from_lexicon_code(lex)
-
-            key_lex = Lexicon.objects.get(src_language=src, dst_language=dst)
-            qs = self.filter(lexicon=key_lex)
         if connection.vendor == 'postgresql':
             iregex = r"\y{0}\y"
         elif connection.vendor == 'sqlite':
@@ -100,22 +92,24 @@ class WordManager(models.Manager):
     def search_near(self, query, lex=None):
         # https://docs.djangoproject.com/en/2.1/ref/contrib/postgres/search/#trigram-similarity
         # https://www.postgresql.org/docs/current/pgtrgm.html
-        # TODO which is the limit of similarity:
         # 0 means totally different
         # 1 means identical
+        MIN_SIMILARITY = 0.2
+
+        qs = self._filter_by_lexicon(lex)
+        qs = qs.annotate(
+            similarity=TrigramSimilarity('term', query),
+        ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
+
+        return qs
+
+    def _filter_by_lexicon(self, lex):
         if lex is None or lex == '':
             qs = self
         else:
             src = get_src_language_from_lexicon_code(lex)
             dst = get_dst_language_from_lexicon_code(lex)
-
-            key_lex = Lexicon.objects.get(src_language=src, dst_language=dst)
-            qs = self.filter(lexicon=key_lex)
-
-        MIN_SIMILARITY = 0.2
-        qs = qs.annotate(
-            similarity=TrigramSimilarity('term', query),
-        ).filter(similarity__gt=MIN_SIMILARITY).order_by('-similarity')
+            qs = self.filter(lexicon__src_language=src, lexicon__dst_language=dst)
 
         return qs
 

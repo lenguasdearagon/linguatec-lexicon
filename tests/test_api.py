@@ -29,6 +29,13 @@ class ApiTestCase(TestCase):
         resp_json = resp.json()
         self.assertEqual(0, resp_json["count"])
 
+    def test_word_search_does_not_exist_lexicon(self):
+        resp = self.client.get('/api/words/search/?q=foo&l=en-zn')
+        self.assertEqual(200, resp.status_code)
+
+        resp_json = resp.json()
+        self.assertEqual(0, resp_json["count"])
+
 
 class LexiconAPITestCase(TestCase):
     fixtures = ['lexicon-sample.json']
@@ -168,3 +175,10 @@ class NearWordTestCase(TestCase):
 
         near_words = [x["term"] for x in resp_json["results"]]
         self.assertIn("bastar", near_words)
+
+    def test_does_not_exist_lexicon(self):
+        resp = self.client.get('/api/words/near/?q=foo&l=en-zn')
+        self.assertEqual(200, resp.status_code)
+
+        resp_json = resp.json()
+        self.assertEqual(0, resp_json["count"])
