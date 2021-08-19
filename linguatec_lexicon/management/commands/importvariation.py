@@ -185,14 +185,14 @@ class Command(BaseCommand):
             })
             return None
         try:
-            return Word.objects.get(term=term, lexicon=self.lexicon)
+            return self.get_word(term)
         except Word.DoesNotExist:
             pass
 
         # 2) handle cases where only masculine form has been included
         # instead of both. e.g. delicado --> delicado/a
         try:
-            return Word.objects.get(term=term + "/a", lexicon=self.lexicon)
+            return self.get_word(term + "/a")
         except Word.DoesNotExist:
             # 3) trigam similarity (only as suggestion)
             message = 'Word "{}" not found in the database.'.format(term)
@@ -208,6 +208,17 @@ class Command(BaseCommand):
                 "message": message,
                 "suggestions": suggestions
             })
+
+    def get_word(self, term):
+        try:
+            return self._words[term]
+        except KeyError:
+            raise Word.DoesNotExist()
+
+    @cached_property
+    def _words(self):
+        qs = Word.objects.filter(lexicon=self.lexicon)
+        return {w.term: w for w in qs}
 
     @transaction.atomic
     def write_to_database(self):
