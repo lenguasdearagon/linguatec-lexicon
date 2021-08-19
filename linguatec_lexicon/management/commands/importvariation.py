@@ -4,6 +4,7 @@ import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils.functional import cached_property
 
 from linguatec_lexicon import utils
 from linguatec_lexicon.models import (DiatopicVariation, Entry,
@@ -141,8 +142,7 @@ class Command(BaseCommand):
         gramcats = []
         for abbr in clean_gramcats:
             try:
-                gramcats.append(
-                    GramaticalCategory.objects.get(abbreviation=abbr))
+                gramcats.append(self.retrieve_gramcat(abbr))
             except GramaticalCategory.DoesNotExist:
                 message = "unkown gramatical category %(value)s"
                 raise ValidationError(message, code='B', params={'value': abbr})
@@ -160,6 +160,17 @@ class Command(BaseCommand):
 
         clean_gramcats = [abbr.strip() for abbr in gramcats_raw.split("//")]
         return clean_gramcats
+
+    def retrieve_gramcat(self, abbr):
+        try:
+            return self._gramcats[abbr]
+        except KeyError:
+            raise GramaticalCategory.DoesNotExist()
+
+    @cached_property
+    def _gramcats(self):
+        # one big query vs N queries where N is the number of entries
+        return {g.abbreviation: g for g in GramaticalCategory.objects.all()}
 
     def retrieve_word(self, row_number, term_raw):
         # 1) exact match

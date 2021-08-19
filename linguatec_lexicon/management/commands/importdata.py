@@ -5,6 +5,7 @@ import sys
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError, transaction
+from django.utils.functional import cached_property
 
 from linguatec_lexicon import utils
 from linguatec_lexicon.models import (
@@ -176,6 +177,11 @@ class Command(BaseCommand):
         except KeyError:
             raise GramaticalCategory.DoesNotExist()
 
+    @cached_property
+    def _gramcats(self):
+        # one big query vs N queries where N is the number of entries
+        return {g.abbreviation: g for g in GramaticalCategory.objects.all()}
+
     def populate_entries(self, word, gramcats, entries_str):
         for translation in entries_str.split('//'):
             entry = Entry(translation=translation.strip())
@@ -251,10 +257,6 @@ class Command(BaseCommand):
                         raw=raw_conjugation)
 
     def populate_models(self, db):
-        # cache gramcats: one big query vs N queries where N is the
-        # number of entries
-        self._gramcats = {g.abbreviation: g for g in GramaticalCategory.objects.all()}
-
         self.errors = []
         self.cleaned_data = {}
         self.cleaned_entries = []
