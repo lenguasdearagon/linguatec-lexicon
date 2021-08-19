@@ -91,14 +91,15 @@ class Command(BaseCommand):
             self.stdout.write(
                 "Excel stats: {} rows | {} valid rows | {} invalid rows".format(
                     sum([len(sheet.index) for sheet in self.xlsx.values()]),
-                    len(self.cleaned_data),
+                    self.words_count,
                     len(self.errors),
                 )
             )
 
     def populate_models(self):
         self.errors = []
-        self.cleaned_data = []
+        self.entries = []
+        self.words_count = 0
 
         for sheet_name, sheet in self.xlsx.items():
             for row in sheet.itertuples():
@@ -118,7 +119,7 @@ class Command(BaseCommand):
                     })
                     continue
 
-                self.cleaned_data.append(word)
+                self.words_count += 1
 
     def populate_entries(self, word, gramcats, translations_raw):
         word.clean_entries = []
@@ -135,6 +136,7 @@ class Command(BaseCommand):
                           variation=self.variation)
             entry.clean_gramcats = gramcats
             word.clean_entries.append(entry)
+            self.entries.append(entry)
 
     def retrieve_gramcats(self, word, gramcats_raw):
         clean_gramcats = self.parse_or_get_default_gramcats(word, gramcats_raw)
@@ -222,12 +224,11 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def write_to_database(self):
-        count_entries = 0
-        for word in self.cleaned_data:
-            for entry in word.clean_entries:
-                entry.save()
-                entry.gramcats.set(entry.clean_gramcats)
-                count_entries += 1
+        Entry.objects.bulk_create(self.entries, batch_size=100)
 
+        for entry in self.entries:
+            entry.gramcats.set(entry.clean_gramcats)
+
+        count_entries = len(self.entries)
         self.stdout.write("Imported: {} entries of {} words.".format(
-            count_entries, len(self.cleaned_data)))
+            count_entries, self.words_count))
