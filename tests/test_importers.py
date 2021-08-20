@@ -220,6 +220,14 @@ class ImporterTestCase(TestCase):
             list(entry_four.gramcats.values_list('abbreviation', flat=True)),
         )
 
+    def test_duplicated_diff_word(self):
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/sample-same-translation-gramcat-diff-word.xlsx')
+        call_command('importdata', self.LEXICON_CODE, sample_path)
+
+        self.assertEqual(3, Word.objects.count())
+        self.assertEqual(3, Entry.objects.count())
+
 
 class ImportGramCatTestCase(TestCase):
     NUMBER_OF_GRAMCATS = 79

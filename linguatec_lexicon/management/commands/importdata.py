@@ -338,8 +338,9 @@ class Command(BaseCommand):
         """
         Detect duplicated term(translation, gramcats) and add error if any
         """
-        qs = Entry.objects.filter(word__lexicon=self.lexicon).order_by('translation', 'gramcats')
-        qs_distinct = qs.distinct('translation', 'gramcats')
+        unique_together = ['word', 'translation', 'gramcats']
+        qs = Entry.objects.filter(word__lexicon=self.lexicon).order_by(*unique_together)
+        qs_distinct = qs.distinct(*unique_together)
 
         if qs.count() > qs_distinct.count():
             dupes = qs.exclude(pk__in=qs_distinct.values_list('pk', flat=True))
