@@ -1,18 +1,11 @@
 from django.core.management.base import BaseCommand, CommandError
 
+from linguatec_lexicon import utils
 from linguatec_lexicon.models import (
     Entry, Lexicon, DiatopicVariation, Word)
 
 import csv
 import os.path
-
-
-def get_src_language_from_lexicon_code(lex_code):
-    return lex_code[:2]
-
-
-def get_dst_language_from_lexicon_code(lex_code):
-    return lex_code[3:]
 
 
 class Command(BaseCommand):
@@ -38,9 +31,7 @@ class Command(BaseCommand):
         self.output_file = options['output_file']
         # check that a lexicon with that code exist
         try:
-            src = get_src_language_from_lexicon_code(self.lexicon_code)
-            dst = get_dst_language_from_lexicon_code(self.lexicon_code)
-
+            src, dst = utils.get_lexicon_languages_from_code(self.lexicon_code)
             self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
@@ -82,7 +73,7 @@ class Command(BaseCommand):
                                                    .values_list('gramcats__abbreviation', flat=True)
                                                    .distinct().order_by('gramcats__abbreviation'))
 
-                to_write['translation'] = ' // '.join(Entry.objects.filter(word=word, variation=self.variation)    
+                to_write['translation'] = ' // '.join(Entry.objects.filter(word=word, variation=self.variation)
                                                       .values_list('translation', flat=True))
 
                 writer.writerow(to_write)

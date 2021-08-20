@@ -4,5 +4,7 @@
 # test and quality tools
 coverage
 bandit
+flake8
 pylint
+pytest
 tblib

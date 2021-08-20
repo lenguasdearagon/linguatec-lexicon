@@ -4,16 +4,11 @@ import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils.functional import cached_property
+
+from linguatec_lexicon import utils
 from linguatec_lexicon.models import (DiatopicVariation, Entry,
                                       GramaticalCategory, Lexicon, Word)
-
-
-def get_src_language_from_lexicon_code(lex_code):
-    return lex_code[:2]
-
-
-def get_dst_language_from_lexicon_code(lex_code):
-    return lex_code[3:]
 
 
 class Command(BaseCommand):
@@ -69,13 +64,10 @@ class Command(BaseCommand):
 
         # check that a lexicon with that code exist
         try:
-            src = get_src_language_from_lexicon_code(self.lexicon_code)
-            dst = get_dst_language_from_lexicon_code(self.lexicon_code)
-
+            src, dst = utils.get_lexicon_languages_from_code(self.lexicon_code)
             self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
-
 
         self.xlsx = pd.read_excel(self.input_file, sheet_name=None, header=None, usecols="A:C",
                                   names=['term', 'gramcats', 'translations'])
@@ -99,14 +91,15 @@ class Command(BaseCommand):
             self.stdout.write(
                 "Excel stats: {} rows | {} valid rows | {} invalid rows".format(
                     sum([len(sheet.index) for sheet in self.xlsx.values()]),
-                    len(self.cleaned_data),
+                    self.words_count,
                     len(self.errors),
                 )
             )
 
     def populate_models(self):
         self.errors = []
-        self.cleaned_data = []
+        self.entries = []
+        self.words_count = 0
 
         for sheet_name, sheet in self.xlsx.items():
             for row in sheet.itertuples():
@@ -126,7 +119,7 @@ class Command(BaseCommand):
                     })
                     continue
 
-                self.cleaned_data.append(word)
+                self.words_count += 1
 
     def populate_entries(self, word, gramcats, translations_raw):
         word.clean_entries = []
@@ -143,6 +136,7 @@ class Command(BaseCommand):
                           variation=self.variation)
             entry.clean_gramcats = gramcats
             word.clean_entries.append(entry)
+            self.entries.append(entry)
 
     def retrieve_gramcats(self, word, gramcats_raw):
         clean_gramcats = self.parse_or_get_default_gramcats(word, gramcats_raw)
@@ -150,8 +144,7 @@ class Command(BaseCommand):
         gramcats = []
         for abbr in clean_gramcats:
             try:
-                gramcats.append(
-                    GramaticalCategory.objects.get(abbreviation=abbr))
+                gramcats.append(self.retrieve_gramcat(abbr))
             except GramaticalCategory.DoesNotExist:
                 message = "unkown gramatical category %(value)s"
                 raise ValidationError(message, code='B', params={'value': abbr})
@@ -170,6 +163,17 @@ class Command(BaseCommand):
         clean_gramcats = [abbr.strip() for abbr in gramcats_raw.split("//")]
         return clean_gramcats
 
+    def retrieve_gramcat(self, abbr):
+        try:
+            return self._gramcats[abbr]
+        except KeyError:
+            raise GramaticalCategory.DoesNotExist()
+
+    @cached_property
+    def _gramcats(self):
+        # one big query vs N queries where N is the number of entries
+        return {g.abbreviation: g for g in GramaticalCategory.objects.all()}
+
     def retrieve_word(self, row_number, term_raw):
         # 1) exact match
         try:
@@ -183,14 +187,14 @@ class Command(BaseCommand):
             })
             return None
         try:
-            return Word.objects.get(term=term, lexicon=self.lexicon)
+            return self.get_word(term)
         except Word.DoesNotExist:
             pass
 
         # 2) handle cases where only masculine form has been included
         # instead of both. e.g. delicado --> delicado/a
         try:
-            return Word.objects.get(term=term + "/a", lexicon=self.lexicon)
+            return self.get_word(term + "/a")
         except Word.DoesNotExist:
             # 3) trigam similarity (only as suggestion)
             message = 'Word "{}" not found in the database.'.format(term)
@@ -207,14 +211,24 @@ class Command(BaseCommand):
                 "suggestions": suggestions
             })
 
+    def get_word(self, term):
+        try:
+            return self._words[term]
+        except KeyError:
+            raise Word.DoesNotExist()
+
+    @cached_property
+    def _words(self):
+        qs = Word.objects.filter(lexicon=self.lexicon)
+        return {w.term: w for w in qs}
+
     @transaction.atomic
     def write_to_database(self):
-        count_entries = 0
-        for word in self.cleaned_data:
-            for entry in word.clean_entries:
-                entry.save()
-                entry.gramcats.set(entry.clean_gramcats)
-                count_entries += 1
+        Entry.objects.bulk_create(self.entries, batch_size=100)
 
+        for entry in self.entries:
+            entry.gramcats.set(entry.clean_gramcats)
+
+        count_entries = len(self.entries)
         self.stdout.write("Imported: {} entries of {} words.".format(
-            count_entries, len(self.cleaned_data)))
+            count_entries, self.words_count))

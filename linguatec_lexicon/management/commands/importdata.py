@@ -5,7 +5,9 @@ import sys
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError, transaction
+from django.utils.functional import cached_property
 
+from linguatec_lexicon import utils
 from linguatec_lexicon.models import (
     Entry, Example, Lexicon, GramaticalCategory, VerbalConjugation, Word)
 from linguatec_lexicon.validators import validate_column_verb_conjugation
@@ -53,14 +55,6 @@ def is_verb(gramcats):
     return False
 
 
-def get_src_language_from_lexicon_code(lex_code):
-    return lex_code[:2]
-
-
-def get_dst_language_from_lexicon_code(lex_code):
-    return lex_code[3:]
-
-
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
@@ -95,10 +89,8 @@ class Command(BaseCommand):
 
         # check that a lexicon with that code exist
         try:
-            src = get_src_language_from_lexicon_code(self.lexicon_code)
-            dst = get_dst_language_from_lexicon_code(self.lexicon_code)
-
-            self.lexicon = Lexicon.objects.get(src_language = src, dst_language = dst)
+            src, dst = utils.get_lexicon_languages_from_code(self.lexicon_code)
+            self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 
@@ -145,7 +137,7 @@ class Command(BaseCommand):
         try:
             return (False, self.cleaned_data[term])
         except KeyError:
-            new_word = Word(term=term)
+            new_word = Word(term=term, lexicon_id=self.lexicon.pk)
             new_word.clean_entries = []
             return (True, new_word)
 
@@ -169,8 +161,7 @@ class Command(BaseCommand):
             for abbr in g_str.split("//"):
                 abbr = abbr.strip()
                 try:
-                    gramcats.append(
-                        GramaticalCategory.objects.get(abbreviation=abbr))
+                    gramcats.append(self.retrieve_gramcat(abbr))
                 except GramaticalCategory.DoesNotExist:
                     self.errors.append({
                         "word": word.term,
@@ -180,12 +171,25 @@ class Command(BaseCommand):
         word.is_verb = is_verb(gramcats)
         return gramcats
 
+    def retrieve_gramcat(self, abbr):
+        try:
+            return self._gramcats[abbr]
+        except KeyError:
+            raise GramaticalCategory.DoesNotExist()
+
+    @cached_property
+    def _gramcats(self):
+        # one big query vs N queries where N is the number of entries
+        return {g.abbreviation: g for g in GramaticalCategory.objects.all()}
+
     def populate_entries(self, word, gramcats, entries_str):
         for translation in entries_str.split('//'):
-            entry = Entry(word=word, translation=translation.strip())
+            entry = Entry(translation=translation.strip())
             entry.clean_gramcats = gramcats
             entry.clean_examples = []
+            entry.word_term = word.term  # term is unique for a lexicon
             word.clean_entries.append(entry)
+            self.cleaned_entries.append(entry)
 
     def populate_examples(self, word, ex_str):
         if pd.isnull(ex_str) or ex_str == '':
@@ -255,6 +259,7 @@ class Command(BaseCommand):
     def populate_models(self, db):
         self.errors = []
         self.cleaned_data = {}
+        self.cleaned_entries = []
         for row in db.itertuples(name=None):
             # itertuples by default return the index as the first element of the tuple.
 
@@ -291,34 +296,62 @@ class Command(BaseCommand):
         count_words = 0
         count_entries = 0
         count_examples = 0
-        for _, word in self.cleaned_data.items():
-            word.lexicon_id = self.lexicon.pk
+
+        try:
+            Word.objects.bulk_create(self.cleaned_data.values(), batch_size=100)
+        except IntegrityError as e:
+            self.stdout.write(self.style.ERROR(
+                "Error: Already exists term '{}' on lexicon '{}'".format(e, self.lexicon_code)
+            ))
+            sys.exit(1)
+
+        # retrieve words to get its PK
+        words = {w[0]: w[1] for w in Word.objects.filter(lexicon=self.lexicon).values_list('term', 'id')}
+        count_words = len(self.cleaned_data)
+
+        for entry in self.cleaned_entries:
+            word_pk = words[entry.word_term]
+            entry.word_id = word_pk
+        Entry.objects.bulk_create(self.cleaned_entries, batch_size=100)
+
+        for entry in self.cleaned_entries:
+            entry.gramcats.set(entry.clean_gramcats)
+            count_entries += 1
+
+            for example in entry.clean_examples:
+                example.entry_id = entry.pk
+                example.save()
+                count_examples += 1
+
             try:
-                word.save()
-            except IntegrityError:
-                self.stdout.write(self.style.ERROR(
-                    "Error: Already exists term '{}' on lexicon '{}'".format(word.term, self.lexicon_code)
-                ))
-                sys.exit(1)
+                entry.clean_conjugation.entry_id = entry.pk
+                entry.clean_conjugation.save()
+            except AttributeError:
+                pass
 
-            count_words += 1
-
-            for entry in word.clean_entries:
-                entry.word_id = word.pk
-                entry.save()
-                entry.gramcats.set(entry.clean_gramcats)
-                count_entries += 1
-
-                for example in entry.clean_examples:
-                    example.entry_id = entry.pk
-                    example.save()
-                    count_examples += 1
-
-                try:
-                    entry.clean_conjugation.entry_id = entry.pk
-                    entry.clean_conjugation.save()
-                except AttributeError:
-                    pass
+        self.validate_unique_together()
 
         self.stdout.write("Imported: %s words, %s entries, %s examples" %
                           (count_words, count_entries, count_examples))
+
+    def validate_unique_together(self):
+        """
+        Detect duplicated term(translation, gramcats) and add error if any
+        """
+        unique_together = ['word', 'translation', 'gramcats']
+        qs = Entry.objects.filter(word__lexicon=self.lexicon).order_by(*unique_together)
+        qs_distinct = qs.distinct(*unique_together)
+
+        if qs.count() > qs_distinct.count():
+            dupes = qs.exclude(pk__in=qs_distinct.values_list('pk', flat=True))
+
+            for e in dupes.select_related('word'):
+                self.stderr.write(self.style.ERROR(
+                    json.dumps({
+                        "word": e.word.term,
+                        "column": "B & C",
+                        "message": "Duplicated pair translation and gramcat'{}'".format(e.translation)
+                    })
+                ))
+
+            raise CommandError()
