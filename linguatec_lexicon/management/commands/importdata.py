@@ -314,13 +314,7 @@ class Command(BaseCommand):
             entry.word_id = word_pk
         Entry.objects.bulk_create(self.cleaned_entries, batch_size=100)
 
-        entries = {
-            (e[0], e[1]): e[2] for e in
-            Entry.objects.filter(word__lexicon=self.lexicon, variation__isnull=True).values_list('word_id', 'translation', 'id')
-        }
-
         for entry in self.cleaned_entries:
-            entry.pk = entries[(entry.word_id, entry.translation)]
             entry.gramcats.set(entry.clean_gramcats)
             count_entries += 1
 
@@ -335,5 +329,28 @@ class Command(BaseCommand):
             except AttributeError:
                 pass
 
+        self.validate_unique_together()
+
         self.stdout.write("Imported: %s words, %s entries, %s examples" %
                           (count_words, count_entries, count_examples))
+
+    def validate_unique_together(self):
+        """
+        Detect duplicated term(translation, gramcats) and add error if any
+        """
+        qs = Entry.objects.filter(word__lexicon=self.lexicon).order_by('translation', 'gramcats')
+        qs_distinct = qs.distinct('translation', 'gramcats')
+
+        if qs.count() > qs_distinct.count():
+            dupes = qs.exclude(pk__in=qs_distinct.values_list('pk', flat=True))
+
+            for e in dupes.select_related('word'):
+                self.stderr.write(self.style.ERROR(
+                    json.dumps({
+                        "word": e.word.term,
+                        "column": "B & C",
+                        "message": "Duplicated pair translation and gramcat'{}'".format(e.translation)
+                    })
+                ))
+
+            raise CommandError()
