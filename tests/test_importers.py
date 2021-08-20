@@ -2,6 +2,7 @@ import os
 from io import StringIO
 
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import TestCase
 
 from linguatec_lexicon.models import (DiatopicVariation, Entry, Example,
@@ -182,6 +183,50 @@ class ImporterTestCase(TestCase):
         self.assertEqual(NUMBER_OF_WORDS_SECOND_INPUT + NUMBER_OF_WORDS_THIRD_INPUT,
                          Word.objects.filter(lexicon=another_lexicon).count())
         self.assertEqual(2, Lexicon.objects.count())
+
+    def test_invalid_duplicated_gramcat_and_translation(self):
+        stderr = StringIO()
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/sample-duplicated-term.xlsx')
+
+        self.assertRaises(CommandError, call_command, 'importdata',
+                          self.LEXICON_CODE, sample_path, stderr=stderr)
+        self.assertEqual(0, Word.objects.count())
+        self.assertIn('Duplicated', stderr.getvalue())
+
+    def test_valid_diff_gramcat_same_translation(self):
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/sample-same-translation-different-gramcat.xlsx')
+        call_command('importdata', self.LEXICON_CODE, sample_path)
+
+        self.assertEqual(2, Word.objects.count())
+        self.assertEqual(4, Entry.objects.count())
+
+        word_one = Word.objects.get(term="bien")
+        self.assertEqual(
+            [('bien', 's. m.'), ('bien', 'adv. m.')],
+            list(word_one.entries.values_list('translation', 'gramcats__abbreviation')),
+        )
+
+        entry_three = Entry.objects.filter(word__term="cantar")[0]
+        self.assertEqual(
+            ['s. m.'],
+            list(entry_three.gramcats.values_list('abbreviation', flat=True)),
+        )
+
+        entry_four = Entry.objects.filter(word__term="cantar")[1]
+        self.assertEqual(
+            ['v. intr.', 'v. tr.'],
+            list(entry_four.gramcats.values_list('abbreviation', flat=True)),
+        )
+
+    def test_duplicated_diff_word(self):
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        sample_path = os.path.join(base_path, 'fixtures/sample-same-translation-gramcat-diff-word.xlsx')
+        call_command('importdata', self.LEXICON_CODE, sample_path)
+
+        self.assertEqual(3, Word.objects.count())
+        self.assertEqual(3, Entry.objects.count())
 
 
 class ImportGramCatTestCase(TestCase):
