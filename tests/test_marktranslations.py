@@ -1,11 +1,37 @@
 import re
 import unittest
-from django.core.exceptions import ValidationError
 
+from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.test import TestCase
 from linguatec_lexicon.management.commands import marktranslations
+from linguatec_lexicon.models import Entry, Lexicon, Word
 
 REGEX = marktranslations.Command.regex
+
+
+class MarkTextTest(TestCase):
+    def test_a(self):
+        Lexicon.objects.bulk_create([
+            Lexicon(name="es-ar", src_language="es", dst_language="ar"),
+            Lexicon(name="ar-es", src_language="ar", dst_language="es"),
+        ])
+        es = Lexicon.objects.get(name="es-ar")
+        ar = Lexicon.objects.get(name="ar-es")
+
+        Word.objects.bulk_create([
+            Word(lexicon=es, term="prieto/a"),
+            Word(lexicon=es, term="tirante"),
+            Word(lexicon=ar, term="preto/a"),
+        ])
+
+        word = Word.objects.get(term="preto/a")
+        entry = word.entries.create(translation="prieto/a, apretado/a, tirante")
+
+        call_command('marktranslations')
+
+        self.assertEqual(2, len(re.findall("</trans>", entry.marked_translation)))
+        self.assertEqual(1, Entry.objects.exclude(marked_translation='').count())
 
 
 class MarkTranslationRegex(TestCase):
@@ -36,7 +62,7 @@ class MarkTranslationRegex(TestCase):
         )
 
 
-class MarkTranslationMethod(TestCase):
+class SplitByParenthesisTest(TestCase):
     def assertMethodSplit(self, text, expected):
         result = marktranslations.split_by_parenthesis(text)
         self.assertListEqual(expected, result)

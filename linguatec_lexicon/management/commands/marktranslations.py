@@ -26,14 +26,19 @@ class Command(BaseCommand):
         self.batch_size = options['batch_size'] or self.default_batch_size
 
         for lexicon in Lexicon.objects.all():
+            # cache lexicon words on a set (hash lookup has better performance)
+            # TODO(@slamora): handle if there is not reverse pair
+            self.lex_reverse = lexicon.get_reverse_pair()
+            self.lex_words = self.retrieve_lexixon_words(self.lex_reverse)
             updated, total = self.fill_marked_translation(lexicon)
             self.stdout.write("Lexicon {} marked {} of {} entries".format(lexicon.code, updated, total))
 
+    def retrieve_lexixon_words(self, lexicon):
+        # cache lexicon words on a set (hash lookup has better performance)
+        return set(lexicon.words.values_list('term', flat=True))
+
     @transaction.atomic
     def fill_marked_translation(self, lexicon):
-        # TODO(@slamora): handle if there is not reverse pair
-        self.lex_reverse = lexicon.get_reverse_pair()
-
         entries = []
         qs = Entry.objects.filter(word__lexicon=lexicon)
         for entry in qs:
@@ -67,11 +72,6 @@ class Command(BaseCommand):
         if translation_exists:
             return "<trans lex=" + self.lex_reverse.code + ">" + match_chunk + "</trans>"
         return match_chunk
-
-    @cached_property
-    def lex_words(self):
-        # cache lexicon words on a set (hash lookup has better performance)
-        return set(self.lex_reverse.words.values_list('term', flat=True))
 
 
 def split_by_parenthesis(text):
