@@ -30,6 +30,8 @@ class MarkTextTest(TestCase):
 
         call_command('marktranslations')
 
+        entry.refresh_from_db()
+
         self.assertEqual(2, len(re.findall("</trans>", entry.marked_translation)))
         self.assertEqual(1, Entry.objects.exclude(marked_translation='').count())
 

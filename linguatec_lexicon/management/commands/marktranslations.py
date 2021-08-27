@@ -28,14 +28,13 @@ class Command(BaseCommand):
         for lexicon in Lexicon.objects.all():
             # cache lexicon words on a set (hash lookup has better performance)
             # TODO(@slamora): handle if there is not reverse pair
-            self.lex_reverse = lexicon.get_reverse_pair()
-            self.lex_words = self.retrieve_lexixon_words(self.lex_reverse)
+            lex_reverse = lexicon.get_reverse_pair()
+            self.lex_words = self.retrieve_lexicon_words(lex_reverse)
             updated, total = self.fill_marked_translation(lexicon)
             self.stdout.write("Lexicon {} marked {} of {} entries".format(lexicon.code, updated, total))
 
-    def retrieve_lexixon_words(self, lexicon):
-        # cache lexicon words on a set (hash lookup has better performance)
-        return set(lexicon.words.values_list('term', flat=True))
+    def retrieve_lexicon_words(self, lexicon):
+        return {word[0]: word[1] for word in lexicon.words.values_list('term', 'id')}
 
     @transaction.atomic
     def fill_marked_translation(self, lexicon):
@@ -68,10 +67,11 @@ class Command(BaseCommand):
 
     def mark_word(self, matchobj):
         match_chunk = matchobj.group(0)
-        translation_exists = match_chunk in self.lex_words
-        if translation_exists:
-            return "<trans lex=" + self.lex_reverse.code + ">" + match_chunk + "</trans>"
-        return match_chunk
+        try:
+            word_id = self.lex_words[match_chunk]
+        except KeyError:
+            return match_chunk
+        return "<trans word={}>{}</trans>".format(word_id, match_chunk)
 
 
 def split_by_parenthesis(text):
