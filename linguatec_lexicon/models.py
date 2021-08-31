@@ -40,6 +40,13 @@ class Lexicon(models.Model):
     def __str__(self):
         return self.name
 
+    def get_reverse_pair(self):
+        """
+        Retrieve reverse lexicon of language pair
+        e.g. if current lexicon was Spanish-Aragonese returns Aragonese-Spanish
+        """
+        return Lexicon.objects.get(dst_language=self.src_language, src_language=self.dst_language)
+
 
 class WordManager(models.Manager):
     TERM_PUNCTUATION_SIGNS = '¡!¿?'
@@ -158,6 +165,7 @@ class Entry(models.Model):
     gramcats = models.ManyToManyField('GramaticalCategory', related_name="entries")
     variation = models.ForeignKey('DiatopicVariation', null=True, on_delete=models.CASCADE, related_name="entries")
     translation = models.TextField()
+    marked_translation = models.TextField(default='', blank=True)
 
     class Meta:
         # TODO instead of depend on 'pk' find another method to
