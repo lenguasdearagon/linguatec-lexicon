@@ -88,16 +88,16 @@ def init_diatopic_variations():
 
 
 VARIANTS_MAPPING = {
-    "Tensino": "ALTO GÁLLEGO-tensino-2021-06-08.xlsx",
+    "Tensino": "ALTO GÁLLEGO-tensino-2021-07-15.xlsx",
     "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2021-06-08.xlsx",
-    "Ansotano": "JACETANIA-ansotano-2021-06-22.xlsx",
+    "Ansotano": "JACETANIA-ansotano-2021-08-20.xlsx",
     "Cheso": "JACETANIA-cheso-2021-06-08.xlsx",
     "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2021-06-08.xlsx",
     "Benasqués": "RIBAGORZA-benasques-2021-06-08.xlsx",
     "Belsetán": "SOBRARBE-belsetán-2021-06-08.xlsx",
     "Chistabín": "SOBRARBE-chistabín-2021-06-22.xlsx",
-    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2021-06-22.xlsx",
-    "Somontanos": "SOMONTANO-2021-06-23.xlsx",
+    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2021-08-20.xlsx",
+    "Somontanos": "SOMONTANO-2021-08-12.xlsx",
 }
 
 
@@ -137,7 +137,7 @@ def main():
             ./manage.py importdata vocabulario-castellano-aragones.xlsx
 
         5. To import diatopic variations data run:
-            ./manage.py importvariation variation_file.xlsx lex_code --variation variation_name --verbosity 3 --dry-run
+            ./manage.py importvariation lex_code variation_file.xlsx --variation variation_name --verbosity 3 --dry-run
     """)
 
 
@@ -153,19 +153,23 @@ def help():
     print("""
 QUICK START
 -------------------
+date
 export DJANGO_SETTINGS_MODULE="lenguasaragon.settings_postgres"
 export LINGUATEC_AR_ES_PATH="/home/santiago/trabajo/dgpl/linguatec-v5/ar-es/"
 export LINGUATEC_VARIANTS_PATH="/home/santiago/trabajo/dgpl/linguatec-v5/variedades/"
 
 python initialize_staging.py --drop
 python initialize_staging.py
-time ./manage.py importdata -v3 es-ar ~/trabajo/dgpl/linguatec-v5/vocabulario-castellano-aragones-2021-06-08.xlsx
+time ./manage.py importdata -v3 es-ar ~/trabajo/dgpl/linguatec-v5/vocabulario-castellano-aragones-2021-08-12.xlsx
 time python initialize_staging.py --import-aragonese
 
-python initialize_staging.py --validate-variations
+#python initialize_staging.py --validate-variations
 
-python initialize_staging.py --import-variations
+time python initialize_staging.py --import-variations
+time python manage.py marktranslations
 
+date
+echo "FIN"
 # to validate a single variation
 ./manage.py importvariation -v3 --dry-run es-ar ~/trabajo/dgpl/linguatec-v4/variedades/SOMONTANO-2021-06-22.xlsx
 

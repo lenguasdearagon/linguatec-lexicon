@@ -5,14 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## master
-- [added] Exportdata and Exportvariation commands and views to use them.
-- [added] Application background-tasks, importations are executed asynchronously.
-- [added] ImportLog which saves in the database the importations made.
 
-## [0.4.1] - 2020-04-12
+## [0.5] - 2021-09-01
+- [added] Command `marktranslations` which finds & marks related words of
+reverse lexicon on entries. This information is stored on new field
+`marked_translation` of `Entry` model and it's exposed on the API.
+
+## [0.4.1] - 2021-04-12
 - [fixed] API: include lexicon code on `word` payload.
 
-## [0.4] - 2020-04-07
+## [0.4] - 2021-04-07
 - [added] Support multiple lexicons.
 - [added] API: Added Lexicon api view and Lexicon serializer
 - [changed] Added database constraints:
