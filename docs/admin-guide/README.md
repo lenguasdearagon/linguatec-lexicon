@@ -8,19 +8,20 @@ Note: the names suggested by the files and this guide are generic (frontend-site
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [Installation and deploy](#installation-and-deploy)
-  - [Requirements](#requirements)
-  - [General nginx config](#general-nginx-config)
-  - [Backend](#backend)
-    - [Database](#database)
-    - [Web server](#web-server)
-    - [WSGI](#wsgi)
-  - [Frontend](#frontend)
-    - [Web server](#web-server-1)
-    - [WGSI](#wgsi)
-- [Maintenance](#maintenance)
-  - [Frontend](#frontend-1)
-  - [Backend](#backend-1)
+- [Admin guide](#admin-guide)
+  - [Installation and deploy](#installation-and-deploy)
+    - [Requirements](#requirements)
+    - [General nginx config](#general-nginx-config)
+    - [Backend](#backend)
+      - [Database](#database)
+      - [Web server](#web-server)
+      - [WSGI](#wsgi)
+    - [Frontend](#frontend)
+      - [Web server](#web-server-1)
+      - [WGSI](#wgsi)
+  - [Maintenance](#maintenance)
+    - [Frontend](#frontend-1)
+    - [Backend](#backend-1)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -38,7 +39,7 @@ apt update
 
 apt=(
     git                            # to clone source repositories
-    postgresql postgresql-client   # database
+    postgresql postgresql-contrib postgresql-client  # database
     nginx                          # webserver
     python3-pip                    # python repos
     python3-setuptools             # support tool python repos
@@ -49,11 +50,7 @@ apt=(
     # required for uwsgi build:
     build-essential
     python3-dev
-    libpcre3 libpcre3-dev          # perl regex url style? src https://stackoverflow.com/questions/21669354/rebuild-uwsgi-with-pcre-support
-
-    # TODO frontend dependencies (javascript)
-    #nodejs
-    #npm # not found in debian
+    #libpcre3 libpcre3-dev          # perl regex url style? src https://stackoverflow.com/questions/21669354/rebuild-uwsgi-with-pcre-support
 
     vim                            # extra tool (temp?)
 )
@@ -69,7 +66,6 @@ pip3 install wheel
 
 # these package requires to be installed through pip
 pip=(
-    virtualenv                     # isolate python applications
     https://projects.unbit.it/downloads/uwsgi-lts.tar.gz # LTS uwsgi -> git https://docs.djangoproject.com/en/2.1/howto/deployment/wsgi/uwsgi/
 )
 
@@ -106,12 +102,12 @@ The backend is the part of the software that manages and processes the data in t
 
 Setup virtual environment setup for backend:
 
-    virtualenv /srv/backend_proj_env
+    python3 -m venv /srv/backend_proj_env
     source /srv/backend_proj_env/bin/activate
 
 Get the source and install its particular dependencies:
 
-    git clone https://github.com/ribaguifi/linguatec-lexicon.git /srv/backend_git
+    git clone https://github.com/lenguasdearagon/aragonario.git /srv/backend_git
     pip3 install -r /srv/backend_git/requirements.txt
     pip3 install -e /srv/backend_git/
 
@@ -135,7 +131,7 @@ Create the database to operate the backend and sets the owner to the previous cr
 
     su - postgres -s /bin/bash -c 'createdb -O lexicon lexicon'
 
-Then django backend models can be populated to the database:
+The django backend models can be populated to the database:
 
     source /srv/backend_proj_env/bin/activate
     cd /srv/backend_proj
@@ -165,7 +161,7 @@ Create the directory if it does not exist:
 
 Save [backend-site.ini](uwsgi_backend-site.ini) in `/etc/uwsgi/backend-site.ini`
 
-Configure `uwsgi-backend.service` for systemd saving [systemd_uwsgi_backend-site.service](systemd_uwsgi_backend-site.service) in `/etc/systemd/system/uwsgi-backend-site.service`
+Configure `uwsgi-backend.service` for systemd saving [systemd_uwsgi_backend-site.service](systemd_uwsgi_backend-site.service) in `/etc/systemd/system/uwsgi-backend.service`
 
 Enable service on boot:
 
@@ -186,7 +182,7 @@ Prepare a virtual environment to install the particular packages for the fronten
 
 Get the source and install its particular dependencies:
 
-    git clone https://github.com/ribaguifi/linguatec-lexicon-frontend.git /srv/frontend_git
+    git clone https://gitlab.com/linguatec/linguatec-lexicon-frontend /srv/frontend_git
     pip3 install -r /srv/frontend_git/requirements.txt
     pip3 install -e /srv/frontend_git/
 
