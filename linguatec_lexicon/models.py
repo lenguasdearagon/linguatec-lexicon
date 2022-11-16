@@ -27,10 +27,11 @@ class Lexicon(models.Model):
     # TODO use ISO 639 codes??? https://www.iso.org/iso-639-language-codes.html
     src_language = models.CharField(max_length=2)
     dst_language = models.CharField(max_length=2)
+    topic = models.CharField(max_length=32, blank=True, help_text="The subject of the lexicon.")
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['src_language', 'dst_language'], name='src_language-dst_language')
+            models.UniqueConstraint(fields=['src_language', 'dst_language', 'topic'], name='src-dst-topic')
         ]
 
     @property
