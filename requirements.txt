@@ -4,6 +4,6 @@ djangorestframework==3.11.2
 psycopg2-binary
 
 # importdata
-pandas
+pandas==1.5.1
 xlrd==1.2.0
 openpyxl==3.0.7
