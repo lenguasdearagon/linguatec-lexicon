@@ -87,16 +87,9 @@ class Command(BaseCommand):
                 "data for example running manage.py importgramcat."
             )
 
-        try:
-            code, topic = self.lexicon_code.split("@")
-        except ValueError:
-            code = self.lexicon_code
-            topic = ''
-
         # check that a lexicon with that code exist
         try:
-            src, dst = utils.get_lexicon_languages_from_code(code)
-            self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst, topic=topic)
+            self.lexicon = Lexicon.objects.get_by_slug(self.lexicon_code)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 
