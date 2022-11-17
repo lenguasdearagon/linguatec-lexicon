@@ -31,12 +31,17 @@ class ExporterDataTestCase(TestCase):
         call_command('importdata', self.LEXICON_NAME, sample_path)
 
         with tempfile.TemporaryDirectory() as tmpdirname:
-            call_command('exportdata', self.LEXICON_CODE, tmpdirname + '/test-output-data-file.csv')
-            sample_path = os.path.join(base_path, 'fixtures/export_test_files/export_data_expected_result.csv')
+            output_path = os.path.join(tmpdirname, 'test-output-data-file.csv')
+            call_command('exportdata', self.LEXICON_CODE, output_path)
 
-            self.assertListEqual(
-                list(io.open(sample_path)),
-                list(io.open(tmpdirname + '/test-output-data-file.csv')))
+            with open(output_path) as file:
+                exported_content = file.read()
+
+            expected_path = os.path.join(base_path, 'fixtures/export_test_files/export_data_expected_result.csv')
+            with open(expected_path) as file:
+                expected_content = file.read()
+
+            self.assertListEqual(list(exported_content), list(expected_content))
 
 
 class ExporterVariationTestCase(TestCase):
@@ -79,9 +84,14 @@ class ExporterVariationTestCase(TestCase):
         call_command('importvariation', self.LEXICON_CODE, sample_path, variation='benasqués')
 
         with tempfile.TemporaryDirectory() as tmpdirname:
-            call_command('exportvariation', self.LEXICON_CODE, 'benasqués', tmpdirname + '/test-output-data-file.csv')
-            sample_path = os.path.join(base_path, 'fixtures/export_test_files/export_variation_expected_result.csv')
+            output_path = os.path.join(tmpdirname, 'test-output-data-file.csv')
+            call_command('exportvariation', self.LEXICON_CODE, 'benasqués', output_path)
 
-            self.assertListEqual(
-                list(io.open(sample_path)),
-                list(io.open(tmpdirname + '/test-output-data-file.csv')))
+            with open(output_path) as file:
+                exported_content = file.read()
+
+            expected_path = os.path.join(base_path, 'fixtures/export_test_files/export_variation_expected_result.csv')
+            with open(expected_path) as file:
+                expected_content = file.read()
+
+            self.assertListEqual(list(exported_content), list(expected_content))

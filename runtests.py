@@ -7,14 +7,20 @@ import shutil
 import sys
 import tempfile
 
-import django
-from django.apps import apps
-from django.conf import settings
-from django.db import connections
-from django.test import TestCase, TransactionTestCase
-from django.test.runner import default_test_processes
-from django.test.utils import get_runner
-from django.utils.log import DEFAULT_LOGGING
+try:
+    import django
+except ImportError as e:
+    raise RuntimeError(
+        "Django module not found, reference tests/README.rst for instructions."
+    ) from e
+else:
+    from django.apps import apps
+    from django.conf import settings
+    from django.db import connections
+    from django.test import TestCase, TransactionTestCase
+    from django.test.runner import get_max_test_processes
+    from django.test.utils import get_runner
+    from django.utils.log import DEFAULT_LOGGING
 
 
 RUNTESTS_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -80,7 +86,7 @@ def setup(verbosity, test_labels, parallel):
     if verbosity >= 1:
         msg = "Testing against Django installed in '%s'" % os.path.dirname(
             django.__file__)
-        max_parallel = default_test_processes() if parallel == 0 else parallel
+        max_parallel = get_max_test_processes() if parallel == 0 else parallel
         if max_parallel > 1:
             msg += " with up to %d processes" % max_parallel
         print(msg)
@@ -164,7 +170,7 @@ def actual_test_processes(parallel):
     if parallel == 0:
         # This doesn't work before django.setup() on some databases.
         if all(conn.features.can_clone_databases for conn in connections.all()):
-            return default_test_processes()
+            return get_max_test_processes()
         else:
             return 1
     else:
@@ -255,7 +261,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--parallel', dest='parallel', nargs='?', default=0, type=int,
-        const=default_test_processes(), metavar='N',
+        const=get_max_test_processes(), metavar='N',
         help='Run tests using up to N parallel processes.',
     )
 

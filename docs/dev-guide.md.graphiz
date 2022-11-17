@@ -12,11 +12,11 @@
 
 to fetch the source code of backend use
 
-    git clone https://gitlab.com/linguatec/linguatec-lexicon.git
+    git clone https://github.com/lenguasdearagon/aragonario.git
 
 or
 
-    git@gitlab.com:linguatec/linguatec-lexicon.git
+    git clone git@github.com:lenguasdearagon/aragonario.git
 
 You have to know that this repository uses `git lfs`. [Git LFS](https://git-lfs.github.com/) is the tool intended to manage large files in git repositories such as audio samples, videos, datasets, and graphics. If you just `git clone` (without `apt install git-lfs`) you are going to be missing [this kind of files](../.gitattributes). Hence, in a simple usage, you just need to install it and address file targets through `.gitattributes`; the rest is using the common git operations.
 

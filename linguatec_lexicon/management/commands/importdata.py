@@ -119,14 +119,16 @@ class Command(BaseCommand):
 
         xlsx = pd.ExcelFile(self.input_file)
 
+        data = []
         for sheet in xlsx.sheet_names:
             # we define na_values and keep_default_na because defaults na_values
             # includes empty string. We don't want that pandas replaces empty
             # cells with 'nan'
             partial = xlsx.parse(sheet, header=None, usecols='A:F')
             # names=['colA', 'colB', 'colC', 'colD', 'colE', 'colF'])
-            df = df.append(partial, ignore_index=True, sort=False)
+            data.append(partial)
 
+        df = pd.concat(data)
         df_obj = df.select_dtypes(['object'])
         df[df_obj.columns] = df_obj.apply(lambda x: x.str.strip())
         df = df.fillna('')  # replace NaN with blank string

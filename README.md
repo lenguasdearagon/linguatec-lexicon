@@ -10,26 +10,25 @@ You can check the linguatec-lexicon API reference on [Swagger Hub](https://app.s
 
 Get the app code:
 ```bash
-git clone https://github.com/ribaguifi/linguatec-lexicon.git #old: git@gitlab.com:linguatec/linguatec-lexicon.git
+git clone https://github.com/lenguasdearagon/aragonario.git
 ```
 
 Create devel project site
 ```bash
 apt-get install --no-install-recommends python3-pip
-pip3 install virtualenv
 
 # create virtualenv and install requirements (included Django)
-virtualenv env
-source env/bin/activate
-pip3 install -r linguatec-lexicon/requirements.txt
+python3 -m venv env
+. env/bin/activate
+pip install -r aragonario/requirements.txt
 
 # add app source code as python site-package
 # checking that has been linked properly
-pip3 install -e linguatec-lexicon/
+pip install -e aragonario/
 python -c "import linguatec_lexicon; print(linguatec_lexicon.get_version())"
 
 # create a project (name it as you want!)
-django-admin startproject mysite --template=linguatec-lexicon/linguatec_lexicon/conf/project_template
+django-admin startproject mysite --template=aragonario/linguatec_lexicon/conf/project_template
 ```
 
 Run migrations, start development server and go to http://127.0.0.1:8000/api/
@@ -55,8 +54,8 @@ To run the tests, clone the repository, and then:
 # Setup the virtual environment
 virtualenv env
 source env/bin/activate
-git clone https://github.com/ribaguifi/linguatec-lexicon.git linguatec-lexicon #old: git@gitlab.com:linguatec/linguatec-lexicon.git
-cd linguatec-lexicon/
+git clone https://github.com/lenguasdearagon/aragonario.git
+cd aragonario/
 pip install -r requirements.txt
 pip install .
 
