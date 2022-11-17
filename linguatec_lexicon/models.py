@@ -4,6 +4,7 @@ from django.db import connection, models
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 
 from linguatec_lexicon import utils, validators
 
@@ -37,6 +38,14 @@ class Lexicon(models.Model):
     @property
     def code(self):
         return (self.src_language + '-' + self.dst_language)
+
+    @property
+    def slug(self):
+        if not self.topic:
+            return self.code
+
+        topic = slugify(self.topic)
+        return f"{self.src_language}-{self.dst_language}@{topic}"
 
     def __str__(self):
         return self.name

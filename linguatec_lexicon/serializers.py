@@ -68,4 +68,4 @@ class WordNearSerializer(serializers.ModelSerializer):
 class LexiconSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lexicon
-        fields = ('id', 'code', 'name', 'src_language', 'dst_language')
+        fields = ('id', 'code', 'name', 'src_language', 'dst_language', 'topic', 'slug')
