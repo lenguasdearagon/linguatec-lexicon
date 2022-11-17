@@ -9,6 +9,19 @@ from django.utils.text import slugify
 from linguatec_lexicon import utils, validators
 
 
+class LexiconManager(models.Manager):
+    def get_by_slug(self, slug):
+        try:
+            code, topic = slug.split("@")
+        except ValueError:
+            code = slug
+            topic = ''
+
+        src, dst = utils.get_lexicon_languages_from_code(code)
+
+        return self.get(src_language=src, dst_language=dst, topic=topic)
+
+
 class Lexicon(models.Model):
     """
     The Lexicon class provides a class to define a bilingual dictionary.
@@ -29,6 +42,8 @@ class Lexicon(models.Model):
     src_language = models.CharField(max_length=2)
     dst_language = models.CharField(max_length=2)
     topic = models.CharField(max_length=32, blank=True, help_text="The subject of the lexicon.")
+
+    objects = LexiconManager()
 
     class Meta:
         constraints = [
@@ -116,9 +131,12 @@ class WordManager(models.Manager):
         if lex is None or lex == '':
             qs = self
         else:
-            src, dst = utils.get_lexicon_languages_from_code(lex)
-            qs = self.filter(lexicon__src_language=src, lexicon__dst_language=dst)
-
+            try:
+                lexicon = Lexicon.objects.get_by_slug(lex)
+            except Lexicon.DoesNotExist:
+                qs = self.none()
+            else:
+                qs = self.filter(lexicon=lexicon)
         return qs
 
 
