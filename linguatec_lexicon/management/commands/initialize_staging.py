@@ -23,7 +23,7 @@ except django.core.exceptions.ImproperlyConfigured:
 from linguatec_lexicon.models import (DiatopicVariation, Lexicon, Region)
 
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 AR_ES_PATH = os.getenv('LINGUATEC_AR_ES_PATH', '~/data/ar-es/')
 VARIANTS_PATH = os.getenv('LINGUATEC_VARIANTS_PATH', '~/data/variedades')
@@ -209,13 +209,13 @@ class Command(BaseCommand):
 
     def main(self):
         self.stdout.write("\t1. Creating Lexicon")
-        # init_lexicon()
+        init_lexicon()
 
         self.stdout.write("\t2. Creating regions and diatopic variations")
-        # init_diatopic_variations()
+        init_diatopic_variations()
 
         self.stdout.write("\t3. Importing gramatical categories.")
-        gramcat_fixture = os.path.join(BASE_DIR, "tests/fixtures/gramcat-es-ar.csv")
+        gramcat_fixture = os.path.join(BASE_DIR, "fixtures/gramcat-es-ar.csv")
         management.call_command("importgramcat", gramcat_fixture, purge=True)
 
         self.stdout.write("""
