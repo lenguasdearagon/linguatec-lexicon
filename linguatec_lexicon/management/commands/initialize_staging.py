@@ -217,14 +217,14 @@ date
 export LINGUATEC_AR_ES_PATH="~/trabajo/dgpl/linguatec-v5/ar-es/"
 export LINGUATEC_VARIANTS_PATH="~/trabajo/dgpl/linguatec-v5/variedades/"
 
-python initialize_staging.py --drop
-python initialize_staging.py
+./manage.py initialize_staging --drop
+./manage.py initialize_staging
 time ./manage.py importdata -v3 es-ar ~/trabajo/dgpl/linguatec-v5/vocabulario-castellano-aragones-2021-08-12.xlsx
-time python initialize_staging.py --import-aragonese
+time ./manage.py initialize_staging --import-aragonese
 
-#python initialize_staging.py --validate-variations
+#./manage.py initialize_staging --validate-variations
 
-time python initialize_staging.py --import-variations
+time ./manage.py initialize_staging --import-variations
 time python manage.py marktranslations
 
 date
