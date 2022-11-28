@@ -1,5 +1,5 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+from django.core.management.base import BaseCommand, CommandError
+
 
 import getopt
 import os
@@ -131,7 +131,7 @@ def main():
 
     print("""
         3. To import gramatical categories run:
-            ./manage.py importgramcat --purge linguatec-lexicon/tests/fixtures/gramcat-es-ar.csv
+            ./manage.py importgramcat --purge ../aragonario/tests/fixtures/gramcat-es-ar.csv
 
         4. To import data (common aragonese) run:
             ./manage.py importdata vocabulario-castellano-aragones.xlsx
@@ -141,41 +141,6 @@ def main():
     """)
 
 
-def help():
-    USAGE = ("""
-             USAGE
-             ---------------
-             {} [--drop]
-             """
-             )
-    print(USAGE.format(sys.argv[0]))
-
-    print("""
-QUICK START
--------------------
-date
-export DJANGO_SETTINGS_MODULE="lenguasaragon.settings_postgres"
-export LINGUATEC_AR_ES_PATH="/home/santiago/trabajo/dgpl/linguatec-v5/ar-es/"
-export LINGUATEC_VARIANTS_PATH="/home/santiago/trabajo/dgpl/linguatec-v5/variedades/"
-
-python initialize_staging.py --drop
-python initialize_staging.py
-time ./manage.py importdata -v3 es-ar ~/trabajo/dgpl/linguatec-v5/vocabulario-castellano-aragones-2021-08-12.xlsx
-time python initialize_staging.py --import-aragonese
-
-#python initialize_staging.py --validate-variations
-
-time python initialize_staging.py --import-variations
-time python manage.py marktranslations
-
-date
-echo "FIN"
-# to validate a single variation
-./manage.py importvariation -v3 --dry-run es-ar ~/trabajo/dgpl/linguatec-v4/variedades/SOMONTANO-2021-06-22.xlsx
-
-# to import a single variation file
-# ./manage.py importvariation -v3 --variation "Ansotano" es-ar ~/trabajo/dgpl/linguatec-v4/variedades/JACETANIA-ansotano-2021-06-08.xlsx
-    """)
 
 
 def import_aragonese_spanish_data():
@@ -195,29 +160,79 @@ def drop_all():
     Lexicon.objects.all().delete()
 
 
-if __name__ == '__main__':
-    argv = sys.argv[1:]
-    try:
-        opts, args = getopt.getopt(argv, "h", ["help", "drop", "validate-variations", "import-variations", "import-aragonese"])
-    except getopt.GetoptError:
-        help()
-        sys.exit(2)
+class Command(BaseCommand):
+    help = 'Helper to initialize {development|staging|production} environment with data.'
 
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            help()
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--quickstart',
+            action='store_true',
+            help='Print quick-start cheat sheet.'
+        )
+        parser.add_argument(
+            '--drop',
+            action='store_true',
+            help='Drop data of database.',
+        )
+        parser.add_argument(
+            '--validate-variations',
+            action='store_true',
+            help='Validate variations of the provided XLSX.',
+        )
+        parser.add_argument(
+            '--import-variations',
+            action='store_true',
+            help='Import variations from XLSX.'
+        )
+        parser.add_argument(
+            '--import-aragonese',
+            action='store_true',
+            help='Import aragonese to spanish data'
+        )
+
+    def handle(self, *args, **options):
+        if options['quickstart']:
+            self.quickstart()
             sys.exit()
-        elif opt == "--drop":
+        elif options['drop']:
             drop_all()
             sys.exit()
-        elif opt == "--validate-variations":
+        elif options['validate_variations']:
             validate_variations()
             sys.exit()
-        elif opt == "--import-variations":
+        elif options['import_variations']:
             import_variations()
             sys.exit()
-        elif opt == "--import-aragonese":
+        elif options['import_aragonese']:
             import_aragonese_spanish_data()
             sys.exit()
 
-    main()
+        main()
+
+    def quickstart(self):
+        self.stdout.write("""
+QUICK START
+-------------------
+date
+export LINGUATEC_AR_ES_PATH="~/trabajo/dgpl/linguatec-v5/ar-es/"
+export LINGUATEC_VARIANTS_PATH="~/trabajo/dgpl/linguatec-v5/variedades/"
+
+./manage.py initialize_staging --drop
+./manage.py initialize_staging
+time ./manage.py importdata -v3 es-ar ~/trabajo/dgpl/linguatec-v5/vocabulario-castellano-aragones-2021-08-12.xlsx
+time ./manage.py initialize_staging --import-aragonese
+
+#./manage.py initialize_staging --validate-variations
+
+time ./manage.py initialize_staging --import-variations
+time python manage.py marktranslations
+
+date
+echo "FIN"
+# to validate a single variation
+./manage.py importvariation -v3 --dry-run es-ar ~/trabajo/dgpl/linguatec-v4/variedades/SOMONTANO-2021-06-22.xlsx
+
+# to import a single variation file
+# ./manage.py importvariation -v3 --variation "Ansotano" es-ar ~/trabajo/dgpl/linguatec-v4/variedades/JACETANIA-ansotano-2021-06-08.xlsx
+        """
+                          )
