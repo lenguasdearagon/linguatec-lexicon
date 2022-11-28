@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.core import management
 
 
 import getopt
@@ -22,6 +23,8 @@ except django.core.exceptions.ImproperlyConfigured:
 from linguatec_lexicon.models import (DiatopicVariation, Lexicon, Region)
 
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 AR_ES_PATH = os.getenv('LINGUATEC_AR_ES_PATH', '~/data/ar-es/')
 VARIANTS_PATH = os.getenv('LINGUATEC_VARIANTS_PATH', '~/data/variedades')
 
@@ -38,6 +41,27 @@ def init_lexicon():
         description="",
         src_language="ar",
         dst_language="es"
+    )
+    Lexicon.objects.create(
+        name="Botánico",
+        description="",
+        src_language="es",
+        dst_language="ar",
+        topic="flora"
+    )
+    Lexicon.objects.create(
+        name="Faunístico",
+        description="",
+        src_language="es",
+        dst_language="ar",
+        topic="fauna"
+    )
+    Lexicon.objects.create(
+        name="Jurídico",
+        description="",
+        src_language="es",
+        dst_language="ar",
+        topic="law"
     )
 
 
@@ -117,32 +141,6 @@ def import_variations():
         management.call_command('importvariation', 'es-ar', xlsx_fullpath, verbosity=3, variation=variation)
 
 
-def main():
-    print("""
-        0. Run migrations
-        ./manage.py migrate
-    """)
-
-    print("\t1. Creating Lexicon")
-    init_lexicon()
-
-    print("\t2. Creating regions and diatopic variations")
-    init_diatopic_variations()
-
-    print("""
-        3. To import gramatical categories run:
-            ./manage.py importgramcat --purge ../aragonario/tests/fixtures/gramcat-es-ar.csv
-
-        4. To import data (common aragonese) run:
-            ./manage.py importdata vocabulario-castellano-aragones.xlsx
-
-        5. To import diatopic variations data run:
-            ./manage.py importvariation lex_code variation_file.xlsx --variation variation_name --verbosity 3 --dry-run
-    """)
-
-
-
-
 def import_aragonese_spanish_data():
     ls_files = sorted(os.listdir(AR_ES_PATH))
 
@@ -207,7 +205,26 @@ class Command(BaseCommand):
             import_aragonese_spanish_data()
             sys.exit()
 
-        main()
+        self.main()
+
+    def main(self):
+        self.stdout.write("\t1. Creating Lexicon")
+        # init_lexicon()
+
+        self.stdout.write("\t2. Creating regions and diatopic variations")
+        # init_diatopic_variations()
+
+        self.stdout.write("\t3. Importing gramatical categories.")
+        gramcat_fixture = os.path.join(BASE_DIR, "tests/fixtures/gramcat-es-ar.csv")
+        management.call_command("importgramcat", gramcat_fixture, purge=True)
+
+        self.stdout.write("""
+            4. To import data (common aragonese) run:
+                ./manage.py importdata vocabulario-castellano-aragones.xlsx
+
+            5. To import diatopic variations data run:
+                ./manage.py importvariation lex_code variation_file.xlsx --variation variation_name --verbosity 3 --dry-run
+        """)
 
     def quickstart(self):
         self.stdout.write("""
