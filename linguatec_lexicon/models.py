@@ -70,7 +70,7 @@ class Lexicon(models.Model):
         Retrieve reverse lexicon of language pair
         e.g. if current lexicon was Spanish-Aragonese returns Aragonese-Spanish
         """
-        return Lexicon.objects.get(dst_language=self.src_language, src_language=self.dst_language)
+        return Lexicon.objects.get(dst_language=self.src_language, src_language=self.dst_language, topic=self.topic)
 
 
 class WordManager(models.Manager):
