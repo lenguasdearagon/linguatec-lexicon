@@ -6,7 +6,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils.functional import cached_property
 
-from linguatec_lexicon import utils
 from linguatec_lexicon.models import (DiatopicVariation, Entry,
                                       GramaticalCategory, Lexicon, Word)
 
@@ -64,8 +63,7 @@ class Command(BaseCommand):
 
         # check that a lexicon with that code exist
         try:
-            src, dst = utils.get_lexicon_languages_from_code(self.lexicon_code)
-            self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
+            self.lexicon = Lexicon.objects.get_by_slug(self.lexicon_code)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 

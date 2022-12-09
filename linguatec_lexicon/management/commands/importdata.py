@@ -7,7 +7,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError, transaction
 from django.utils.functional import cached_property
 
-from linguatec_lexicon import utils
 from linguatec_lexicon.models import (
     Entry, Example, Lexicon, GramaticalCategory, VerbalConjugation, Word)
 from linguatec_lexicon.validators import validate_column_verb_conjugation
@@ -351,7 +350,7 @@ class Command(BaseCommand):
                     json.dumps({
                         "word": e.word.term,
                         "column": "B & C",
-                        "message": "Duplicated pair translation and gramcat'{}'".format(e.translation)
+                        "message": "Duplicated pair translation and gramcat '{}'".format(e.translation)
                     })
                 ))
 
