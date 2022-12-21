@@ -358,11 +358,11 @@ class Command(BaseCommand):
 
         # store labels & create relations with entries
         Label.objects.bulk_create([
-            Label(name=label) for label in self.cleaned_labels
+            Label(name=label, lexicon=self.lexicon) for label in self.cleaned_labels
         ], batch_size=200)
 
         # cache labels to optimize get query
-        all_labels = {label.name: label for label in Label.objects.all()}
+        all_labels = {label.name: label for label in self.lexicon.labels.all()}
         for entry in self.cleaned_entries:
             # label_model = Label.objects.get(name=entry.label)
             label_model = all_labels[entry.label]
