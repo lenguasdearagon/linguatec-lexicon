@@ -15,7 +15,7 @@ Input data example:
 "n.","noun"
 ```
 
-**NOTE:** [gramcat-es-ar.csv](tests/fixtures/gramcat-es-ar.csv) is an example of CSV containing gramcats.
+**NOTE:** [gramcat-es-ar.csv](linguatec_lexicon/fixtures/gramcat-es-ar.csv) is an example of CSV containing gramcats.
 
 
 To run `importdata` utility go to the root of your project and execute:

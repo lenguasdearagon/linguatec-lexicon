@@ -10,6 +10,10 @@ from linguatec_lexicon.models import (DiatopicVariation, Entry, Example,
                                       VerbalConjugation, Word)
 
 
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+APP_BASE_PATH = os.path.join(os.path.dirname(BASE_PATH), 'linguatec_lexicon')
+
+
 class ImporterTestCase(TestCase):
     LEXICON_NAME = 'es-ar'
     LEXICON_CODE = 'es-ar'
@@ -23,8 +27,7 @@ class ImporterTestCase(TestCase):
 
     def setUp(self):
         # importdata requires that GramaticalCategories are initialized
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
+        sample_path = os.path.join(APP_BASE_PATH, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path, verbosity=0)
 
     def test_import_sample(self):
@@ -234,7 +237,7 @@ class ImportGramCatTestCase(TestCase):
 
     def test_import(self):
         base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
+        sample_path = os.path.join(APP_BASE_PATH, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path)
 
         self.assertEqual(self.NUMBER_OF_GRAMCATS,
@@ -245,7 +248,7 @@ class ImportGramCatTestCase(TestCase):
         existing_gramcats = GramaticalCategory.objects.count()
 
         base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
+        sample_path = os.path.join(APP_BASE_PATH, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path, purge=True)
 
         self.assertNotEqual(self.NUMBER_OF_GRAMCATS + existing_gramcats,
@@ -277,7 +280,7 @@ class ImportVariationTestCase(TestCase):
         )
 
         # initialize GramaticalCategories
-        sample_path = cls.get_fixture_path('gramcat-es-ar.csv')
+        sample_path = os.path.join(APP_BASE_PATH, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path, verbosity=0)
 
         # initialize words on main language

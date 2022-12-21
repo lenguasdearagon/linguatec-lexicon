@@ -4,8 +4,22 @@ from django.db import connection, models
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.functional import cached_property
+from django.utils.text import slugify
 
 from linguatec_lexicon import utils, validators
+
+
+class LexiconManager(models.Manager):
+    def get_by_slug(self, slug):
+        try:
+            code, topic = slug.split("@")
+        except ValueError:
+            code = slug
+            topic = ''
+
+        src, dst = utils.get_lexicon_languages_from_code(code)
+
+        return self.get(src_language=src, dst_language=dst, topic=topic)
 
 
 class Lexicon(models.Model):
@@ -27,15 +41,26 @@ class Lexicon(models.Model):
     # TODO use ISO 639 codes??? https://www.iso.org/iso-639-language-codes.html
     src_language = models.CharField(max_length=2)
     dst_language = models.CharField(max_length=2)
+    topic = models.CharField(max_length=32, blank=True, help_text="The subject of the lexicon.")
+
+    objects = LexiconManager()
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['src_language', 'dst_language'], name='src_language-dst_language')
+            models.UniqueConstraint(fields=['src_language', 'dst_language', 'topic'], name='src-dst-topic')
         ]
 
     @property
     def code(self):
         return (self.src_language + '-' + self.dst_language)
+
+    @property
+    def slug(self):
+        if not self.topic:
+            return self.code
+
+        topic = slugify(self.topic)
+        return f"{self.src_language}-{self.dst_language}@{topic}"
 
     def __str__(self):
         return self.name
@@ -45,7 +70,7 @@ class Lexicon(models.Model):
         Retrieve reverse lexicon of language pair
         e.g. if current lexicon was Spanish-Aragonese returns Aragonese-Spanish
         """
-        return Lexicon.objects.get(dst_language=self.src_language, src_language=self.dst_language)
+        return Lexicon.objects.get(dst_language=self.src_language, src_language=self.dst_language, topic=self.topic)
 
 
 class WordManager(models.Manager):
@@ -106,9 +131,12 @@ class WordManager(models.Manager):
         if lex is None or lex == '':
             qs = self
         else:
-            src, dst = utils.get_lexicon_languages_from_code(lex)
-            qs = self.filter(lexicon__src_language=src, lexicon__dst_language=dst)
-
+            try:
+                lexicon = Lexicon.objects.get_by_slug(lex)
+            except Lexicon.DoesNotExist:
+                qs = self.none()
+            else:
+                qs = self.filter(lexicon=lexicon)
         return qs
 
 

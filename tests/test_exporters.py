@@ -1,10 +1,13 @@
 import os
-import io
 import tempfile
 from django.core.management import call_command
 from django.test import TestCase
 
 from linguatec_lexicon.models import (DiatopicVariation, Lexicon, Region)
+
+
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
+APP_BASE_PATH = os.path.join(os.path.dirname(BASE_PATH), 'linguatec_lexicon')
 
 
 class ExporterDataTestCase(TestCase):
@@ -20,14 +23,11 @@ class ExporterDataTestCase(TestCase):
 
     def setUp(self):
         # importdata requires that GramaticalCategories are initialized
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(base_path, 'fixtures/gramcat-es-ar.csv')
+        sample_path = os.path.join(APP_BASE_PATH, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path, verbosity=0)
 
     def test_export_data(self):
-
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(base_path, 'fixtures/sample-input.xlsx')
+        sample_path = os.path.join(BASE_PATH, 'fixtures/sample-input.xlsx')
         call_command('importdata', self.LEXICON_NAME, sample_path)
 
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -37,7 +37,7 @@ class ExporterDataTestCase(TestCase):
             with open(output_path) as file:
                 exported_content = file.read()
 
-            expected_path = os.path.join(base_path, 'fixtures/export_test_files/export_data_expected_result.csv')
+            expected_path = os.path.join(BASE_PATH, 'fixtures/export_test_files/export_data_expected_result.csv')
             with open(expected_path) as file:
                 expected_content = file.read()
 
@@ -50,8 +50,7 @@ class ExporterVariationTestCase(TestCase):
 
     @classmethod
     def get_fixture_path(cls, name):
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        return os.path.join(base_path, 'fixtures/{}'.format(name))
+        return os.path.join(BASE_PATH, 'fixtures/{}'.format(name))
 
     @classmethod
     def setUpTestData(cls):
@@ -70,7 +69,7 @@ class ExporterVariationTestCase(TestCase):
         )
 
         # initialize GramaticalCategories
-        sample_path = cls.get_fixture_path('gramcat-es-ar.csv')
+        sample_path = os.path.join(APP_BASE_PATH, 'fixtures/gramcat-es-ar.csv')
         call_command('importgramcat', sample_path, verbosity=0)
 
         # initialize words on main language
@@ -78,9 +77,7 @@ class ExporterVariationTestCase(TestCase):
         call_command('importdata', lexicon.name, sample_path)
 
     def test_export_variation(self):
-
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        sample_path = os.path.join(base_path, 'fixtures/variation-sample-benasques.xlsx')
+        sample_path = os.path.join(BASE_PATH, 'fixtures/variation-sample-benasques.xlsx')
         call_command('importvariation', self.LEXICON_CODE, sample_path, variation='benasqués')
 
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -90,7 +87,7 @@ class ExporterVariationTestCase(TestCase):
             with open(output_path) as file:
                 exported_content = file.read()
 
-            expected_path = os.path.join(base_path, 'fixtures/export_test_files/export_variation_expected_result.csv')
+            expected_path = os.path.join(BASE_PATH, 'fixtures/export_test_files/export_variation_expected_result.csv')
             with open(expected_path) as file:
                 expected_content = file.read()
 

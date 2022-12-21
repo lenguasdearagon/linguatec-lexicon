@@ -7,7 +7,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError, transaction
 from django.utils.functional import cached_property
 
-from linguatec_lexicon import utils
 from linguatec_lexicon.models import (
     Entry, Example, Lexicon, GramaticalCategory, VerbalConjugation, Word)
 from linguatec_lexicon.validators import validate_column_verb_conjugation
@@ -89,8 +88,7 @@ class Command(BaseCommand):
 
         # check that a lexicon with that code exist
         try:
-            src, dst = utils.get_lexicon_languages_from_code(self.lexicon_code)
-            self.lexicon = Lexicon.objects.get(src_language=src, dst_language=dst)
+            self.lexicon = Lexicon.objects.get_by_slug(self.lexicon_code)
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 
@@ -352,7 +350,7 @@ class Command(BaseCommand):
                     json.dumps({
                         "word": e.word.term,
                         "column": "B & C",
-                        "message": "Duplicated pair translation and gramcat'{}'".format(e.translation)
+                        "message": "Duplicated pair translation and gramcat '{}'".format(e.translation)
                     })
                 ))
 

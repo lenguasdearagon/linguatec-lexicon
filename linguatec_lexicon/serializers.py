@@ -44,7 +44,7 @@ class EntrySerializer(serializers.ModelSerializer):
 
 
 class WordSerializer(serializers.ModelSerializer):
-    lexicon = serializers.SlugRelatedField(slug_field='code', read_only=True)
+    lexicon = serializers.SlugRelatedField(slug_field='slug', read_only=True)
     entries = EntrySerializer(many=True, read_only=True)
     gramcats = serializers.ListField(read_only=True)
 
@@ -68,4 +68,4 @@ class WordNearSerializer(serializers.ModelSerializer):
 class LexiconSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lexicon
-        fields = ('id', 'code', 'name', 'src_language', 'dst_language')
+        fields = ('id', 'code', 'name', 'src_language', 'dst_language', 'topic', 'slug')

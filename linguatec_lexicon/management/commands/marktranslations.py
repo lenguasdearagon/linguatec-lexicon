@@ -26,14 +26,16 @@ class Command(BaseCommand):
         self.batch_size = options['batch_size'] or self.default_batch_size
 
         for lexicon in Lexicon.objects.all():
-            # cache lexicon words on a set (hash lookup has better performance)
-            # TODO(@slamora): handle if there is not reverse pair
-            lex_reverse = lexicon.get_reverse_pair()
+            try:
+                lex_reverse = lexicon.get_reverse_pair()
+            except Lexicon.DoesNotExist:
+                continue
             self.lex_words = self.retrieve_lexicon_words(lex_reverse)
             updated, total = self.fill_marked_translation(lexicon)
             self.stdout.write("Lexicon {} marked {} of {} entries".format(lexicon.code, updated, total))
 
     def retrieve_lexicon_words(self, lexicon):
+        # cache lexicon words on a set (hash lookup has better performance)
         return {word[0]: word[1] for word in lexicon.words.values_list('term', 'id')}
 
     @transaction.atomic
