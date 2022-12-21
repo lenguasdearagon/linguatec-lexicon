@@ -369,7 +369,7 @@ class Command(BaseCommand):
         # cache labels to optimize get query
         all_labels = {label.name: label for label in self.lexicon.labels.all()}
         for entry in self.cleaned_entries:
-            if entry.label:
+            if getattr(entry, "label", None):
                 label_model = all_labels[entry.label]
                 label_model.entries.add(entry)
 
