@@ -1,14 +1,14 @@
 import json
-import pandas as pd
 import sys
 
+import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError, transaction
 from django.utils.functional import cached_property
 
-from linguatec_lexicon.models import (
-    Entry, Example, Lexicon, GramaticalCategory, VerbalConjugation, Word)
+from linguatec_lexicon.models import (Entry, Example, GramaticalCategory,
+                                      Label, Lexicon, VerbalConjugation, Word)
 from linguatec_lexicon.validators import validate_column_verb_conjugation
 
 
@@ -260,6 +260,7 @@ class Command(BaseCommand):
         self.errors = []
         self.cleaned_data = {}
         self.cleaned_entries = []
+        self.cleaned_labels = set()
         for row in db.itertuples(name=None):
             # itertuples by default return the index as the first element of the tuple.
 
@@ -277,6 +278,13 @@ class Command(BaseCommand):
             # column C is entry (required)
             self.populate_entries(word, gramcats, row[3])
 
+            # column D is label or category (optional)
+            try:
+                label_str = row[4]
+            except IndexError:
+                continue
+            self.populate_label(word, label_str)
+
             # column E is example (optional)
             try:
                 ex_str = row[5]
@@ -290,6 +298,25 @@ class Command(BaseCommand):
             except IndexError:
                 continue
             self.populate_verbal_conjugation(word, gramcats, conjugation_str)
+
+    def populate_label(self, word, label_str):
+        # support multiple label (separated by "//")
+        row_labels = []
+        for label in label_str.split("//"):
+            label = label.strip()
+            self.cleaned_labels.add(label)
+            row_labels.append(label)
+
+        # by default if only one label, apply to all entries
+        # this way we avoid that the user needs to duplicate it
+        if len(word.clean_entries) > len(row_labels):
+            for entry in word.clean_entries:
+                entry.label = row_labels[0]
+
+        # match each label with the entry
+        else:
+            for i, entry in enumerate(word.clean_entries):
+                entry.label = row_labels[i]
 
     @transaction.atomic
     def write_to_database(self):
@@ -328,6 +355,18 @@ class Command(BaseCommand):
                 entry.clean_conjugation.save()
             except AttributeError:
                 pass
+
+        # store labels & create relations with entries
+        Label.objects.bulk_create([
+            Label(name=label) for label in self.cleaned_labels
+        ], batch_size=200)
+
+        # cache labels to optimize get query
+        all_labels = {label.name: label for label in Label.objects.all()}
+        for entry in self.cleaned_entries:
+            # label_model = Label.objects.get(name=entry.label)
+            label_model = all_labels[entry.label]
+            label_model.entries.add(entry)
 
         self.validate_unique_together()
 
