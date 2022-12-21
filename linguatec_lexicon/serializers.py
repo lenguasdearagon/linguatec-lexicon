@@ -33,6 +33,7 @@ class DiatopicVariationSerializer(serializers.ModelSerializer):
 
 class EntrySerializer(serializers.ModelSerializer):
     gramcats = GramaticalCategorySerializer(many=True, read_only=True)
+    labels = serializers.SlugRelatedField(slug_field='name', read_only=True, many=True)
     examples = ExampleSerializer(many=True, read_only=True)
     conjugation = VerbalConjugationSerializer()
     variation = DiatopicVariationSerializer()
@@ -40,7 +41,7 @@ class EntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = Entry
         fields = ('id', 'variation', 'gramcats', 'translation', 'marked_translation',
-                  'examples', 'conjugation')
+                  'labels', 'examples', 'conjugation')
 
 
 class WordSerializer(serializers.ModelSerializer):
