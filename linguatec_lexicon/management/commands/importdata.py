@@ -304,7 +304,12 @@ class Command(BaseCommand):
         row_labels = []
         for label in label_str.split("//"):
             label = label.strip()
-            self.cleaned_labels.add(label)
+
+            # discard empty `labels`
+            if label:
+                self.cleaned_labels.add(label)
+
+            # add empty label to keep offset of multiple label ("//")
             row_labels.append(label)
 
         # by default if only one label, apply to all entries
@@ -364,9 +369,9 @@ class Command(BaseCommand):
         # cache labels to optimize get query
         all_labels = {label.name: label for label in self.lexicon.labels.all()}
         for entry in self.cleaned_entries:
-            # label_model = Label.objects.get(name=entry.label)
-            label_model = all_labels[entry.label]
-            label_model.entries.add(entry)
+            if entry.label:
+                label_model = all_labels[entry.label]
+                label_model.entries.add(entry)
 
         self.validate_unique_together()
 
