@@ -12,6 +12,13 @@ from linguatec_lexicon.models import (Entry, Example, GramaticalCategory,
 from linguatec_lexicon.validators import validate_column_verb_conjugation
 
 
+# gramcat auto correction (very common mistakes that could be autocorrected)
+GRAMCAT_AUTO_CORRECTION = {
+    "s.f.": "s. f.",
+    "s.m.": "s. m.",
+}
+
+
 def split_data_frame_list(df, target_column):
     # thanks src https://gist.github.com/jlln/338b4b0b55bd6984f883#gistcomment-2676729
     """
@@ -92,18 +99,21 @@ class Command(BaseCommand):
         except Lexicon.DoesNotExist:
             raise CommandError('Error: There is not a lexicon with that code: ' + self.lexicon_code)
 
-        self.stdout.write("INFO\tinput file: %s\n" % self.input_file)
+        self.stdout.write(self.style.NOTICE(f"INFO\tinput file: {self.input_file}\n"))
 
         db = self.read_input_file()
 
         # TODO add arg to print (or not gramcats)
-        #gramcats = extract_gramcats(db)
+        # gramcats = extract_gramcats(db)
 
         self.populate_models(db)
 
+        if self.verbosity >= 2 and self.cleaned_labels:
+            self.stdout.write(self.lexicon.slug)
+            self.stdout.write(self.cleaned_labels)
+
         if self.errors:
-            self.stdout.write(self.style.ERROR(
-                "Detected {} errors!".format(len(self.errors))))
+            self.stdout.write(self.style.ERROR(f"Detected {len(self.errors)} errors!"))
             if self.verbosity >= 2:
                 for error in self.errors:
                     self.stdout.write(self.style.ERROR(json.dumps(error)))
@@ -175,7 +185,16 @@ class Command(BaseCommand):
         try:
             return self._gramcats[abbr]
         except KeyError:
-            raise GramaticalCategory.DoesNotExist()
+            pass
+
+        # if fails, try with auto_correction
+        try:
+            auto_correction = GRAMCAT_AUTO_CORRECTION[abbr]
+            return self._gramcats[auto_correction]
+        except KeyError:
+            pass
+
+        raise GramaticalCategory.DoesNotExist()
 
     @cached_property
     def _gramcats(self):
