@@ -290,3 +290,17 @@ class VerbalConjugation(models.Model):
         except Word.DoesNotExist:
             # TODO log this error to detect database inconsistency
             return None
+
+
+class Label(models.Model):
+    name = models.CharField(max_length=64)
+    entries = models.ManyToManyField(Entry, related_name="labels")
+    lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE, related_name="labels")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['lexicon', 'name'], name='lexicon-label')
+        ]
+
+    def __str__(self):
+        return self.name
