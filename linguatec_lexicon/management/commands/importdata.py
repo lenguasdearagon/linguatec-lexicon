@@ -381,8 +381,13 @@ class Command(BaseCommand):
                 pass
 
         # store labels & create relations with entries
+        # NOTE only create not existing labels. For example ar-es
+        # content is splited on several XLSX files so labels may
+        # already exist.
+        existing_labels = self.lexicon.labels.values_list("name", flat=True)
+        new_labels = self.cleaned_labels - set(existing_labels)
         Label.objects.bulk_create([
-            Label(name=label, lexicon=self.lexicon) for label in self.cleaned_labels
+            Label(name=label, lexicon=self.lexicon) for label in new_labels
         ], batch_size=200)
 
         # cache labels to optimize get query
