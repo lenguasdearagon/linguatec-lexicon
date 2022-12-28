@@ -1,27 +1,13 @@
-from django.core.management.base import BaseCommand, CommandError
-from django.core import management
-
-
-import getopt
 import os
+import pathlib
 import sys
 
-import django
 from django.core import management
+from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-try:
-    django.setup()
-except django.core.exceptions.ImproperlyConfigured:
-    print("""
-        You must define the environment variable DJANGO_SETTINGS_MODULE. Run:
-            export DJANGO_SETTINGS_MODULE=aragonario.settings
-    """)
-    sys.exit(2)
 
-
-from linguatec_lexicon.models import (DiatopicVariation, Lexicon, Region)
-
+from linguatec_lexicon.models import DiatopicVariation, Lexicon, Region
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -111,23 +97,34 @@ def init_diatopic_variations():
     create_variation(somontano, "Somontanos", "Somon.")
 
 
+VARIANTS_SUFFIX_PATTERN = "-????-??-??.xlsx"
+
 VARIANTS_MAPPING = {
-    "Tensino": "ALTO GÁLLEGO-tensino-2021-07-15.xlsx",
-    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto-2021-06-08.xlsx",
-    "Ansotano": "JACETANIA-ansotano-2021-08-20.xlsx",
-    "Cheso": "JACETANIA-cheso-2021-06-08.xlsx",
-    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano-2021-06-08.xlsx",
-    "Benasqués": "RIBAGORZA-benasques-2021-06-08.xlsx",
-    "Belsetán": "SOBRARBE-belsetán-2021-06-08.xlsx",
-    "Chistabín": "SOBRARBE-chistabín-2021-06-22.xlsx",
-    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto-2021-08-20.xlsx",
-    "Somontanos": "SOMONTANO-2021-08-12.xlsx",
+    "Tensino": "ALTO GÁLLEGO-tensino",
+    "Tensino Panticuto": "ALTO GÁLLEGO-tensino-panticuto",
+    "Ansotano": "JACETANIA-ansotano",
+    "Cheso": "JACETANIA-cheso",
+    "Bajorribagorzano": "RIBAGORZA-baixoribagorzano",
+    "Benasqués": "RIBAGORZA-benasques",
+    "Belsetán": "SOBRARBE-belsetán",
+    "Chistabín": "SOBRARBE-chistabín",
+    "Habla de Sobrepuerto": "SOBRARBE-sobrepuerto",
+    "Somontanos": "SOMONTANO",
 }
 
 
+def get_fullpath_from_pattern(base_path, regex):
+    p = pathlib.Path(base_path)
+    matches = p.glob(regex)
+    try:
+        return next(matches)
+    except StopIteration:
+        raise RuntimeError(f"File matching {regex} not found on {base_path}")
+
+
 def validate_variations():
-    for _, xlsx in VARIANTS_MAPPING.items():
-        xlsx_fullpath = os.path.join(VARIANTS_PATH, xlsx)
+    for _, xlsx_prefix in VARIANTS_MAPPING.items():
+        xlsx_fullpath = get_fullpath_from_pattern(VARIANTS_PATH, f"{xlsx_prefix}{VARIANTS_SUFFIX_PATTERN}")
         print("-" * 80)
         print(xlsx_fullpath)
         management.call_command('importvariation', 'es-ar', xlsx_fullpath, verbosity=3, dry_run=True)
