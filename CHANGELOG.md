@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## master
 
+## [0.6] - 2023-01-01
+- [added] Lexicons with topic.
+- [added] Entries can be labelled (e.g. groups, categories...)
+
 ## [0.5] - 2021-09-01
 - [added] Command `marktranslations` which finds & marks related words of
 reverse lexicon on entries. This information is stored on new field
