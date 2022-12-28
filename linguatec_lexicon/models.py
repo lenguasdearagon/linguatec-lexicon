@@ -293,9 +293,14 @@ class VerbalConjugation(models.Model):
 
 
 class Label(models.Model):
-    name = models.CharField(unique=True, max_length=64)
+    name = models.CharField(max_length=64)
     entries = models.ManyToManyField(Entry, related_name="labels")
     lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE, related_name="labels")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['lexicon', 'name'], name='lexicon-label')
+        ]
 
     def __str__(self):
         return self.name
