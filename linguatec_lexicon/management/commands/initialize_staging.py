@@ -126,15 +126,15 @@ def validate_variations():
     for _, xlsx_prefix in VARIANTS_MAPPING.items():
         xlsx_fullpath = get_fullpath_from_pattern(VARIANTS_PATH, f"{xlsx_prefix}{VARIANTS_SUFFIX_PATTERN}")
         print("-" * 80)
-        print(xlsx_fullpath)
+        print(xlsx_fullpath.name)
         management.call_command('importvariation', 'es-ar', xlsx_fullpath, verbosity=3, dry_run=True)
 
 
 def import_variations():
-    for variation, xlsx in VARIANTS_MAPPING.items():
+    for variation, xlsx_prefix in VARIANTS_MAPPING.items():
+        xlsx_fullpath = get_fullpath_from_pattern(VARIANTS_PATH, f"{xlsx_prefix}{VARIANTS_SUFFIX_PATTERN}")
         print("-" * 80)
-        print(variation, xlsx)
-        xlsx_fullpath = os.path.join(VARIANTS_PATH, xlsx)
+        print(variation, xlsx_fullpath.name)
         management.call_command('importvariation', 'es-ar', xlsx_fullpath, verbosity=3, variation=variation)
 
 
