@@ -76,7 +76,7 @@ class Command(BaseCommand):
                 "Detected {} errors!".format(len(self.errors))))
             if self.verbosity > 2:
                 for error in self.errors:
-                    values = [value or '' for _, value in error.items()]
+                    values = [str(value) or '' for value in error.values()]
                     self.stdout.write(self.style.ERROR('    '.join(values)))
         else:
             if not self.dry_run:
