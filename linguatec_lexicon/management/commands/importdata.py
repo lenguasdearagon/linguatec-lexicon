@@ -109,8 +109,8 @@ class Command(BaseCommand):
         self.populate_models(db)
 
         if self.verbosity >= 2 and self.cleaned_labels:
-            self.stdout.write(self.lexicon.slug)
-            self.stdout.write(self.cleaned_labels)
+            self.stdout.write(f"Labels of {self.lexicon.slug}")
+            self.stdout.write("; ".join(self.cleaned_labels))
 
         if self.errors:
             self.stdout.write(self.style.ERROR(f"Detected {len(self.errors)} errors!"))
