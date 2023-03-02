@@ -64,6 +64,19 @@ def validate_column_verb_conjugation(value):
     return cleaned_data
 
 
+def validate_lexicon_slug(value):
+    # TODO REGEX for topic & for full slug
+    try:
+        code, topic = value.split("@")
+    except ValueError:
+        code = value
+        topic = ''
+
+    from .utils import get_lexicon_languages_from_code
+    get_lexicon_languages_from_code(code)
+    return value
+
+
 def validate_verb_reference_to_model(value):
     from linguatec_lexicon.models import VerbalConjugation
     REGEX = r'^(\w+)\s*\((\w+( \w+)?)\)$'
