@@ -181,6 +181,22 @@ class Word(models.Model):
     def admin_panel_url(self):
         return reverse('admin:linguatec_lexicon_word_change', args=(self.pk,))
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.slug = self.calculate_slug()
+        if update_fields is not None and "term" in update_fields:
+            update_fields = {"slug"}.union(update_fields)
+        super().save(
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields,
+        )
+
+    def calculate_slug(self):
+        data = f"{self.lexicon.slug}|{self.term}"
+        encoded_data = data.encode('utf-8')
+        return hashlib.md5(encoded_data).hexdigest()
+
 
 class Region(models.Model):
     name = models.CharField(unique=True, max_length=64)

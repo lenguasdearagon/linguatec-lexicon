@@ -2,12 +2,13 @@ import os
 import unittest
 
 from django.core.management import call_command
-from django.db import connection, IntegrityError
+from django.db import IntegrityError, connection
 from django.test import TestCase
 
-from linguatec_lexicon.models import (
-    Entry, GramaticalCategory, Lexicon, VerbalConjugation, Word, Region, DiatopicVariation)
-
+from linguatec_lexicon.models import (DiatopicVariation, Entry,
+                                      GramaticalCategory, Lexicon, Region,
+                                      VerbalConjugation, Word,
+                                      annotate_words_slug)
 
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 APP_BASE_PATH = os.path.join(os.path.dirname(BASE_PATH), 'linguatec_lexicon')
@@ -190,6 +191,16 @@ class WordManagerTestCase(TestCase):
     def test_search_query_unbalanced_parenthesis(self):
         result = Word.objects.search("largo(a", "es-ar")
         self.assertEqual(0, result.count())
+
+
+class WordSlugTest(TestCase):
+    fixtures = ['lexicon-sample.json']
+
+    def test_slug_generators(self):
+        lex = Lexicon.objects.get(src_language="es", dst_language="ar")
+        qs = annotate_words_slug(lex)
+        for w in qs:
+            self.assertEqual(w.calculated_slug, w.calculate_slug())
 
 
 class EntryModelTestCase(TestCase):
