@@ -1,12 +1,26 @@
+import hashlib
+
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.db import connection, models
 from django.db.models import Q
+from django.db.models import Value as V
+from django.db.models.functions import MD5, Concat
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 
 from linguatec_lexicon import utils, validators
+
+
+def annotate_words_slug(lexicon):
+    lex_slug = lexicon.slug
+    qs = lexicon.words.all()
+    return qs.annotate(
+        calculated_slug=MD5(
+            Concat(V(lex_slug), V("|"), "term")
+        )
+    )
 
 
 class LexiconManager(models.Manager):
@@ -148,6 +162,7 @@ class Word(models.Model):
     """
     lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE, related_name="words")
     term = models.CharField(max_length=64)
+    slug = models.SlugField()
 
     class Meta:
         constraints = [
