@@ -7,10 +7,10 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError, transaction
 from django.utils.functional import cached_property
 
+from linguatec_lexicon import utils
 from linguatec_lexicon.models import (Entry, Example, GramaticalCategory,
                                       Label, Lexicon, VerbalConjugation, Word)
 from linguatec_lexicon.validators import validate_column_verb_conjugation
-
 
 # gramcat auto correction (very common mistakes that could be autocorrected)
 GRAMCAT_AUTO_CORRECTION = {
@@ -155,6 +155,7 @@ class Command(BaseCommand):
         # avoid duplicated word.term
         created, word = self.get_or_create_word(w_str)
         if created:
+            word.slug = utils.calculate_slug(self.lexicon.slug, word.term)
             self.cleaned_data[word.term] = word
 
         return word

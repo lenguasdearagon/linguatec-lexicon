@@ -1,5 +1,3 @@
-import hashlib
-
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.db import connection, models
@@ -193,9 +191,7 @@ class Word(models.Model):
         )
 
     def calculate_slug(self):
-        data = f"{self.lexicon.slug}|{self.term}"
-        encoded_data = data.encode('utf-8')
-        return hashlib.md5(encoded_data).hexdigest()
+        return utils.calculate_slug(self.lexicon.slug, self.term)
 
 
 class Region(models.Model):

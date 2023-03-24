@@ -1,3 +1,4 @@
+import hashlib
 import re
 
 
@@ -12,3 +13,9 @@ def get_lexicon_languages_from_code(lex_code):
         )
 
     return match.groups()
+
+
+def calculate_slug(lexicon_slug, word_term):
+    data = f"{lexicon_slug}|{word_term}"
+    encoded_data = data.encode('utf-8')
+    return hashlib.md5(encoded_data).hexdigest()
