@@ -7,7 +7,7 @@ from django.core.management import call_command
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.generic.base import TemplateView
-from rest_framework import viewsets
+from rest_framework import generics, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -152,6 +152,12 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+
+class WordDetailBySlug(generics.RetrieveAPIView):
+    queryset = Word.objects.all()
+    lookup_field = 'slug'
+    serializer_class = WordSerializer
 
 
 class GramaticalCategoryViewSet(viewsets.ReadOnlyModelViewSet):
