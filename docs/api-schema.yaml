@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: "0.4"
+  version: '0.5'
   title: linguarec_lexicon_API
   description: >
     An application for a dictionary, that allows add multiple language-languge
@@ -58,6 +58,25 @@ paths:
         - words
       summary: Returns a page with the specific Word in json format
       operationId: getWordById
+      responses:
+        '200':
+          description: Return json word page
+
+  '/words/slug/{slug}':
+    parameters:
+      - name: slug
+        in: path
+        description: slug of Word to return
+        required: true
+        schema:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/Word'
+    get:
+      tags:
+        - words
+      summary: Returns a page with the specific Word in json format
+      operationId: getWordBySlug
       responses:
         '200':
           description: Return json word page
@@ -270,6 +289,12 @@ components:
           $ref: '#/components/schemas/DiatopicVariation'
         translation:
           type: string
+        examples:
+          type: array
+          items:
+            $ref: '#/components/schemas/Example'
+        conjugation:
+          $ref: '#/components/schemas/VerbalConjugation'
       xml:
         name: Entry
     GramaticalCategory:
@@ -330,15 +355,10 @@ components:
       type: object
       required:
         - phrase
-        - entry
       properties:
-        id:
-          type: integer
-          format: int64
         phrase:
           type: string
-        entry:
-          $ref: '#/components/schemas/Entry'
+
       xml:
         name: Example
     VerbalConjugation:

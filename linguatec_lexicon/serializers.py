@@ -51,7 +51,7 @@ class WordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Word
-        fields = ('id', 'url', 'lexicon', 'term', 'gramcats', 'entries', 'admin_panel_url')
+        fields = ('id', 'slug', 'url', 'lexicon', 'term', 'gramcats', 'entries', 'admin_panel_url')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -63,7 +63,7 @@ class WordSerializer(serializers.ModelSerializer):
 class WordNearSerializer(serializers.ModelSerializer):
     class Meta:
         model = Word
-        fields = ('url', 'id', 'term')
+        fields = ('id', 'slug', 'url', 'term')
 
 
 class LexiconSerializer(serializers.ModelSerializer):

@@ -2,11 +2,23 @@ from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.db import connection, models
 from django.db.models import Q
+from django.db.models import Value as V
+from django.db.models.functions import MD5, Concat
 from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 
 from linguatec_lexicon import utils, validators
+
+
+def annotate_words_slug(lexicon):
+    lex_slug = lexicon.slug
+    qs = lexicon.words.all()
+    return qs.annotate(
+        calculated_slug=MD5(
+            Concat(V(lex_slug), V("|"), "term")
+        )
+    )
 
 
 class LexiconManager(models.Manager):
@@ -148,6 +160,7 @@ class Word(models.Model):
     """
     lexicon = models.ForeignKey('Lexicon', on_delete=models.CASCADE, related_name="words")
     term = models.CharField(max_length=64)
+    slug = models.SlugField()
 
     class Meta:
         constraints = [
@@ -165,6 +178,20 @@ class Word(models.Model):
     @property
     def admin_panel_url(self):
         return reverse('admin:linguatec_lexicon_word_change', args=(self.pk,))
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.slug = self.calculate_slug()
+        if update_fields is not None and "term" in update_fields:
+            update_fields = {"slug"}.union(update_fields)
+        super().save(
+            force_insert=force_insert,
+            force_update=force_update,
+            using=using,
+            update_fields=update_fields,
+        )
+
+    def calculate_slug(self):
+        return utils.calculate_slug(self.lexicon.slug, self.term)
 
 
 class Region(models.Model):

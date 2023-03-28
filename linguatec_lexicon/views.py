@@ -4,9 +4,10 @@ import tempfile
 from io import StringIO
 
 from django.core.management import call_command
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.generic.base import TemplateView
-from rest_framework import viewsets
+from rest_framework import generics, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
@@ -14,6 +15,7 @@ from rest_framework.response import Response
 from .forms import ValidatorForm
 from .models import GramaticalCategory, Word, Lexicon
 from .serializers import GramaticalCategorySerializer, WordSerializer, WordNearSerializer, LexiconSerializer
+from .validators import validate_lexicon_slug
 
 
 class DataValidatorView(TemplateView):
@@ -128,6 +130,34 @@ class WordViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+    @action(detail=False)
+    def exact(self, request):
+        lex = self.request.query_params.get('l', '')
+        term = self.request.query_params.get('q')
+
+        try:
+            validate_lexicon_slug(lex)
+        except ValueError as e:
+            return Response(
+                data={"code": 400, "message": "Bad Requset", "details": str(e)},
+                status=400,
+            )
+
+        try:
+            lexicon = Lexicon.objects.get_by_slug(lex)
+            instance = lexicon.words.get(term=term)
+        except (Lexicon.DoesNotExist, Word.DoesNotExist):
+            raise Http404()
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+class WordDetailBySlug(generics.RetrieveAPIView):
+    queryset = Word.objects.all()
+    lookup_field = 'slug'
+    serializer_class = WordSerializer
 
 
 class GramaticalCategoryViewSet(viewsets.ReadOnlyModelViewSet):
