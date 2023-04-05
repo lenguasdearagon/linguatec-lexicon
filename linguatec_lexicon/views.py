@@ -64,7 +64,9 @@ class DataValidatorView(TemplateView):
 
     def validate(self, xlsx_file):
         out = StringIO()
-        call_command('importdata', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
+        # TODO(@slamora) lexicon paramenter is required since multilexicon support is added
+        default_lexicon = 'es-ar'   # TODO XXX XXX
+        call_command('importdata', default_lexicon, xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
         return out
 
 
