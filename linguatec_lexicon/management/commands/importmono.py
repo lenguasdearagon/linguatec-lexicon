@@ -29,33 +29,95 @@ class Command(BaseCommand):
         # self.xlsx = pd.read_excel(self.input_file, sheet_name=None, header=None, usecols="A:E",
         #                           names=["term", "url", "etimol", "def", "def2"])
 
+        # use temp lexicon and if everything is ok, then change to the real one
+        self._lexicon = self.lexicon
+        self.lexicon = Lexicon.objects.create(name="Temp Lexicon", src_language="99", dst_language="99")
+
         self.xlsx = load_workbook(self.input_file, read_only=True)
         sheet = self.xlsx.active
 
+        errors = []
         for i, row in enumerate(sheet.iter_rows()):
             if i == 0:
                 continue
 
-            term = row[0].value
-            url = row[1].value,
-            etimol = row[2].value
-            definition = row[3].value
-            definition2 = row[4].value
-
-            word_data = {
-                "term": term,
-                # "etimol": etimol,     # TODO: Add etimol to Word model
-            }
-
-            try:
-                word = Word(lexicon=self.lexicon, **word_data)
-                word.full_clean(exclude=["slug"])
-                word.save()
-            except ValidationError as e:
-                errors = e.message_dict
+            row_number = i + 1
+            wrow = self.validate_row(row, row_number)
+            if not wrow.is_valid():
+                errors.append({
+                    "row": row_number,
+                    "term": wrow.term,
+                    "errors": wrow.errors,
+                })
                 continue
 
-            entries = [Entry(word=word, translation=definition)]
-            if definition2:
-                entries.append(Entry(word=word, translation=definition2))
+            word = Word(
+                lexicon=self.lexicon,
+                term=wrow.term,
+                # etimol=wrow.etimol,   # TODO: Add etimol to Word model
+            )
+            word.save()
+            entries = [Entry(word=word, translation=wrow.definition)]
+            if wrow.definition2:
+                entries.append(Entry(word=word, translation=wrow.definition2))
             word.entries.bulk_create(entries)
+
+            if len(errors) >= 10:
+                break
+
+        if errors:
+            self.lexicon.delete()
+            self.print_errors(errors, compact=True)
+            raise CommandError("The imported file has errors. Please check the errors above.")
+        else:
+            self.lexicon.words.update(lexicon=self._lexicon)
+            self.lexicon.delete()
+            self.lexicon = self._lexicon
+
+    def validate_row(self, row, row_number):
+        instance = Row(row, row_number)
+        instance.is_valid()
+        return instance
+
+    def print_errors(self, errors, compact=False):
+        for error in errors:
+            if compact:
+                msg = "; ".join([f"{key}: {value}" for key, value in error["errors"].items()])
+                self.stdout.write(self.style.ERROR(
+                    f"{error['row']}: {error['term']} - {msg}"
+                ))
+                continue
+
+            # extended output
+            self.stdout.write(self.style.ERROR(f"Row: {error['row']}"))
+            self.stdout.write(self.style.ERROR(f"Term: {error['term']}"))
+            for key, value in error["errors"].items():
+                self.stdout.write(self.style.ERROR(f"  * {key}: {value}"))
+            self.stdout.write("\n")
+
+
+class Row:
+    def __init__(self, row, row_number):
+        self.term = row[0].value
+        self.url = row[1].value,
+        self.etimol = row[2].value
+        self.definition = row[3].value
+        self.definition2 = row[4].value
+        self.row_number = row_number
+
+    def is_valid(self):
+        self.errors = {}
+        if not self.term:
+            self.errors["term"] = "Term is required"
+        if not self.definition:
+            self.errors["definition"] = "Definition is required"
+
+        self.validate_unique()
+
+        return False if self.errors else True
+
+    def validate_unique(self):
+        if Word.objects.filter(term=self.term).exists():
+            self.errors["term"] = "This term already exists"
+            return False
+        return True
