@@ -3,7 +3,7 @@ import os
 import tempfile
 from io import StringIO
 
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.generic.base import TemplateView
@@ -13,8 +13,9 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 
 from .forms import ValidatorForm
-from .models import GramaticalCategory, Word, Lexicon
-from .serializers import GramaticalCategorySerializer, WordSerializer, WordNearSerializer, LexiconSerializer
+from .models import GramaticalCategory, Lexicon, Word
+from .serializers import (GramaticalCategorySerializer, LexiconSerializer,
+                          WordNearSerializer, WordSerializer)
 from .validators import validate_lexicon_slug
 
 
@@ -76,6 +77,16 @@ class DiatopicVariationValidatorView(DataValidatorView):
     def validate(self, xlsx_file):
         out = StringIO()
         call_command('importvariation', xlsx_file, dry_run=True, no_color=True, verbosity=3, stdout=out)
+        return out
+
+
+class MonoValidatorView(DataValidatorView):
+    title = "Monolingual validator"
+    lexicon = 'an-an'
+
+    def validate(self, xlsx_file):
+        out = StringIO()
+        call_command('importmono', self.lexicon, xlsx_file, no_color=True, verbosity=3, stdout=out, stderr=out)
         return out
 
 

@@ -1,4 +1,5 @@
-from django.core.exceptions import ValidationError
+import json
+
 from django.core.management import BaseCommand, CommandError
 from django.db import transaction
 from openpyxl import load_workbook
@@ -62,13 +63,13 @@ class Command(BaseCommand):
                 entries.append(Entry(word=word, translation=wrow.definition2))
             word.entries.bulk_create(entries)
 
-            if len(errors) >= 10:
+            # TODO: think how to handle too many errors
+            if len(errors) >= 100:
                 break
 
         if errors:
             self.lexicon.delete()
-            self.print_errors(errors, compact=True)
-            raise CommandError("The imported file has errors. Please check the errors above.")
+            self.print_errors(errors, json=True)
         else:
             self.lexicon.words.update(lexicon=self._lexicon)
             self.lexicon.delete()
@@ -79,13 +80,18 @@ class Command(BaseCommand):
         instance.is_valid()
         return instance
 
-    def print_errors(self, errors, compact=False):
+    def print_errors(self, errors, json=False):
         for error in errors:
-            if compact:
-                msg = "; ".join([f"{key}: {value}" for key, value in error["errors"].items()])
-                self.stdout.write(self.style.ERROR(
-                    f"{error['row']}: {error['term']} - {msg}"
-                ))
+            if json:
+                for key, value in error["errors"].items():
+                    self.stdout.write(self.style.ERROR(
+                        json.dumps({
+                            "word": f"#{error['row']}: {error['term']}",
+                            "column": key,
+                            "message": value,
+                        })
+                    ))
+
                 continue
 
             # extended output
