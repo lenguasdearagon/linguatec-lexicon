@@ -3,14 +3,14 @@ import os
 import tempfile
 from io import StringIO
 
-from django.core.management import CommandError, call_command
+from django.core.management import call_command
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
-from django_q.tasks import async_task
+from django_q.tasks import async_task, result
 from rest_framework import generics, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
@@ -121,27 +121,33 @@ class MonoValidatorView(FormView):
         return reverse("task-detail", kwargs={"task_id": self.task_id})
 
 
-class TaskDetailView(View):
-    def get(self, request, *args, **kwargs):
-        # task_id = request.GET.get('task_id')
+class TaskDetailView(TemplateView):
+    template_name = "linguatec_lexicon/task-detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
         task_id = kwargs.get('task_id')
-        from django_q.tasks import result
-        r = result(task_id)
+        task_result = result(task_id)
+        data = []
 
         # NOTE: when the task has not yet be run, r is None
-        if r is None:
-            return HttpResponse("Task not found")
+        # NOTE: we don't have way to differentiate between a task that has not been run and non existing task
+        if task_result is not None:
+            content = task_result.getvalue()
+            for line in content.split('\n'):
+                if line == '':
+                    continue
 
-        content = r.getvalue()
-        data = []
-        for line in content.split('\n'):
-            if line == '':
-                continue
+                line = json.loads(line)
+                data.append(line)
 
-            line = json.loads(line)
-            data.append(line)
+        context.update({
+            'task_id': task_id,
+            'task_result': data,
+        })
 
-        return HttpResponse(data)
+        return context
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
