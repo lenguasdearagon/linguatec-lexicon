@@ -7,3 +7,6 @@ psycopg2-binary
 pandas==1.5.1
 xlrd==1.2.0
 openpyxl==3.1.3
+
+# bg jobs
+django-q2==1.6.2
