@@ -69,7 +69,7 @@ class Command(BaseCommand):
 
         if errors:
             self.lexicon.delete()
-            self.print_errors(errors, json=True)
+            self.print_errors(errors, format="json")
         else:
             self.lexicon.words.update(lexicon=self._lexicon)
             self.lexicon.delete()
@@ -80,9 +80,9 @@ class Command(BaseCommand):
         instance.is_valid()
         return instance
 
-    def print_errors(self, errors, json=False):
+    def print_errors(self, errors, format="json"):
         for error in errors:
-            if json:
+            if format == "json":
                 for key, value in error["errors"].items():
                     self.stdout.write(self.style.ERROR(
                         json.dumps({
