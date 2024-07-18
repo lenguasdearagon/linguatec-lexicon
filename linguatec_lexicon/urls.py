@@ -15,4 +15,5 @@ urlpatterns = [
     path('validator/', views.DataValidatorView.as_view(), name='validator'),
     path('validator-diatopic-variation/', views.DiatopicVariationValidatorView.as_view(), name='validator-variation'),
     path('validator-mono/', views.MonoValidatorView.as_view(), name='validator-mono'),
+    path('tasks/<str:task_id>/', views.TaskDetailView.as_view(), name='task-detail'),
 ]

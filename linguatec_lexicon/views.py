@@ -4,13 +4,19 @@ import tempfile
 from io import StringIO
 
 from django.core.management import CommandError, call_command
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
+from django.views import View
 from django.views.generic.base import TemplateView
+from django.views.generic.edit import FormView
+from django_q.tasks import async_task
 from rest_framework import generics, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
+
+from linguatec_lexicon import tasks
 
 from .forms import ValidatorForm
 from .models import GramaticalCategory, Lexicon, Word
@@ -80,14 +86,62 @@ class DiatopicVariationValidatorView(DataValidatorView):
         return out
 
 
-class MonoValidatorView(DataValidatorView):
+class MonoValidatorView(FormView):
     title = "Monolingual validator"
     lexicon = 'an-an'
+    form_class = ValidatorForm
+    template_name = "linguatec_lexicon/datavalidator.html"
 
-    def validate(self, xlsx_file):
-        out = StringIO()
-        call_command('importmono', self.lexicon, xlsx_file, no_color=True, verbosity=3, stdout=out, stderr=out)
-        return out
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'title': self.title,
+        })
+        return context
+
+    def form_valid(self, form):
+        print("H")
+
+        xlsx_file = form.cleaned_data['input_file']
+
+        # store uploaded file as a temporal file
+        tmp_fd, tmp_file = tempfile.mkstemp(suffix='.xlsx')
+        with open(tmp_file, 'wb') as f:
+            f.write(xlsx_file.read())
+
+        # run the validation async
+
+        task_id = async_task(tasks.validate_mono, self.lexicon, tmp_file)
+
+        self.task_id = task_id
+
+        return super().form_valid(form)
+
+    def get_success_url(self) -> str:
+        return reverse("task-detail", kwargs={"task_id": self.task_id})
+
+
+class TaskDetailView(View):
+    def get(self, request, *args, **kwargs):
+        # task_id = request.GET.get('task_id')
+        task_id = kwargs.get('task_id')
+        from django_q.tasks import result
+        r = result(task_id)
+
+        # NOTE: when the task has not yet be run, r is None
+        if r is None:
+            return HttpResponse("Task not found")
+
+        content = r.getvalue()
+        data = []
+        for line in content.split('\n'):
+            if line == '':
+                continue
+
+            line = json.loads(line)
+            data.append(line)
+
+        return HttpResponse(data)
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
