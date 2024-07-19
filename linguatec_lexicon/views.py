@@ -145,6 +145,7 @@ class TaskDetailView(TemplateView):
         context.update({
             'task_id': task_id,
             'task_result': data,
+            'task_finished': task_result is not None,
         })
 
         return context
