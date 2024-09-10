@@ -50,7 +50,7 @@
         <th>error</th>
       </thead>
       <tbody>
-        {% for e in task_result %}
+        {% for e in task_result.object_list %}
         <tr>
           <td>{{ forloop.counter }}</td>
           <td>{{ e.word }}</td>
@@ -60,7 +60,36 @@
         {% endfor %}
       </tbody>
     </table>
+
+    <!--Pagination-->
+    <nav aria-label="result-paginator">
+      <ul class="pager">
+        {% if task_result.has_previous %}
+        <li class="previous"><a href="?page={{ task_result.previous_page_number }}">
+            {% else %}
+        <li class="previous disabled"><a href="#">
+            {% endif %}
+            <span aria-hidden="true">&larr;</span> Previous</a>
+        </li>
+
+        <li class="current">
+          <span>Page {{ task_result.number }} of {{ task_result.paginator.num_pages }}</span>
+        </li>
+
+        {% if task_result.has_next %}
+        <li class="next"><a href="?page={{ task_result.next_page_number }}">
+            {% else %}
+        <li class="next disabled"><a href="#">
+            {% endif %}
+            Next <span aria-hidden="true">&rarr;</span></a>
+        </li>
+
+      </ul>
+    </nav>
   </div>
+  <!--end of Pagination-->
+
+</div>
 </div>
 {% else %}
 <p>Task is still running...</p>

@@ -4,10 +4,10 @@ import tempfile
 from io import StringIO
 
 from django.core.management import call_command
-from django.http import Http404, HttpResponse
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django_q.tasks import async_task, result
@@ -100,8 +100,6 @@ class MonoValidatorView(FormView):
         return context
 
     def form_valid(self, form):
-        print("H")
-
         xlsx_file = form.cleaned_data['input_file']
 
         # store uploaded file as a temporal file
@@ -142,6 +140,8 @@ class TaskDetailView(TemplateView):
                 line = json.loads(line)
                 data.append(line)
 
+        data = self.paginate_queryset(data)
+
         context.update({
             'task_id': task_id,
             'task_result': data,
@@ -149,6 +149,20 @@ class TaskDetailView(TemplateView):
         })
 
         return context
+
+    def paginate_queryset(self, data):
+        page_size = 50
+        page = self.request.GET.get('page', 1)
+        paginator = Paginator(data, page_size)
+
+        try:
+            data = paginator.page(page)
+        except PageNotAnInteger:
+            data = paginator.page(1)
+        except EmptyPage:
+            data = paginator.page(paginator.num_pages)
+
+        return data
 
 
 class DefaultLimitOffsetPagination(LimitOffsetPagination):
