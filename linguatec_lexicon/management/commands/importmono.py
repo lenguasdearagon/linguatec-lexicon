@@ -55,7 +55,7 @@ class Command(BaseCommand):
             word = Word(
                 lexicon=self.lexicon,
                 term=wrow.term,
-                # etimol=wrow.etimol,   # TODO: Add etimol to Word model
+                etimol=wrow.etimol,
             )
             word.save()
             entries = [Entry(word=word, translation=wrow.definition)]
@@ -105,8 +105,8 @@ class Command(BaseCommand):
 class Row:
     def __init__(self, row, row_number):
         self.term = row[0].value
-        self.url = row[1].value,
-        self.etimol = row[2].value
+        self.url = row[1].value
+        self.etimol = row[2].value or ""
         self.definition = row[3].value
         self.definition2 = row[4].value
         self.row_number = row_number
