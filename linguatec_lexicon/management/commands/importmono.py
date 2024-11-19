@@ -1,7 +1,11 @@
 import json
+import os
 
 from django.core.management import BaseCommand, CommandError
 from django.db import transaction
+from odf import opendocument
+from odf.table import Table, TableCell, TableRow
+from odf.text import P
 from openpyxl import load_workbook
 
 from linguatec_lexicon.models import Entry, Lexicon, Word
@@ -44,6 +48,7 @@ class Command(BaseCommand):
         self.lexicon = Lexicon.objects.create(name="Temp Lexicon", src_language="99", dst_language="99")
 
         self.xlsx = load_workbook(self.input_file, read_only=True)
+        self.ods = self.xlsx2ods()
         sheet = self.xlsx.active
 
         errors = []
@@ -88,10 +93,31 @@ class Command(BaseCommand):
             self.lexicon.delete()
             self.lexicon = self._lexicon
 
+    def xlsx2ods(self):
+        # TODO(@slamora): create code to convert xlsx to ods
+        odspath = self.input_file.replace(".xlsx", ".ods")
+        if not os.path.exists(odspath):
+            raise CommandError(f"ODS file doesn't exist: {odspath}")
+        return opendocument.load(odspath)
+
     def validate_row(self, row, row_number):
         instance = Row(row, row_number, self._words)
         instance.is_valid()
+
+        instance.etimol = self.extract_etimol_rich_text(row_number)
+
         return instance
+
+    def extract_etimol_rich_text(self, row_number):
+        # retrieve etimol XML from ODS
+        doc = self.ods
+        table = doc.getElementsByType(Table)[0]
+        row = table.getElementsByType(TableRow)[row_number - 1]  # 0-indexed
+        cell = row.getElementsByType(TableCell)[2]
+
+        etimol_html = extract_text_as_html(cell)
+
+        return etimol_html
 
     def print_errors(self, errors, format="json"):
         for error in errors:
@@ -156,3 +182,25 @@ class Row:
 
         self.existing_words.add(self.term)
         return True
+
+
+def extract_text_as_html(cell):
+    html_content = ""
+    paragraphs = cell.getElementsByType(P)
+    for p in paragraphs:
+        for element in p.childNodes:
+
+            if element.tagName == 'text:span':  # Handle styled spans
+                text = element.firstChild.data if element.firstChild else ""
+
+                if element.getAttribute("stylename") == "T1":   # T1 is the style for italic text
+                    html_content += f"<i>{text}</i>"
+                else:
+                    html_content += text
+
+            elif element.tagName == 'text:s':  # Handle spaces
+                html_content += " "
+            else:  # Handle plain text
+                text = element.data if element.nodeType == element.TEXT_NODE else ""
+                html_content += text
+    return html_content
