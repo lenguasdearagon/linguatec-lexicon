@@ -7,6 +7,13 @@ from openpyxl import load_workbook
 from linguatec_lexicon.models import Entry, Lexicon, Word
 
 
+def is_row_empty(row):
+    for cell in row:
+        if cell.value is not None:  # If any cell in the row has a value
+            return False
+    return True
+
+
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
@@ -30,6 +37,8 @@ class Command(BaseCommand):
         # self.xlsx = pd.read_excel(self.input_file, sheet_name=None, header=None, usecols="A:E",
         #                           names=["term", "url", "etimol", "def", "def2"])
 
+        self._words = set()
+
         # use temp lexicon and if everything is ok, then change to the real one
         self._lexicon = self.lexicon
         self.lexicon = Lexicon.objects.create(name="Temp Lexicon", src_language="99", dst_language="99")
@@ -43,8 +52,12 @@ class Command(BaseCommand):
                 continue
 
             row_number = i + 1
+            if is_row_empty(row):
+                print(f"Row {row_number} is empty")
+                continue
+
             wrow = self.validate_row(row, row_number)
-            if not wrow.is_valid():
+            if wrow.errors:
                 errors.append({
                     "row": row_number,
                     "term": wrow.term,
@@ -76,7 +89,7 @@ class Command(BaseCommand):
             self.lexicon = self._lexicon
 
     def validate_row(self, row, row_number):
-        instance = Row(row, row_number)
+        instance = Row(row, row_number, self._words)
         instance.is_valid()
         return instance
 
@@ -103,13 +116,21 @@ class Command(BaseCommand):
 
 
 class Row:
-    def __init__(self, row, row_number):
-        self.term = row[0].value
-        self.url = row[1].value
-        self.etimol = row[2].value or ""
-        self.definition = row[3].value
-        self.definition2 = row[4].value
+    TERM = 0
+    URL = 1
+    ETIMOL = 2
+    DEFINITION = 4  # legacy 3
+    DEFINITION2 = 6  # legacy 4
+
+    def __init__(self, row, row_number, words):
+        self.term = row[self.TERM].value
+        self.url = row[self.URL].value
+        self.etimol = row[self.ETIMOL].value or ""
+        self.definition = row[self.DEFINITION].value
+        self.definition2 = row[self.DEFINITION2].value
         self.row_number = row_number
+
+        self.existing_words = words
 
     def is_valid(self):
         self.errors = {}
@@ -123,7 +144,15 @@ class Row:
         return False if self.errors else True
 
     def validate_unique(self):
-        if Word.objects.filter(term=self.term).exists():
+        if self.term in self.existing_words:
             self.errors["term"] = "This term already exists"
             return False
+
+        # TODO(@slamora): check if the term is in the database???? or all the imports are from scratch???
+        # allow user to decide if the import is from scratch or not
+        # TODO(@slamora): optimize storing on memmory to perform only one query
+        # if Word.objects.filter(lexicon=XXX, term=self.term).exists():
+        #     self.errors["term"] = "This term already exists"
+
+        self.existing_words.add(self.term)
         return True
